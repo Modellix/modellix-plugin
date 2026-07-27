@@ -3,6 +3,18 @@
 All notable changes to this project are documented here. The format loosely follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and versions use [Semantic Versioning](https://semver.org/).
 
+## [3.5.0] - 2026-07-27
+
+### Added
+
+- Open Plugins hooks component: [`hooks/hooks.json`](hooks/hooks.json) for Open Plugins / Claude Code event names and [`hooks/cursor-hooks.json`](hooks/cursor-hooks.json) for Cursor, wired through the matching `plugin.json` so a host loads only one config.
+- Plugin-level [`scripts/`](scripts/) hook implementations (stdlib Python): confirmation prompt for repeated paid submits and for `model batch` without `--max-tasks`, task-id tracking, and a single stop-time reminder to download results before the 7-day expiry.
+
+### Changed
+
+- `package.json` publishes `hooks/**` and `scripts/**`; README and AGENTS.md document hook behavior, the two-config split, and the plugin-level vs skill-level `scripts/` distinction.
+- `skills/modellix/scripts/clean_build_artifacts.py` now cleans the whole plugin tree when run from the repo, and stays scoped to the skill directory for standalone skill installs.
+
 ## [3.4.0] - 2026-07-27
 
 ### Added

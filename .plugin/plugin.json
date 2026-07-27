@@ -1,6 +1,6 @@
 {
   "name": "modellix",
-  "version": "3.4.0",
+  "version": "3.5.0",
   "description": "Unified API/CLI for AI image and video generation via Modellix",
   "author": {
     "name": "Modellix",
@@ -17,5 +17,6 @@
     "generation",
     "api",
     "modellix"
-  ]
+  ],
+  "hooks": "./hooks/hooks.json"
 }

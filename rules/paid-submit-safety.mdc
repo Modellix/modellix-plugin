@@ -7,4 +7,5 @@ alwaysApply: true
 - On unclear submit results, use `modellix-cli task history` (or equivalent task lookup) before creating a new paid task.
 - Persist downloads promptly (`task download`); resource URLs expire (~7 days).
 - If download fails because the CDN host resolves into a private/reserved range (e.g. proxy DNS `198.18.0.0/15`), retry with `--allow-private-network` for trusted Modellix CDN hosts, or curl the resource URL.
+- Hosts that load this plugin's hooks will ask for confirmation on a repeated paid submit or an unbounded `model batch`; treat that prompt as a signal to check `task history`, not as a reason to rephrase the same command.
 - Details: `skills/modellix/SKILL.md` and `references/cli-playbook.md`.

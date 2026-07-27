@@ -14,6 +14,7 @@ Official install guide: [docs.modellix.ai/ways-to-use/plugin](https://docs.model
 - Model discovery via `modellix-cli model list` / `model describe`, plus live docs at [llms.txt](https://docs.modellix.ai/llms.txt)
 - Optional **Docs MCP** (`.mcp.json` → [docs.modellix.ai/mcp](https://docs.modellix.ai/mcp)) for searching and reading official documentation — not for running generation tasks
 - Persistent **rules** under `rules/` (Open Plugins `.mdc`): CLI-first defaults, paid-submit safety, credential/docs guardrails
+- Optional **hooks** under `hooks/`: confirm before a repeated paid submit or an unbounded `model batch`, and remind the agent to download results before they expire
 - Retry and error guidance aligned with CLI exit codes and paid-submit safety
 - Credential handling for `MODELLIX_API_KEY` and CLI auth profiles
 
@@ -324,6 +325,20 @@ Request-body schemas come from each model’s docs (prefer the plugin Docs MCP w
 4. Optional helpers in `skills/modellix/scripts/` wrap CLI/REST; if they fail, call the CLI commands directly.
 5. CLI behavior source of truth: [npm modellix-cli](https://www.npmjs.com/package/modellix-cli) and `modellix-cli --help` (not the website CLI guide page, which may lag).
 
+## Hooks (spend and result safety)
+
+Hosts that support Open Plugins hooks load three lightweight guards. They only react to `modellix-cli` commands and never change the CLI workflow itself:
+
+| Hook | Trigger | Behavior |
+| --- | --- | --- |
+| Run guard | Before a `model run` / `model invoke` / `model batch` shell command | Asks for confirmation when the same paid submit repeats in a session or when `model batch` has no `--max-tasks`; suggests `doctor` when no credential is discoverable |
+| Task watch | After a `modellix-cli` command | Records task ids from the output and clears them once `task download` succeeds |
+| Stop reminder | When the agent tries to finish | Sends one follow-up if tasks were generated but never downloaded (resource URLs expire in about 7 days) |
+
+Config lives in [`hooks/hooks.json`](hooks/hooks.json) (Open Plugins / Claude Code event names) and [`hooks/cursor-hooks.json`](hooks/cursor-hooks.json) (Cursor event names); each manifest points at exactly one of them, so a host never runs both. Scripts are Python 3 stdlib only, keep per-session state in a temp file (command fingerprints and task ids, never prompts or keys), and fail open — if anything goes wrong the command proceeds. Hosts without hook support (Pi, Hermes, OpenCode, Codex) simply ignore this directory.
+
+Plugin-level `scripts/` holds these hook scripts; the CLI/REST helpers used by the skill live in `skills/modellix/scripts/`.
+
 ## Supported task types
 
 | Type | Description |
@@ -345,6 +360,8 @@ Request-body schemas come from each model’s docs (prefer the plugin Docs MCP w
 ├── openclaw.plugin.json            # OpenClaw package manifest (skills bundle)
 ├── .mcp.json                       # Docs MCP → https://docs.modellix.ai/mcp (read-only docs search)
 ├── rules/                          # Open Plugins always-on guardrails (.mdc)
+├── hooks/                          # Hook configs: hooks.json (Open Plugins/Claude), cursor-hooks.json (Cursor)
+├── scripts/                        # Plugin-level hook scripts (Python, stdlib only)
 ├── .opencode/skills/modellix       # Symlink → skills/modellix (OpenCode skill discovery)
 ├── .pi/skills/modellix             # Symlink → skills/modellix (Pi local skill discovery)
 ├── .plugin/plugin.json             # Vendor-neutral Open Plugins manifest
