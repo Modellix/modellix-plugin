@@ -1,0 +1,13 @@
+{
+  "id": "modellix",
+  "name": "Modellix",
+  "description": "Unified API/CLI for AI image and video generation via Modellix",
+  "skills": [
+    "./skills"
+  ],
+  "icon": "https://raw.githubusercontent.com/Modellix/modellix-plugin/main/assets/logo.svg",
+  "configSchema": {
+    "type": "object",
+    "additionalProperties": false
+  }
+}

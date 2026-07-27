@@ -10,3 +10,6 @@ modellix-plugin-packaging-guide.md
 
 # Cursor hook runtime state (generated after git push)
 .cursor/hooks/state/
+
+# ClawHub / Plugin Inspector local reports
+reports/

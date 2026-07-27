@@ -24,7 +24,10 @@ This repo publishes the Modellix plugin consumed by AI coding agents (Cursor, Cl
 | [`skills/modellix/scripts/`](skills/modellix/scripts/) | Optional Python helpers (thin wrappers around CLI / REST) |
 | [`skills/modellix/assets/`](skills/modellix/assets/) | Schemas and other static assets |
 | [`skills/modellix/evals/`](skills/modellix/evals/) | Eval prompts and assertions kept as a regression reference |
-| [`.github/workflows/skill_update.yml`](.github/workflows/skill_update.yml) | On `main` push: sync Smithery, `npx skills add`, and ClawHub publish |
+| [`.github/workflows/skill_update.yml`](.github/workflows/skill_update.yml) | On `main` push: sync Smithery, `npx skills add`, ClawHub skill + OpenClaw package |
+| [`openclaw.plugin.json`](openclaw.plugin.json) | OpenClaw / ClawHub package manifest (skill bundle; no runtime extensions) |
+| [`package.json`](package.json) | npm-style package metadata for ClawHub (`@modellix/modellix-plugin`) |
+| [`.opencode/skills/modellix`](.opencode/skills/modellix) | Symlink to `skills/modellix` for [OpenCode Agent Skills](https://opencode.ai/docs/skills/) discovery |
 | [`.cursor/hooks.json`](.cursor/hooks.json) | After local `git push` to main: community listing check + agent follow-up |
 
 There is no application runtime, package.json, or test suite for a product app. The “product” is the plugin manifests + skill markdown + scripts.
@@ -89,6 +92,8 @@ Keep progressive disclosure tight:
 
 Paths inside the skill are relative to the **skill root** (`scripts/preflight.py`, `references/cli-playbook.md`). If something must resolve against the plugin root, use `${PLUGIN_ROOT}` (Claude Code also accepts `${CLAUDE_PLUGIN_ROOT}`). Never use `../` traversal outside the plugin.
 
+[`.opencode/skills/modellix`](.opencode/skills/modellix) is a **symlink** to [`skills/modellix`](skills/modellix) so [OpenCode](https://opencode.ai/docs/skills/) can discover the skill. Keep a single source of truth under `skills/modellix/`; do not duplicate the skill tree. OpenCode’s separate [plugins](https://opencode.ai/docs/zh-cn/plugins/) system (JS/TS hooks under `.opencode/plugins/`) is not used here.
+
 Install URLs:
 
 ```text
@@ -101,10 +106,11 @@ npx skills add https://github.com/Modellix/modellix-plugin --skill modellix
 
 ## Manifest rules
 
-- The four `plugin.json` files must stay in sync for shared metadata (`name`, `version`, `description`, `author`, `homepage`, `repository`, `license`, `logo`, `keywords`). Only the Cursor manifest carries the extra `variables` block.
-- `.plugin/plugin.json` is the primary source; edit it first, then mirror.
-- `name` must satisfy the spec: lowercase alphanumerics, hyphens, periods; no `--` or `..`.
-- Keep `version` identical across the manifests and [`skills/modellix/skill.json`](skills/modellix/skill.json).
+- The four Open Plugins `plugin.json` files must stay in sync for shared metadata (`name`, `version`, `description`, `author`, `homepage`, `repository`, `license`, `logo`, `keywords`). Only the Cursor manifest carries the extra `variables` block.
+- Keep `version` identical across those manifests, [`skills/modellix/skill.json`](skills/modellix/skill.json), and root [`package.json`](package.json).
+- [`openclaw.plugin.json`](openclaw.plugin.json) is for ClawHub / OpenClaw. Keep `skills: ["./skills"]` and an empty `configSchema`. **Do not** add `openclaw.extensions` / runtime entrypoints unless intentionally shipping a native TypeScript OpenClaw code plugin (that would change detection from content bundle to code plugin).
+- `.plugin/plugin.json` is the primary Open Plugins source; edit it first, then mirror to vendor manifests.
+- `name` must satisfy the Open Plugins spec: lowercase alphanumerics, hyphens, periods; no `--` or `..`.
 - Manifest directories must contain only `plugin.json` (and, for Claude, `marketplace.json`). Components live at the plugin root.
 - Never put credentials in a manifest; the Cursor `variables` block only declares the variable name.
 
@@ -215,7 +221,22 @@ On push to `main`, [`skill_update.yml`](.github/workflows/skill_update.yml):
 
 1. `PUT` Smithery skill `modellix/modellix-skill` with the git URL of `skills/modellix/` (requires `SMITHERY_TOKEN` secret). The Smithery slug stays `modellix-skill` to preserve existing installs; only the git URL changed.
 2. After 60s, runs `npx skills add https://github.com/Modellix/modellix-plugin --skill modellix`.
-3. Publishes `skills/modellix` to ClawHub as `modellix/modellix` via the reusable [`skill-publish.yml`](https://github.com/openclaw/clawhub/blob/main/.github/workflows/skill-publish.yml) workflow (requires `CLAWHUB_TOKEN` secret). Unchanged content is skipped; later changes auto-publish the next patch version unless you pass an explicit `--version` outside CI.
+3. Publishes `skills/modellix` to ClawHub as skill `modellix/modellix` via [`skill-publish.yml`](https://github.com/openclaw/clawhub/blob/main/.github/workflows/skill-publish.yml) (requires `CLAWHUB_TOKEN`).
+4. Publishes the repo root as OpenClaw **bundle-plugin** package `@modellix/modellix-plugin` via [`package-publish.yml`](https://github.com/openclaw/clawhub/blob/main/.github/workflows/package-publish.yml) (same token). This is a content/skill bundle (`openclaw.plugin.json` + Open Plugins manifests), not a code plugin with `openclaw.extensions`.
+
+OpenClaw install paths:
+
+```bash
+clawhub install modellix                                 # skill
+openclaw plugins install clawhub:@modellix/modellix-plugin  # bundle plugin
+```
+
+Before changing OpenClaw package metadata, run:
+
+```bash
+npx clawhub@latest package validate .
+npx clawhub@latest package publish . --family bundle-plugin --owner modellix --dry-run --json
+```
 
 Agents editing the plugin do not need to trigger publish manually; merging to `main` does. Claude Code / Codex marketplaces read the repository directly, so no extra publish step is required for them.
 

@@ -46,11 +46,22 @@ jobs:
 
   # Publish skills/modellix to ClawHub (owner modellix, slug modellix).
   # Requires repository secret CLAWHUB_TOKEN. Unchanged content is skipped.
-  sync-clawhub:
+  sync-clawhub-skill:
     uses: openclaw/clawhub/.github/workflows/skill-publish.yml@main
     with:
       owner: modellix
       skill_path: skills/modellix
+      dry_run: false
+    secrets:
+      clawhub_token: ${{ secrets.CLAWHUB_TOKEN }}
+
+  # Publish this Open Plugins repo as an OpenClaw bundle-plugin package
+  # (@modellix/modellix-plugin). Skill-only content; no native runtime entrypoint.
+  sync-clawhub-package:
+    uses: openclaw/clawhub/.github/workflows/package-publish.yml@main
+    with:
+      owner: modellix
+      family: bundle-plugin
       dry_run: false
     secrets:
       clawhub_token: ${{ secrets.CLAWHUB_TOKEN }}

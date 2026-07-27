@@ -3,6 +3,19 @@
 All notable changes to this project are documented here. The format loosely follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and versions use [Semantic Versioning](https://semver.org/).
 
+## [3.2.0] - 2026-07-27
+
+### Added
+
+- OpenClaw / ClawHub **bundle-plugin** packaging: root `package.json` (`@modellix/modellix-plugin`) and `openclaw.plugin.json` declaring `./skills` (content/skill bundle, no `openclaw.extensions` runtime).
+- `skill_update.yml` publishes the package via ClawHub `package-publish.yml` alongside the existing skill publish.
+- README / AGENTS install docs for `openclaw plugins install clawhub:@modellix/modellix-plugin` and the existing `clawhub install modellix` skill path.
+- OpenCode Agent Skills discovery via `.opencode/skills/modellix` → `skills/modellix` symlink (OpenCode plugins are a separate JS/TS hook system; Modellix ships as a skill).
+
+### Notes
+
+- `clawhub package validate` may report a P2 `package-openclaw-entry-missing` warning because this package intentionally has no runtime entrypoint. That is expected for a skill/content bundle.
+
 ## [3.1.0] - 2026-07-27
 
 ### Changed

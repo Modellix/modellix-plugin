@@ -2,7 +2,7 @@
 
 Agent plugin for [Modellix](https://modellix.ai), a unified Model-as-a-Service (MaaS) platform for image and video generation.
 
-This repository follows the [Open Plugins](https://open-plugins.com/plugin-builders/specification) specification: the repository root **is** the plugin root, and the skill ships as `skills/modellix/`. The same layout installs into Cursor, Claude Code, Codex, and any Agent Skills host.
+This repository follows the [Open Plugins](https://open-plugins.com/plugin-builders/specification) specification: the repository root **is** the plugin root, and the skill ships as `skills/modellix/`. The same layout installs into Cursor, Claude Code, Codex, OpenClaw, OpenCode (via Agent Skills), and any Agent Skills host.
 
 ## What this plugin provides
 
@@ -23,64 +23,175 @@ npm i -g modellix-cli@latest
 modellix-cli doctor --json
 ```
 
-## Install
+## Install and update
 
-### Claude Code
+After install, set `MODELLIX_API_KEY` (see [Setup](#setup)).
+
+Prefer **Plugin** when the host supports Open Plugins / marketplace plugins. Use **Skill** when you only need the Agent Skill (`skills/modellix`), or when the host has no plugin marketplace.
+
+### 1) Plugin
+
+Installs the repository root as a plugin (manifests + `skills/modellix/`).
+
+#### Claude Code
+
+Install:
 
 ```text
 /plugin marketplace add Modellix/modellix-plugin
 /plugin install modellix@modellix
 ```
 
-### Codex
+Update:
+
+```text
+/plugin marketplace update modellix
+/plugin update modellix@modellix
+```
+
+Or use the `/plugin` UI, then `/reload-plugins` if needed.
+
+Local development:
+
+```bash
+claude --plugin-dir /path/to/modellix-plugin
+claude plugin validate /path/to/modellix-plugin
+```
+
+#### Codex
+
+Install:
 
 ```bash
 codex plugin marketplace add Modellix/modellix-plugin
 # then install modellix from /plugins
 ```
 
-### Cursor
+Update: re-open `/plugins` and update, or re-add the marketplace and reinstall.
 
-Browse or submit via [cursor.directory](https://cursor.directory/plugins/new), or link the repository for local use:
+#### Cursor
+
+Install (community): submit or browse via [cursor.directory](https://cursor.directory/plugins/new) — paste `https://github.com/Modellix/modellix-plugin`.
+
+Install (local):
 
 ```bash
 git clone https://github.com/Modellix/modellix-plugin.git
-ln -s "$PWD/modellix-plugin" ~/.cursor/plugins/local/modellix
-# then run "Developer: Reload Window" and confirm the skill under Customize
+ln -sfn "$PWD/modellix-plugin" ~/.cursor/plugins/local/modellix
+# Developer: Reload Window — confirm under Customize
 ```
 
-### Agent Skills (skills.sh)
+Update:
 
-The skill can still be installed on its own, without the plugin wrapper:
+```bash
+git -C ~/.cursor/plugins/local/modellix pull   # when the symlink points at a clone
+# Developer: Reload Window
+```
+
+#### OpenClaw (bundle plugin)
+
+ClawHub package `@modellix/modellix-plugin` — Open Plugins layout as a content/skill bundle (not a TypeScript runtime plugin).
+
+Install:
+
+```bash
+openclaw plugins install clawhub:@modellix/modellix-plugin
+
+# local / git
+openclaw plugins install .
+openclaw plugins install git:github.com/Modellix/modellix-plugin
+```
+
+Update: reinstall from the same ClawHub/git/path source (or `git pull` if you linked a local checkout). `openclaw plugins update` only refreshes npm-tracked installs.
+
+---
+
+### 2) Skill
+
+Installs only `skills/modellix` (Agent Skill). Useful for skills.sh, ClawHub skills, OpenCode, Smithery, or Cursor skill-only installs.
+
+#### Agent Skills (skills.sh) — any host
+
+Install:
 
 ```bash
 npx skills add https://github.com/Modellix/modellix-plugin --skill modellix
+npx skills add https://github.com/Modellix/modellix-plugin --skill modellix --agent cursor   # one agent
 ```
 
-Cursor:
-
-```bash
-npx skills add https://github.com/Modellix/modellix-plugin --skill modellix --agent cursor
-```
-
-Update installed skills:
+Update:
 
 ```bash
 npx skills update
 ```
 
-### From Smithery
+#### ClawHub / OpenClaw (skill)
 
-```bash
-npx @smithery/cli@latest skill add modellix/modellix-skill
-```
+Slug `modellix` (skill registry; separate from the `@modellix/modellix-plugin` package above).
 
-### From ClawHub
+Install:
 
 ```bash
 clawhub install modellix
+# or
+openclaw skills install modellix
+```
+
+Update:
+
+```bash
+clawhub update modellix
+# or
 clawhub update --all
 ```
+
+#### OpenCode
+
+OpenCode’s [plugins](https://opencode.ai/docs/zh-cn/plugins/) are JS/TS event hooks — Modellix does **not** use that path. Use [Agent Skills](https://opencode.ai/docs/skills/) instead. This repo exposes `.opencode/skills/modellix` → `skills/modellix`.
+
+Install:
+
+```bash
+npx skills add https://github.com/Modellix/modellix-plugin --skill modellix
+
+# Global
+mkdir -p ~/.config/opencode/skills
+ln -sfn /path/to/modellix-plugin/skills/modellix ~/.config/opencode/skills/modellix
+
+# Project-local
+mkdir -p .opencode/skills
+ln -sfn /path/to/modellix-plugin/skills/modellix .opencode/skills/modellix
+```
+
+Update:
+
+```bash
+npx skills update
+# or, for a symlink install:
+git -C /path/to/modellix-plugin pull
+```
+
+In OpenCode, load with `skill({ name: "modellix" })`.
+
+#### Cursor (skill-only)
+
+When you want the skill without installing the full Cursor plugin:
+
+```bash
+npx skills add https://github.com/Modellix/modellix-plugin --skill modellix --agent cursor
+npx skills update
+```
+
+#### Smithery
+
+Install:
+
+```bash
+npx @smithery/cli@latest skill add modellix/modellix-skill
+npx @smithery/cli@latest skill add modellix/modellix-skill --agent cursor
+```
+
+Update: re-run the same `skill add` command (or your Smithery client’s update flow).
 
 ## Setup
 
@@ -164,7 +275,10 @@ Request-body schemas come from each model’s docs (`docs_url` from `model descr
 ├── README.md                       # This file (humans)
 ├── AGENTS.md                       # Maintainer / coding-agent instructions
 ├── CHANGELOG.md
-├── .plugin/plugin.json             # Vendor-neutral manifest (primary source)
+├── package.json                    # ClawHub OpenClaw package (@modellix/modellix-plugin)
+├── openclaw.plugin.json            # OpenClaw package manifest (skills bundle)
+├── .opencode/skills/modellix       # Symlink → skills/modellix (OpenCode skill discovery)
+├── .plugin/plugin.json             # Vendor-neutral Open Plugins manifest
 ├── .cursor-plugin/plugin.json      # Cursor manifest (+ MODELLIX_API_KEY variable)
 ├── .claude-plugin/
 │   ├── plugin.json
@@ -174,7 +288,7 @@ Request-body schemas come from each model’s docs (`docs_url` from `model descr
 ├── assets/logo.svg
 ├── skills/
 │   └── modellix/                   # Skill package (SKILL.md, scripts, references, assets, evals)
-└── .github/workflows/              # Publish sync (Smithery / skills add)
+└── .github/workflows/              # Publish sync (Smithery / skills add / ClawHub)
 ```
 
 `skills/modellix/` sits on the Open Plugins default discovery path, so no `skills` field is needed in the manifests.
