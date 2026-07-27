@@ -44,6 +44,61 @@ jobs:
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
         run: npx skills add https://github.com/Modellix/modellix-plugin --skill modellix
 
+  # ClawHub rejects republishing an existing package version, and every skill
+  # publish burns a new version number, so only publish what actually changed.
+  # Manual dispatches always publish.
+  detect-changes:
+    runs-on: ubuntu-latest
+    outputs:
+      package: ${{ steps.check.outputs.package }}
+      skill: ${{ steps.check.outputs.skill }}
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 2
+
+      - id: check
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          SKILL_PATH: skills/modellix
+        run: |
+          python3 - <<'PY'
+          import json, os, subprocess
+          from pathlib import Path
+
+          def version(blob):
+              return json.loads(blob)["version"]
+
+          is_push = os.environ["EVENT_NAME"] == "push"
+
+          current = version(Path("package.json").read_text(encoding="utf-8"))
+          previous = None
+          if is_push:
+              result = subprocess.run(
+                  ["git", "show", "HEAD~1:package.json"], capture_output=True, text=True
+              )
+              if result.returncode == 0:
+                  previous = version(result.stdout)
+          package_changed = previous is None or previous != current
+          print(f"Package version: {previous} -> {current} (publish: {package_changed})")
+
+          skill_path = os.environ["SKILL_PATH"]
+          skill_changed = True
+          if is_push:
+              result = subprocess.run(
+                  ["git", "diff", "--name-only", "HEAD~1", "HEAD", "--", skill_path],
+                  capture_output=True,
+                  text=True,
+              )
+              if result.returncode == 0:
+                  skill_changed = bool(result.stdout.strip())
+          print(f"Skill files changed: {skill_changed}")
+
+          with Path(os.environ["GITHUB_OUTPUT"]).open("a", encoding="utf-8") as fh:
+              fh.write(f"package={str(package_changed).lower()}\n")
+              fh.write(f"skill={str(skill_changed).lower()}\n")
+          PY
+
   # Publish skills/modellix to ClawHub (owner modellix, slug modellix).
   # Requires repository secret CLAWHUB_TOKEN. Unchanged content is skipped.
   #
@@ -52,6 +107,8 @@ jobs:
   # so a successful submit that returns "pending-publication" (queued for security
   # scans) is reported as a failed publish.
   sync-clawhub-skill:
+    needs: detect-changes
+    if: needs.detect-changes.outputs.skill == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 15
     permissions:
@@ -92,10 +149,13 @@ jobs:
       - name: Publish skill to ClawHub
         run: |
           python3 - <<'PY'
-          import json, os, subprocess, sys
+          import json, os, re, subprocess, sys
+
+          MAX_ATTEMPTS = 5
+          TAKEN_VERSION = re.compile(r"[Vv]ersion (\d+)\.(\d+)\.(\d+) already exists")
 
           skill_path = os.environ["SKILL_PATH"]
-          command = [
+          base = [
               "npx", "--yes", f"clawhub@{os.environ['CLAWHUB_CLI_VERSION']}",
               "--registry", os.environ["CLAWHUB_REGISTRY"],
               "skill", "publish", skill_path,
@@ -106,11 +166,25 @@ jobs:
               "--source-ref", os.environ["GITHUB_REF"],
               "--source-path", skill_path,
           ]
-          completed = subprocess.run(command, capture_output=True, text=True)
-          sys.stderr.write(completed.stderr)
-          print(completed.stdout)
-          if completed.returncode != 0:
-              raise SystemExit(f"clawhub skill publish exited with {completed.returncode}")
+
+          # The CLI defaults to "next patch after the latest published version",
+          # which collides when the previous submission is still queued for
+          # security scans (pending-publication is not counted as published).
+          version = None
+          for attempt in range(1, MAX_ATTEMPTS + 1):
+              command = base + (["--version", version] if version else [])
+              completed = subprocess.run(command, capture_output=True, text=True)
+              sys.stderr.write(completed.stderr)
+              print(completed.stdout)
+              if completed.returncode == 0:
+                  break
+
+              taken = TAKEN_VERSION.search(completed.stderr + completed.stdout)
+              if not taken or attempt == MAX_ATTEMPTS:
+                  raise SystemExit(f"clawhub skill publish exited with {completed.returncode}")
+              major, minor, patch = (int(part) for part in taken.groups())
+              version = f"{major}.{minor}.{patch + 1}"
+              print(f"{taken.group(0)}; retrying as {version}")
 
           status = json.loads(completed.stdout).get("status")
           # "pending-publication" and "submitted" mean the upload landed and is
@@ -120,48 +194,11 @@ jobs:
           print(f"ClawHub skill publish status: {status}")
           PY
 
-  # ClawHub rejects republishing an existing package version, so only publish
-  # when package.json version changed (or on a manual dispatch).
-  check-package-version:
-    runs-on: ubuntu-latest
-    outputs:
-      changed: ${{ steps.check.outputs.changed }}
-    steps:
-      - uses: actions/checkout@v7
-        with:
-          fetch-depth: 2
-
-      - id: check
-        env:
-          EVENT_NAME: ${{ github.event_name }}
-        run: |
-          python3 - <<'PY'
-          import json, os, subprocess
-          from pathlib import Path
-
-          def version(blob):
-              return json.loads(blob)["version"]
-
-          current = version(Path("package.json").read_text(encoding="utf-8"))
-          previous = None
-          if os.environ["EVENT_NAME"] == "push":
-              result = subprocess.run(
-                  ["git", "show", "HEAD~1:package.json"], capture_output=True, text=True
-              )
-              if result.returncode == 0:
-                  previous = version(result.stdout)
-
-          changed = previous is None or previous != current
-          print(f"Package version: {previous} -> {current} (publish: {changed})")
-          with Path(os.environ["GITHUB_OUTPUT"]).open("a", encoding="utf-8") as fh:
-              fh.write(f"changed={str(changed).lower()}\n")
-          PY
-
   # Publish this Open Plugins repo as an OpenClaw bundle-plugin package
   # (@modellix/modellix-plugin). Skill-only content; no native runtime entrypoint.
   sync-clawhub-package:
-    needs: check-package-version
-    if: needs.check-package-version.outputs.changed == 'true'
+    needs: detect-changes
+    if: needs.detect-changes.outputs.package == 'true'
     permissions:
       actions: read
       contents: read
