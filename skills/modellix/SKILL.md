@@ -2,10 +2,20 @@
 name: modellix
 description: Integrate Modellix's unified API for AI image and video generation into applications. Use this skill whenever the user wants to generate images from text, create videos from text or images, edit images, do virtual try-on, or call any Modellix model API. Also trigger when the user mentions Modellix, model-as-a-service for media generation, or needs to work with providers like Qwen, Wan, Seedream, Seedance, Kling, Hailuo, or MiniMax through a unified API. Prefer modellix-cli (model run --wait, task download, doctor, model list) over hand-rolled REST polling whenever the CLI is available.
 license: MIT
+version: 3.2.1
+author: Modellix
 primaryCredential: MODELLIX_API_KEY
 primaryEnv: MODELLIX_API_KEY
 requiredEnv:
   - MODELLIX_API_KEY
+required_environment_variables:
+  - name: MODELLIX_API_KEY
+    prompt: Enter your Modellix API key
+    help: Get one at https://modellix.ai/console/api-key
+    required_for: Modellix CLI and REST API access
+metadata:
+  hermes:
+    tags: [creative, image-generation, video-generation, modellix, cli, api]
 ---
 
 # Modellix Skill

@@ -6,7 +6,7 @@ Human-facing overview lives in [README.md](README.md). This file is for coding a
 
 ## Project overview
 
-This repo publishes the Modellix plugin consumed by AI coding agents (Cursor, Claude Code, Codex, ClawHub, Smithery, etc.). It follows the [Open Plugins specification](https://open-plugins.com/plugin-builders/specification): **the repository root is the plugin root**.
+This repo publishes the Modellix plugin consumed by AI coding agents (Cursor, Claude Code, Codex, ClawHub, Smithery, Pi, Hermes, etc.). It follows the [Open Plugins specification](https://open-plugins.com/plugin-builders/specification): **the repository root is the plugin root**.
 
 | Path | Role |
 |------|------|
@@ -26,13 +26,14 @@ This repo publishes the Modellix plugin consumed by AI coding agents (Cursor, Cl
 | [`skills/modellix/evals/`](skills/modellix/evals/) | Eval prompts and assertions kept as a regression reference |
 | [`.github/workflows/skill_update.yml`](.github/workflows/skill_update.yml) | On `main` push: sync Smithery, `npx skills add`, ClawHub skill + OpenClaw package |
 | [`openclaw.plugin.json`](openclaw.plugin.json) | OpenClaw / ClawHub package manifest (skill bundle; no runtime extensions) |
-| [`package.json`](package.json) | npm-style package metadata for ClawHub (`@modellix/modellix-plugin`) |
+| [`package.json`](package.json) | npm-style package metadata for ClawHub + Pi (`@modellix/modellix-plugin`, `pi.skills`) |
 | [`.opencode/skills/modellix`](.opencode/skills/modellix) | Symlink to `skills/modellix` for [OpenCode Agent Skills](https://opencode.ai/docs/skills/) discovery |
+| [`.pi/skills/modellix`](.pi/skills/modellix) | Symlink to `skills/modellix` for [Pi](https://github.com/badlogic/pi-mono) local skill discovery |
 | [`.cursor/hooks.json`](.cursor/hooks.json) | After local `git push` to main: community listing check + agent follow-up |
 
-There is no application runtime, package.json, or test suite for a product app. The “product” is the plugin manifests + skill markdown + scripts.
+There is no application runtime or test suite for a product app. The “product” is the plugin manifests + skill markdown + scripts.
 
-Because `skills/` is an Open Plugins default discovery path, the manifests deliberately omit a `skills` field. Do not add one unless the skill moves.
+Because `skills/` is an Open Plugins default discovery path, the Open Plugins manifests deliberately omit a `skills` field. Do not add one unless the skill moves. **Pi** and **Hermes** consume the same skill tree: Pi via `package.json#pi` / `pi install`; Hermes via `hermes skills install` / `~/.hermes/skills/` (or `skills.external_dirs`). Do not invent Hermes- or Pi-only plugin manifest directories.
 
 Do not create top-level `commands/`, `agents/`, `rules/`, `hooks/`, `.mcp.json`, or `.lsp.json` unless you intend to ship those components: those paths are auto-discovered by plugin hosts. In particular, never put internal maintainer conventions in `rules/` — they would be installed into users' agents.
 
@@ -92,7 +93,7 @@ Keep progressive disclosure tight:
 
 Paths inside the skill are relative to the **skill root** (`scripts/preflight.py`, `references/cli-playbook.md`). If something must resolve against the plugin root, use `${PLUGIN_ROOT}` (Claude Code also accepts `${CLAUDE_PLUGIN_ROOT}`). Never use `../` traversal outside the plugin.
 
-[`.opencode/skills/modellix`](.opencode/skills/modellix) is a **symlink** to [`skills/modellix`](skills/modellix) so [OpenCode](https://opencode.ai/docs/skills/) can discover the skill. Keep a single source of truth under `skills/modellix/`; do not duplicate the skill tree. OpenCode’s separate [plugins](https://opencode.ai/docs/zh-cn/plugins/) system (JS/TS hooks under `.opencode/plugins/`) is not used here.
+[`.opencode/skills/modellix`](.opencode/skills/modellix) and [`.pi/skills/modellix`](.pi/skills/modellix) are **symlinks** to [`skills/modellix`](skills/modellix) so [OpenCode](https://opencode.ai/docs/skills/) and [Pi](https://github.com/badlogic/pi-mono) can discover the skill locally. Keep a single source of truth under `skills/modellix/`; do not duplicate the skill tree. OpenCode’s separate [plugins](https://opencode.ai/docs/zh-cn/plugins/) system (JS/TS hooks under `.opencode/plugins/`) is not used here. Hermes has no symlink dir in-repo — install `skills/modellix` via `hermes skills install` or into `~/.hermes/skills/`.
 
 Install URLs:
 
@@ -102,6 +103,12 @@ Modellix/modellix-plugin
 
 # Skill-only install (skills.sh)
 npx skills add https://github.com/Modellix/modellix-plugin --skill modellix
+
+# Pi package
+pi install git:github.com/Modellix/modellix-plugin
+
+# Hermes skill
+hermes skills install Modellix/modellix-plugin/skills/modellix
 ```
 
 ## Manifest rules
@@ -109,6 +116,8 @@ npx skills add https://github.com/Modellix/modellix-plugin --skill modellix
 - The four Open Plugins `plugin.json` files must stay in sync for shared metadata (`name`, `version`, `description`, `author`, `homepage`, `repository`, `license`, `logo`, `keywords`). Only the Cursor manifest carries the extra `variables` block.
 - Keep `version` identical across those manifests, [`skills/modellix/skill.json`](skills/modellix/skill.json), and root [`package.json`](package.json).
 - [`openclaw.plugin.json`](openclaw.plugin.json) is for ClawHub / OpenClaw. Keep `skills: ["./skills"]` and an empty `configSchema`. **Do not** add `openclaw.extensions` / runtime entrypoints unless intentionally shipping a native TypeScript OpenClaw code plugin (that would change detection from content bundle to code plugin).
+- Root [`package.json`](package.json) also declares Pi packaging: keep `keywords` including `pi-package` and `"pi": { "skills": ["./skills"] }` in sync with the skill layout. Do not add Pi `extensions` unless shipping executable Pi extensions.
+- Hermes-specific skill metadata lives in [`skills/modellix/SKILL.md`](skills/modellix/SKILL.md) frontmatter (`metadata.hermes`, `required_environment_variables`). Keep the long `description` for cross-host skill triggering; do not invent a second SKILL.md for Hermes. Optional short listing copy for directories: `Unified API for AI image and video generation`.
 - `.plugin/plugin.json` is the primary Open Plugins source; edit it first, then mirror to vendor manifests.
 - `name` must satisfy the Open Plugins spec: lowercase alphanumerics, hyphens, periods; no `--` or `..`.
 - Manifest directories must contain only `plugin.json` (and, for Claude, `marketplace.json`). Components live at the plugin root.
@@ -259,7 +268,7 @@ Agents editing the plugin do not need to trigger publish manually; merging to `m
 - Paid `model run` must not be auto-retried on ambiguous/unknown submission outcomes.
 - Filename ≠ model slug (e.g. docs path `seedance-2-0-mini-t2v.md` vs slug `bytedance/seedance-2.0-mini-t2v`).
 - Plugin root is the repo root; the skill-only install path is `skills/modellix`, not the repo root and not a nested package directory.
-- Version lives in five files (four manifests + `skill.json`); bump them together.
+- Version lives in the four Open Plugins manifests + `skills/modellix/skill.json` + root `package.json` (+ Claude marketplace `metadata.version`); bump them together.
 
 ## Quick file map for edits
 
@@ -271,6 +280,8 @@ Agents editing the plugin do not need to trigger publish manually; merging to `m
 | CLI workflow | `skills/modellix/SKILL.md`, `skills/modellix/references/cli-playbook.md`, `capability-matrix.md`, scripts |
 | REST fallback | `skills/modellix/references/rest-playbook.md`, `capability-matrix.md` |
 | Install / registry copy | root `README.md`, manifests, `skills/modellix/skill.json` |
+| Pi package metadata | root `package.json` (`pi-package`, `pi.skills`); keep `.pi/skills/modellix` symlink |
+| Hermes skill metadata | `skills/modellix/SKILL.md` frontmatter (`metadata.hermes`, `required_environment_variables`); README Hermes install |
 | Eval prompts | `skills/modellix/evals/evals.json` |
 
 ## Listing the plugin in external directories

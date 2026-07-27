@@ -3,6 +3,18 @@
 All notable changes to this project are documented here. The format loosely follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and versions use [Semantic Versioning](https://semver.org/).
 
+## [3.2.1] - 2026-07-27
+
+### Added
+
+- Pi package support: `package.json` `keywords` include `pi-package`, `"pi": { "skills": ["./skills"] }`, and `.pi/skills/modellix` → `skills/modellix` symlink for local discovery.
+- Hermes Agent skill metadata in `SKILL.md`: `metadata.hermes.tags` and `required_environment_variables` for `MODELLIX_API_KEY` (secure prompt / `~/.hermes/.env`).
+- README / AGENTS install docs for Pi (`pi install git:github.com/Modellix/modellix-plugin`) and Hermes (`hermes skills install …`, symlink / `external_dirs`).
+
+### Notes
+
+- Pi and Hermes consume the skill tree (and Pi package metadata); they are not Open Plugins marketplace hosts. Long skill `description` is unchanged for cross-host triggering; short listing blurb for Hermes directories: `Unified API for AI image and video generation`.
+
 ## [3.2.0] - 2026-07-27
 
 ### Added

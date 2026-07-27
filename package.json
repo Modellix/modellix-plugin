@@ -1,12 +1,14 @@
 {
   "name": "@modellix/modellix-plugin",
-  "version": "3.2.0",
+  "version": "3.2.1",
   "description": "Unified API/CLI for AI image and video generation via Modellix",
   "type": "module",
   "license": "MIT",
   "keywords": [
     "openclaw",
     "clawhub",
+    "pi-package",
+    "pi",
     "modellix",
     "image-generation",
     "video-generation",
@@ -28,6 +30,7 @@
     "openclaw.plugin.json",
     "skills/**",
     ".opencode/skills/**",
+    ".pi/skills/**",
     ".plugin/**",
     ".claude-plugin/**",
     ".cursor-plugin/**",
@@ -38,6 +41,9 @@
     "LICENSE",
     "CHANGELOG.md"
   ],
+  "pi": {
+    "skills": ["./skills"]
+  },
   "openclaw": {
     "compat": {
       "pluginApi": ">=2026.3.22",

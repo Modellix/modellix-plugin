@@ -2,7 +2,7 @@
 
 Agent plugin for [Modellix](https://modellix.ai), a unified Model-as-a-Service (MaaS) platform for image and video generation.
 
-This repository follows the [Open Plugins](https://open-plugins.com/plugin-builders/specification) specification: the repository root **is** the plugin root, and the skill ships as `skills/modellix/`. The same layout installs into Cursor, Claude Code, Codex, OpenClaw, OpenCode (via Agent Skills), and any Agent Skills host.
+This repository follows the [Open Plugins](https://open-plugins.com/plugin-builders/specification) specification: the repository root **is** the plugin root, and the skill ships as `skills/modellix/`. The same layout installs into Cursor, Claude Code, Codex, OpenClaw, OpenCode, Pi, Hermes, and any Agent Skills host.
 
 ## What this plugin provides
 
@@ -104,11 +104,33 @@ openclaw plugins install git:github.com/Modellix/modellix-plugin
 
 Update: reinstall from the same ClawHub/git/path source (or `git pull` if you linked a local checkout). `openclaw plugins update` only refreshes npm-tracked installs.
 
+#### Pi (package)
+
+[Pi](https://github.com/badlogic/pi-mono) loads this repo as a [Pi package](https://docs.pi.dev/packages) (skills only — not an Open Plugins marketplace plugin). `package.json` declares `pi-package` and `pi.skills`; the repo also exposes `.pi/skills/modellix` → `skills/modellix` for local discovery.
+
+Install:
+
+```bash
+pi install git:github.com/Modellix/modellix-plugin
+# or
+pi install https://github.com/Modellix/modellix-plugin
+# local checkout
+pi install /path/to/modellix-plugin
+```
+
+Update:
+
+```bash
+pi update --extensions
+# or pin/move ref:
+pi install git:github.com/Modellix/modellix-plugin
+```
+
 ---
 
 ### 2) Skill
 
-Installs only `skills/modellix` (Agent Skill). Useful for skills.sh, ClawHub skills, OpenCode, Smithery, or Cursor skill-only installs.
+Installs only `skills/modellix` (Agent Skill). Useful for skills.sh, ClawHub skills, OpenCode, Pi, Hermes, Smithery, or Cursor skill-only installs.
 
 #### Agent Skills (skills.sh) — any host
 
@@ -193,6 +215,45 @@ npx @smithery/cli@latest skill add modellix/modellix-skill --agent cursor
 
 Update: re-run the same `skill add` command (or your Smithery client’s update flow).
 
+#### Pi (skill-only)
+
+Prefer the [Pi package](#pi-package) install above. Skill-only alternatives:
+
+```bash
+npx skills add https://github.com/Modellix/modellix-plugin --skill modellix
+# Pi also scans ~/.agents/skills/
+
+# or symlink the skill tree
+mkdir -p ~/.pi/agent/skills
+ln -sfn /path/to/modellix-plugin/skills/modellix ~/.pi/agent/skills/modellix
+```
+
+#### Hermes Agent
+
+[Hermes](https://hermes-agent.nousresearch.com/) uses Agent Skills (`SKILL.md`), not Open Plugins. Short listing blurb: **Unified API for AI image and video generation**.
+
+Install:
+
+```bash
+hermes skills install Modellix/modellix-plugin/skills/modellix
+# or from skills.sh (when listed):
+# hermes skills install skills-sh/Modellix/modellix-plugin/modellix
+
+# copy / symlink into the Hermes skills tree
+mkdir -p ~/.hermes/skills
+ln -sfn /path/to/modellix-plugin/skills/modellix ~/.hermes/skills/modellix
+```
+
+To reuse a shared Agent Skills directory, add under `skills` in `~/.hermes/config.yaml`:
+
+```yaml
+skills:
+  external_dirs:
+    - ~/.agents/skills
+```
+
+Update: re-run `hermes skills install ...`, or `git pull` on a symlink checkout. After install, start a new session and invoke `/modellix` (or load the skill via Hermes skill tools). Set `MODELLIX_API_KEY` in the environment or `~/.hermes/.env` (Hermes may prompt securely on first load when the skill declares `required_environment_variables`).
+
 ## Setup
 
 | Item | Value |
@@ -207,6 +268,7 @@ export MODELLIX_API_KEY="your_api_key"
 - REST requires `MODELLIX_API_KEY`.
 - CLI may use the env var **or** a saved profile (`modellix-cli auth login` / `init`).
 - In Cursor, the key can also be set as the `MODELLIX_API_KEY` plugin variable.
+- In Hermes, prefer `~/.hermes/.env` or the secure prompt when the skill loads (`required_environment_variables`).
 - Prefer session-only keys; persist only when you explicitly ask for it.
 - Never commit API keys or print them in logs.
 
@@ -275,9 +337,10 @@ Request-body schemas come from each model’s docs (`docs_url` from `model descr
 ├── README.md                       # This file (humans)
 ├── AGENTS.md                       # Maintainer / coding-agent instructions
 ├── CHANGELOG.md
-├── package.json                    # ClawHub OpenClaw package (@modellix/modellix-plugin)
+├── package.json                    # ClawHub OpenClaw + Pi package (@modellix/modellix-plugin)
 ├── openclaw.plugin.json            # OpenClaw package manifest (skills bundle)
 ├── .opencode/skills/modellix       # Symlink → skills/modellix (OpenCode skill discovery)
+├── .pi/skills/modellix             # Symlink → skills/modellix (Pi local skill discovery)
 ├── .plugin/plugin.json             # Vendor-neutral Open Plugins manifest
 ├── .cursor-plugin/plugin.json      # Cursor manifest (+ MODELLIX_API_KEY variable)
 ├── .claude-plugin/
@@ -291,7 +354,7 @@ Request-body schemas come from each model’s docs (`docs_url` from `model descr
 └── .github/workflows/              # Publish sync (Smithery / skills add / ClawHub)
 ```
 
-`skills/modellix/` sits on the Open Plugins default discovery path, so no `skills` field is needed in the manifests.
+`skills/modellix/` sits on the Open Plugins default discovery path, so no `skills` field is needed in the Open Plugins manifests. Pi uses `package.json#pi.skills`; Hermes installs the skill tree only (no Hermes-specific plugin manifest).
 
 ## Maintaining this plugin
 

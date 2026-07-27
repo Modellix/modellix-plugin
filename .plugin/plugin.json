@@ -1,6 +1,6 @@
 {
   "name": "modellix",
-  "version": "3.2.0",
+  "version": "3.2.1",
   "description": "Unified API/CLI for AI image and video generation via Modellix",
   "author": {
     "name": "Modellix",
