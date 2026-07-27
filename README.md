@@ -4,6 +4,8 @@ Agent plugin for [Modellix](https://modellix.ai), a unified Model-as-a-Service (
 
 This repository follows the [Open Plugins](https://open-plugins.com/plugin-builders/specification) specification: the repository root **is** the plugin root, and the skill ships as `skills/modellix/`. The same layout installs into Cursor, Claude Code, Codex, OpenClaw, OpenCode, Pi, Hermes, and any Agent Skills host.
 
+Official install guide: [docs.modellix.ai/ways-to-use/plugin](https://docs.modellix.ai/ways-to-use/plugin).
+
 ## What this plugin provides
 
 - CLI-first workflow: `modellix-cli doctor` → `model run --wait` → `task download`
@@ -367,6 +369,7 @@ Current version: see [`.plugin/plugin.json`](.plugin/plugin.json) (kept in sync 
 - Product: [modellix.ai](https://modellix.ai)
 - Docs: [docs.modellix.ai](https://docs.modellix.ai)
 - Models index: [llms.txt](https://docs.modellix.ai/llms.txt)
+- Plugin guide: [ways-to-use/plugin](https://docs.modellix.ai/ways-to-use/plugin)
 - Agent skill guide: [ways-to-use/skill](https://docs.modellix.ai/ways-to-use/skill.md)
 - REST API: [ways-to-use/api](https://docs.modellix.ai/ways-to-use/api.md)
 - CLI package: [npmjs.com/package/modellix-cli](https://www.npmjs.com/package/modellix-cli)

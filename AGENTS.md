@@ -45,8 +45,9 @@ When updating CLI usage or model guidance, prefer live sources over memory or st
 2. **REST API**: https://docs.modellix.ai/ways-to-use/api.md
 3. **Model index**: https://docs.modellix.ai/llms.txt — then fetch each model’s `.md` (or use `modellix-cli model describe <slug> --json` → `docs_url`).
 4. **Plugin format**: https://open-plugins.com/plugin-builders/specification
-5. **Do not** treat https://docs.modellix.ai/ways-to-use/cli.md as authoritative until it is updated to match the CLI package.
-6. **Do not** reintroduce a bundled `references/REFERENCE.md` mirror of `llms.txt` (removed on purpose; it went stale and duplicated CLI/`llms.txt`).
+5. **Published plugin docs**: https://docs.modellix.ai/ways-to-use/plugin.md is the human install guide for this repo (the skill-only guide stays at `ways-to-use/skill.md`). When install commands, default models, or troubleshooting change in `README.md`, check that page for drift and flag it.
+6. **Do not** treat https://docs.modellix.ai/ways-to-use/cli.md as authoritative until it is updated to match the CLI package.
+7. **Do not** reintroduce a bundled `references/REFERENCE.md` mirror of `llms.txt` (removed on purpose; it went stale and duplicated CLI/`llms.txt`).
 
 Canonical agent workflow the skill teaches:
 
@@ -115,6 +116,7 @@ hermes skills install Modellix/modellix-plugin/skills/modellix
 
 - The four Open Plugins `plugin.json` files must stay in sync for shared metadata (`name`, `version`, `description`, `author`, `homepage`, `repository`, `license`, `logo`, `keywords`). Only the Cursor manifest carries the extra `variables` block.
 - Keep `version` identical across those manifests, [`skills/modellix/skill.json`](skills/modellix/skill.json), and root [`package.json`](package.json).
+- `homepage` points at the plugin guide (https://docs.modellix.ai/ways-to-use/plugin), not the skill-only guide. Keep it identical in the four manifests and `package.json`.
 - [`openclaw.plugin.json`](openclaw.plugin.json) is for ClawHub / OpenClaw. Keep `skills: ["./skills"]` and an empty `configSchema`. **Do not** add `openclaw.extensions` / runtime entrypoints unless intentionally shipping a native TypeScript OpenClaw code plugin (that would change detection from content bundle to code plugin).
 - Root [`package.json`](package.json) also declares Pi packaging: keep `keywords` including `pi-package` and `"pi": { "skills": ["./skills"] }` in sync with the skill layout. Do not add Pi `extensions` unless shipping executable Pi extensions.
 - Hermes-specific skill metadata lives in [`skills/modellix/SKILL.md`](skills/modellix/SKILL.md) frontmatter (`metadata.hermes`, `required_environment_variables`). Keep the long `description` for cross-host skill triggering; do not invent a second SKILL.md for Hermes. Optional short listing copy for directories: `Unified API for AI image and video generation`.

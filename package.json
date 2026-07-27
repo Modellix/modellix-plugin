@@ -1,6 +1,6 @@
 {
   "name": "@modellix/modellix-plugin",
-  "version": "3.2.1",
+  "version": "3.2.2",
   "description": "Unified API/CLI for AI image and video generation via Modellix",
   "type": "module",
   "license": "MIT",
@@ -14,7 +14,7 @@
     "video-generation",
     "ai"
   ],
-  "homepage": "https://docs.modellix.ai/ways-to-use/skill.md",
+  "homepage": "https://docs.modellix.ai/ways-to-use/plugin",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/Modellix/modellix-plugin.git"

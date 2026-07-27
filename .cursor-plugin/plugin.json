@@ -1,12 +1,12 @@
 {
   "name": "modellix",
-  "version": "3.2.1",
+  "version": "3.2.2",
   "description": "Unified API/CLI for AI image and video generation via Modellix",
   "author": {
     "name": "Modellix",
     "url": "https://modellix.ai"
   },
-  "homepage": "https://docs.modellix.ai/ways-to-use/skill.md",
+  "homepage": "https://docs.modellix.ai/ways-to-use/plugin",
   "repository": "https://github.com/Modellix/modellix-plugin",
   "license": "MIT",
   "logo": "assets/logo.svg",

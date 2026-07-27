@@ -5,6 +5,8 @@
     "marketplace_source": "Modellix/modellix-plugin",
     "clawhub_url": "https://clawhub.ai/modellix/modellix",
     "docs_llms": "https://docs.modellix.ai/llms.txt",
+    "docs_plugin": "https://docs.modellix.ai/ways-to-use/plugin",
+    "docs_skill": "https://docs.modellix.ai/ways-to-use/skill.md",
     "cli_npm": "https://www.npmjs.com/package/modellix-cli",
     "short_description": "Unified API for AI image and video generation",
     "stale_url_substrings": [

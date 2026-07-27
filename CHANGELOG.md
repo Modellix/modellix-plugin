@@ -3,6 +3,14 @@
 All notable changes to this project are documented here. The format loosely follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and versions use [Semantic Versioning](https://semver.org/).
 
+## [3.2.2] - 2026-07-27
+
+### Changed
+
+- `homepage` in the four Open Plugins manifests and root `package.json` now points at the plugin guide (https://docs.modellix.ai/ways-to-use/plugin) instead of the skill-only guide.
+- README links to the published plugin guide; AGENTS.md records it as a source of truth to keep in sync with the install sections.
+- `.cursor/hooks/community-listings.json` carries `docs_plugin` / `docs_skill` canonical URLs for directory listings.
+
 ## [3.2.1] - 2026-07-27
 
 ### Added
