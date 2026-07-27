@@ -18,13 +18,15 @@ jobs:
       - name: Update Smithery skill
         env:
           SMITHERY_TOKEN: ${{ secrets[format('{0}', 'SMITHERY_TOKEN')] || '' }}
-          SKILL_GIT_URL: https://github.com/Modellix/modellix-skill/tree/main/modellix-skill
+          SKILL_GIT_URL: https://github.com/Modellix/modellix-plugin/tree/main/skills/modellix
         run: |
           if [ -z "$SMITHERY_TOKEN" ]; then
             echo "SMITHERY_TOKEN is not set. Please configure it in repository secrets."
             exit 1
           fi
 
+          # The Smithery registry slug stays modellix/modellix-skill to preserve
+          # existing installs; only the gitUrl moves to the plugin layout.
           curl --fail-with-body --request PUT \
             --url "https://api.smithery.ai/skills/modellix/modellix-skill" \
             --header "Authorization: Bearer ${SMITHERY_TOKEN}" \
@@ -38,4 +40,4 @@ jobs:
 
       - name: Add skill via npx
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-        run: npx skills add https://github.com/Modellix/modellix-skill/tree/main/modellix-skill
+        run: npx skills add https://github.com/Modellix/modellix-plugin/tree/main/skills/modellix

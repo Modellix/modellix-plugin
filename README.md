@@ -1,10 +1,10 @@
-# Modellix Agent Skill
+# Modellix Plugin
 
-Agent skill for integrating [Modellix](https://modellix.ai), a unified Model-as-a-Service (MaaS) platform for image and video generation.
+Agent plugin for [Modellix](https://modellix.ai), a unified Model-as-a-Service (MaaS) platform for image and video generation.
 
-The published package lives in [`modellix-skill/`](modellix-skill/). Install URLs must point at that subdirectory, not the repo root.
+This repository follows the [Open Plugins](https://open-plugins.com/plugin-builders/specification) specification: the repository root **is** the plugin root, and the skill ships as `skills/modellix/`. The same layout installs into Cursor, Claude Code, Codex, and any Agent Skills host.
 
-## What this skill provides
+## What this plugin provides
 
 - CLI-first workflow: `modellix-cli doctor` → `model run --wait` → `task download`
 - REST fallback when the CLI is unavailable
@@ -25,16 +25,42 @@ modellix-cli doctor --json
 
 ## Install
 
-### From GitHub
+### Claude Code
+
+```text
+/plugin marketplace add Modellix/modellix-plugin
+/plugin install modellix@modellix
+```
+
+### Codex
 
 ```bash
-npx skills add https://github.com/Modellix/modellix-skill/tree/main/modellix-skill
+codex plugin marketplace add Modellix/modellix-plugin
+# then install modellix from /plugins
+```
+
+### Cursor
+
+Browse or submit via [cursor.directory](https://cursor.directory/plugins/new), or link the repository for local use:
+
+```bash
+git clone https://github.com/Modellix/modellix-plugin.git
+ln -s "$PWD/modellix-plugin" ~/.cursor/plugins/local/modellix
+# then run "Developer: Reload Window" and confirm the skill under Customize
+```
+
+### Agent Skills (skills.sh)
+
+The skill can still be installed on its own, without the plugin wrapper:
+
+```bash
+npx skills add https://github.com/Modellix/modellix-plugin/tree/main/skills/modellix
 ```
 
 Cursor:
 
 ```bash
-npx skills add https://github.com/Modellix/modellix-skill/tree/main/modellix-skill --agent cursor
+npx skills add https://github.com/Modellix/modellix-plugin/tree/main/skills/modellix --agent cursor
 ```
 
 Update installed skills:
@@ -49,12 +75,6 @@ npx skills update
 npx @smithery/cli@latest skill add modellix/modellix-skill
 ```
 
-Cursor:
-
-```bash
-npx @smithery/cli@latest skill add modellix/modellix-skill --agent cursor
-```
-
 ### From ClawHub
 
 ```bash
@@ -62,25 +82,28 @@ clawhub install modellix
 clawhub update --all
 ```
 
-## Credential
+## Setup
 
 | Item | Value |
 | --- | --- |
 | Primary credential / env | `MODELLIX_API_KEY` |
 | Console | https://modellix.ai/console/api-key |
 
+```bash
+export MODELLIX_API_KEY="your_api_key"
+```
+
 - REST requires `MODELLIX_API_KEY`.
 - CLI may use the env var **or** a saved profile (`modellix-cli auth login` / `init`).
-- Prefer session-only keys; persist only when the user explicitly asks.
-- Never print API keys in logs or commits.
+- In Cursor, the key can also be set as the `MODELLIX_API_KEY` plugin variable.
+- Prefer session-only keys; persist only when you explicitly ask for it.
+- Never commit API keys or print them in logs.
 
 Key resolution order in the CLI: `--api-key` → `MODELLIX_API_KEY` → selected saved profile.
 
 ## Quick start (CLI)
 
 ```bash
-export MODELLIX_API_KEY="your_api_key"
-
 modellix-cli doctor --json
 
 modellix-cli model run \
@@ -121,7 +144,7 @@ Request-body schemas come from each model’s docs (`docs_url` from `model descr
 1. Prefer CLI when installed; otherwise use REST ([API guide](https://docs.modellix.ai/ways-to-use/api.md)).
 2. Do not hand-roll `task get` polling loops when `model run --wait` or `task wait` is available.
 3. Do not blindly retry a paid `model run` after an unknown submission outcome — check `modellix-cli task history` first.
-4. Optional helpers in `modellix-skill/scripts/` wrap CLI/REST; if they fail, call the CLI commands directly.
+4. Optional helpers in `skills/modellix/scripts/` wrap CLI/REST; if they fail, call the CLI commands directly.
 5. CLI behavior source of truth: [npm modellix-cli](https://www.npmjs.com/package/modellix-cli) and `modellix-cli --help` (not the website CLI guide page, which may lag).
 
 ## Supported task types
@@ -138,23 +161,29 @@ Request-body schemas come from each model’s docs (`docs_url` from `model descr
 
 ```text
 .
-├── README.md                 # This file (humans)
-├── AGENTS.md                 # Maintainer / coding-agent instructions
-├── modellix-skill/           # Published skill package
-│   ├── SKILL.md
-│   ├── skill.json
-│   ├── evals/
-│   ├── scripts/
-│   ├── references/
-│   └── assets/
-└── .github/workflows/        # Publish sync (Smithery / skills add)
+├── README.md                       # This file (humans)
+├── AGENTS.md                       # Maintainer / coding-agent instructions
+├── CHANGELOG.md
+├── .plugin/plugin.json             # Vendor-neutral manifest (primary source)
+├── .cursor-plugin/plugin.json      # Cursor manifest (+ MODELLIX_API_KEY variable)
+├── .claude-plugin/
+│   ├── plugin.json
+│   └── marketplace.json            # Claude Code marketplace entry
+├── .codex-plugin/plugin.json
+├── .agents/plugins/marketplace.json # Codex / vendor-neutral marketplace entry
+├── assets/logo.svg
+├── skills/
+│   └── modellix/                   # Skill package (SKILL.md, scripts, references, assets, evals)
+└── .github/workflows/              # Publish sync (Smithery / skills add)
 ```
 
-## Maintaining this skill
+`skills/modellix/` sits on the Open Plugins default discovery path, so no `skills` field is needed in the manifests.
+
+## Maintaining this plugin
 
 See [AGENTS.md](AGENTS.md) for sources of truth, update checklists, smoke tests, versioning, and PR conventions.
 
-Current package version: see [`modellix-skill/skill.json`](modellix-skill/skill.json).
+Current version: see [`.plugin/plugin.json`](.plugin/plugin.json) (kept in sync with [`skills/modellix/skill.json`](skills/modellix/skill.json)).
 
 ## Links
 

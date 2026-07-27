@@ -1,0 +1,21 @@
+{
+  "name": "modellix",
+  "version": "3.0.0",
+  "description": "Unified API/CLI for AI image and video generation via Modellix",
+  "author": {
+    "name": "Modellix",
+    "url": "https://modellix.ai"
+  },
+  "homepage": "https://docs.modellix.ai/ways-to-use/skill.md",
+  "repository": "https://github.com/Modellix/modellix-plugin",
+  "license": "MIT",
+  "logo": "assets/logo.svg",
+  "keywords": [
+    "ai",
+    "image",
+    "video",
+    "generation",
+    "api",
+    "modellix"
+  ]
+}

@@ -1,0 +1,19 @@
+{
+  "name": "modellix",
+  "interface": {
+    "displayName": "Modellix"
+  },
+  "owner": {
+    "name": "Modellix",
+    "url": "https://modellix.ai"
+  },
+  "plugins": [
+    {
+      "name": "modellix",
+      "source": {
+        "path": "./"
+      },
+      "description": "Unified API/CLI for AI image and video generation via Modellix"
+    }
+  ]
+}

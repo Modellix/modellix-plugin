@@ -2,3 +2,8 @@
 *.pyc
 *.pyo
 modellix-workspace/
+.DS_Store
+
+# Local-only maintainer notes
+.gitmessage.txt
+modellix-plugin-packaging-guide.md
