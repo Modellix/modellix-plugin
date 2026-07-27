@@ -3,6 +3,17 @@
 All notable changes to this project are documented here. The format loosely follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and versions use [Semantic Versioning](https://semver.org/).
 
+## [3.6.0] - 2026-07-27
+
+### Added
+
+- Open Plugins commands component under [`commands/`](commands/): `/modellix:image`, `/modellix:video`, `/modellix:doctor`, `/modellix:models`, `/modellix:tasks`, `/modellix:download`. Each is a thin prompt that routes arguments to the existing `modellix-cli` flow; execution policy stays in `skills/modellix/SKILL.md` and `rules/`.
+- The two paid commands (`image`, `video`) set `disable-model-invocation: true`, so only a human can trigger a charge through a command.
+
+### Changed
+
+- `package.json` publishes `commands/**`; README and AGENTS.md document the command set and its authoring invariants.
+
 ## [3.5.0] - 2026-07-27
 
 ### Added

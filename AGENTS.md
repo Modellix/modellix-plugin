@@ -4,7 +4,7 @@ Instructions for coding agents that maintain this **Modellix plugin** package. H
 
 ## Project overview
 
-This repository is an [Open Plugins](https://open-plugins.com/plugin-builders/specification) **v1** plugin: **the git repository root is the plugin root**. It ships one Agent Skill at `skills/modellix/` for Modellix image/video generation (CLI-first, REST fallback), a read-only **Docs MCP** at `.mcp.json`, always-on **rules**, and spend-safety **hooks**. Hosts that consume it include Cursor, Claude Code, Codex, OpenClaw/ClawHub, OpenCode, Pi, Hermes, and any Agent Skills host.
+This repository is an [Open Plugins](https://open-plugins.com/plugin-builders/specification) **v1** plugin: **the git repository root is the plugin root**. It ships one Agent Skill at `skills/modellix/` for Modellix image/video generation (CLI-first, REST fallback), a read-only **Docs MCP** at `.mcp.json`, always-on **rules**, spend-safety **hooks**, and six slash **commands**. Hosts that consume it include Cursor, Claude Code, Codex, OpenClaw/ClawHub, OpenCode, Pi, Hermes, and any Agent Skills host.
 
 There is no application runtime or unit-test suite. The product is manifests + skill markdown + thin Python helpers.
 
@@ -25,6 +25,7 @@ modellix-plugin/                 ← plugin root (= repo root)
 │   └── evals/
 ├── openclaw.plugin.json         ← ClawHub bundle-plugin (skills only; no extensions)
 ├── .mcp.json                    ← Docs MCP → https://docs.modellix.ai/mcp (search/read docs only)
+├── commands/                    ← slash commands (thin prompts routing to the CLI flow)
 ├── rules/                       ← Open Plugins always-on .mdc guardrails
 ├── hooks/                       ← hooks.json (Open Plugins/Claude) + cursor-hooks.json (Cursor)
 ├── scripts/                     ← plugin-level hook scripts (stdlib Python)
@@ -41,7 +42,7 @@ Follow https://open-plugins.com/plugin-builders/specification (and marketplace/i
 1. **Plugin root = repo root.** All component paths are relative to that root and use `./…`. Never `../` outside the plugin tree.
 2. **Manifests:** Prefer `.plugin/plugin.json` as the source of truth; keep vendor copies (`.cursor-plugin/`, `.claude-plugin/`, `.codex-plugin/`) in sync for shared metadata. Each metadata directory contains **only** `plugin.json` (Claude may also have `marketplace.json`). Components live at the plugin root, not inside `.plugin/`.
 3. **Default discovery:** Hosts load `skills/` automatically. Because the skill lives at `skills/modellix/`, Open Plugins manifests **omit** a `skills` field — do not add one unless the skill moves off the default path.
-4. **Do not invent unused components.** Never create top-level `commands/`, `agents/`, or `.lsp.json` unless you intend to ship them (hosts auto-discover those paths). This plugin ships `.mcp.json` (Docs MCP), `rules/*.mdc` (always-on guardrails), and `hooks/` + `scripts/` (spend-safety hooks). Maintainer Cursor hooks stay under `.cursor/hooks/` — that is **not** an Open Plugins `hooks/` component.
+4. **Do not invent unused components.** Never create top-level `agents/` or `.lsp.json` unless you intend to ship them (hosts auto-discover those paths). This plugin ships `.mcp.json` (Docs MCP), `rules/*.mdc` (always-on guardrails), `hooks/` + `scripts/` (spend-safety hooks), and `commands/*.md` (slash commands). Maintainer Cursor hooks stay under `.cursor/hooks/` — that is **not** an Open Plugins `hooks/` component.
 5. **Names:** `name` is lowercase alphanumerics, hyphens, periods; no `--` or `..`. Current name: `modellix`.
 6. **`${PLUGIN_ROOT}`** (Claude also accepts `${CLAUDE_PLUGIN_ROOT}`) for paths that must resolve against the plugin root. Skill-internal refs stay relative to the skill root (`scripts/…`, `references/…`).
 7. **Pi / Hermes** reuse the same `skills/modellix` tree (Pi via `package.json#pi` / symlink; Hermes via skill install + SKILL.md frontmatter). Do not invent Pi-/Hermes-only Open Plugins manifest directories.
@@ -98,6 +99,29 @@ Progressive disclosure:
 | `scripts/` | Optional; must not block the direct CLI path |
 
 Keep a **single** skill tree under `skills/modellix/`. `.opencode/skills/modellix` and `.pi/skills/modellix` are symlinks only — do not duplicate. OpenCode’s JS/TS `.opencode/plugins/` system is unused here.
+
+## Commands
+
+Six markdown prompts in `commands/`; the filename is the command name, hosts namespace it as `/modellix:<file>`.
+
+| File | Paid | Role |
+|------|------|------|
+| `image.md` | yes | T2I, or I2I when the request carries input images |
+| `video.md` | yes | T2V / I2V / V2V routed by input type |
+| `doctor.md` | no | `--version` + `doctor --json`, credential lifecycle pointer |
+| `models.md` | no | `model list` filters, `model describe`, schema lookup |
+| `tasks.md` | no | `task history` / `get` / `wait`, unknown-submit recovery |
+| `download.md` | no | `task download`, private-network fallback, expiry warning |
+
+Invariants when editing commands:
+
+- **Thin prompts, not policy.** A command routes arguments to an existing CLI flow and points at `skills/modellix/SKILL.md`. Do not restate the credential lifecycle, retry table, or REST fallback — that duplication goes stale.
+- **Paid commands stay user-only.** `image.md` and `video.md` set `disable-model-invocation: true` so an agent cannot spend by calling a command; agent-initiated generation goes through the skill, where the rules and hooks apply.
+- **Frontmatter is the union of hosts.** `description` (all hosts), `argument-hint` (Claude), `disable-model-invocation` (spec + Claude). Unknown keys are ignored elsewhere. Only `$ARGUMENTS` is a guaranteed placeholder — never `$1` / `$2`.
+- **Handle empty arguments.** Ask the user instead of inventing a prompt or a task id.
+- Default slugs appearing in `image.md` / `video.md` must match the Default models table below, `SKILL.md`, and [`rules/cli-and-defaults.mdc`](rules/cli-and-defaults.mdc).
+
+`commands/` is a default discovery path, so the manifests omit a `commands` field. ClawHub installs the skill bundle only and will not expose these commands — that is expected.
 
 ## Hooks
 
@@ -172,6 +196,10 @@ Verify via OpenAPI / `model describe`. Changing defaults → bump version everyw
 # Manifests
 python3 -c "import json,glob; [json.load(open(f)) for f in glob.glob('.*-plugin/*.json') + glob.glob('hooks/*.json') + ['.plugin/plugin.json', '.agents/plugins/marketplace.json', 'openclaw.plugin.json', 'package.json', 'skills/modellix/skill.json', '.mcp.json']]"
 
+# Commands (frontmatter present + default slugs consistent)
+python3 -c "import pathlib,sys; [sys.exit(f'bad frontmatter: {p}') for p in sorted(pathlib.Path('commands').glob('*.md')) if not (p.read_text().startswith('---') and 'description:' in p.read_text().split('---')[1])]"
+rg -n 'nano-banana-2-lite|seedance-2\.0' commands/
+
 # Hooks (stdin payloads; expect {} for non-Modellix, ask on a repeated paid submit)
 echo '{"command":"ls -la"}' | python3 scripts/modellix_run_guard.py
 echo '{"tool_name":"Bash","tool_input":{"command":"modellix-cli model batch tasks.jsonl"}}' | python3 scripts/modellix_run_guard.py
@@ -239,6 +267,7 @@ Bump versions when behavior or packaged content changes.
 |--------|-------------|
 | Plugin metadata / logo | `.plugin/plugin.json` → vendor manifests |
 | Docs MCP endpoint | `.mcp.json` (keep URL in sync with https://docs.modellix.ai/mcp) |
+| Slash commands | `commands/*.md` (thin prompts; keep default slugs in sync with `SKILL.md`) |
 | Always-on guardrails | `rules/*.mdc` (keep in sync with skill defaults / paid-submit / credential policy) |
 | Hook behavior | `scripts/*.py` + both `hooks/*.json` (keep the two configs equivalent) |
 | Marketplace | `.agents/plugins/marketplace.json`, `.claude-plugin/marketplace.json` |

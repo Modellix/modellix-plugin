@@ -13,6 +13,7 @@ Official install guide: [docs.modellix.ai/ways-to-use/plugin](https://docs.model
 - Default models when the user does not specify one
 - Model discovery via `modellix-cli model list` / `model describe`, plus live docs at [llms.txt](https://docs.modellix.ai/llms.txt)
 - Optional **Docs MCP** (`.mcp.json` → [docs.modellix.ai/mcp](https://docs.modellix.ai/mcp)) for searching and reading official documentation — not for running generation tasks
+- Slash **commands** under `commands/`: `/modellix:image`, `/modellix:video`, `/modellix:doctor`, `/modellix:models`, `/modellix:tasks`, `/modellix:download`
 - Persistent **rules** under `rules/` (Open Plugins `.mdc`): CLI-first defaults, paid-submit safety, credential/docs guardrails
 - Optional **hooks** under `hooks/`: confirm before a repeated paid submit or an unbounded `model batch`, and remind the agent to download results before they expire
 - Retry and error guidance aligned with CLI exit codes and paid-submit safety
@@ -339,6 +340,21 @@ Config lives in [`hooks/hooks.json`](hooks/hooks.json) (Open Plugins / Claude Co
 
 Plugin-level `scripts/` holds these hook scripts; the CLI/REST helpers used by the skill live in `skills/modellix/scripts/`.
 
+## Slash commands
+
+Hosts that support Open Plugins commands expose six shortcuts. Each one routes to the same `modellix-cli` workflow the skill teaches — they add no separate runtime:
+
+| Command | Use it for |
+| --- | --- |
+| `/modellix:image [prompt] [image url]` | Text-to-image, or image editing when input images are given |
+| `/modellix:video [prompt] [image or video url]` | Text-to-video, image-to-video, or video-to-video |
+| `/modellix:doctor [profile]` | CLI install, credential resolution, connectivity, balance |
+| `/modellix:models [term or slug]` | Find a model and its request-body schema |
+| `/modellix:tasks [task id]` | Task status, plus recovery after a timeout or unknown submission |
+| `/modellix:download [task id] [dir]` | Fetch results into `./outputs` before the ~7-day expiry |
+
+The two paid commands (`image`, `video`) set `disable-model-invocation: true`, so only a human can trigger them; the read-only four can also be called by the agent. Hosts without command support (Pi, Hermes, OpenCode, the ClawHub skill bundle) ignore [`commands/`](commands/) and keep using the skill.
+
 ## Supported task types
 
 | Type | Description |
@@ -359,6 +375,7 @@ Plugin-level `scripts/` holds these hook scripts; the CLI/REST helpers used by t
 ├── package.json                    # ClawHub OpenClaw + Pi package (@modellix/modellix-plugin)
 ├── openclaw.plugin.json            # OpenClaw package manifest (skills bundle)
 ├── .mcp.json                       # Docs MCP → https://docs.modellix.ai/mcp (read-only docs search)
+├── commands/                       # Slash commands (/modellix:image, :video, :doctor, :models, :tasks, :download)
 ├── rules/                          # Open Plugins always-on guardrails (.mdc)
 ├── hooks/                          # Hook configs: hooks.json (Open Plugins/Claude), cursor-hooks.json (Cursor)
 ├── scripts/                        # Plugin-level hook scripts (Python, stdlib only)
