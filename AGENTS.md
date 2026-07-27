@@ -25,6 +25,7 @@ modellix-plugin/                 ← plugin root (= repo root)
 │   └── evals/
 ├── openclaw.plugin.json         ← ClawHub bundle-plugin (skills only; no extensions)
 ├── .mcp.json                    ← Docs MCP → https://docs.modellix.ai/mcp (search/read docs only)
+├── rules/                       ← Open Plugins always-on .mdc guardrails
 ├── package.json                 ← ClawHub + Pi (`pi-package`, pi.skills)
 ├── .opencode/skills/modellix → ../../skills/modellix
 ├── .pi/skills/modellix → ../../skills/modellix
@@ -38,7 +39,7 @@ Follow https://open-plugins.com/plugin-builders/specification (and marketplace/i
 1. **Plugin root = repo root.** All component paths are relative to that root and use `./…`. Never `../` outside the plugin tree.
 2. **Manifests:** Prefer `.plugin/plugin.json` as the source of truth; keep vendor copies (`.cursor-plugin/`, `.claude-plugin/`, `.codex-plugin/`) in sync for shared metadata. Each metadata directory contains **only** `plugin.json` (Claude may also have `marketplace.json`). Components live at the plugin root, not inside `.plugin/`.
 3. **Default discovery:** Hosts load `skills/` automatically. Because the skill lives at `skills/modellix/`, Open Plugins manifests **omit** a `skills` field — do not add one unless the skill moves off the default path.
-4. **Do not invent unused components.** Never create top-level `commands/`, `agents/`, `rules/`, `hooks/`, or `.lsp.json` unless you intend to ship them (hosts auto-discover those paths). This plugin **does** ship `.mcp.json` (Docs MCP only). Maintainer Cursor hooks stay under `.cursor/hooks/` — that is **not** an Open Plugins `hooks/` component.
+4. **Do not invent unused components.** Never create top-level `commands/`, `agents/`, `hooks/`, or `.lsp.json` unless you intend to ship them (hosts auto-discover those paths). This plugin **does** ship `.mcp.json` (Docs MCP) and `rules/*.mdc` (always-on guardrails). Maintainer Cursor hooks stay under `.cursor/hooks/` — that is **not** an Open Plugins `hooks/` component.
 5. **Names:** `name` is lowercase alphanumerics, hyphens, periods; no `--` or `..`. Current name: `modellix`.
 6. **`${PLUGIN_ROOT}`** (Claude also accepts `${CLAUDE_PLUGIN_ROOT}`) for paths that must resolve against the plugin root. Skill-internal refs stay relative to the skill root (`scripts/…`, `references/…`).
 7. **Pi / Hermes** reuse the same `skills/modellix` tree (Pi via `package.json#pi` / symlink; Hermes via skill install + SKILL.md frontmatter). Do not invent Pi-/Hermes-only Open Plugins manifest directories.
@@ -204,6 +205,7 @@ Bump versions when behavior or packaged content changes.
 |--------|-------------|
 | Plugin metadata / logo | `.plugin/plugin.json` → vendor manifests |
 | Docs MCP endpoint | `.mcp.json` (keep URL in sync with https://docs.modellix.ai/mcp) |
+| Always-on guardrails | `rules/*.mdc` (keep in sync with skill defaults / paid-submit / credential policy) |
 | Marketplace | `.agents/plugins/marketplace.json`, `.claude-plugin/marketplace.json` |
 | Defaults | `SKILL.md`, examples, `evals/evals.json`, version bump |
 | CLI / REST | `SKILL.md`, `references/*`, scripts |

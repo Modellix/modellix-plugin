@@ -1,0 +1,15 @@
+---
+description: Prefer modellix-cli and use skill default models when none named.
+alwaysApply: true
+---
+
+- Prefer `modellix-cli` over hand-rolled REST polling when the CLI is available.
+- Canonical flow: `doctor` → `model run --wait` → `task download`. Prefer `--json`.
+- Do not reinvent poll loops when CLI `--wait` / `task wait` exists. Use REST only if CLI is missing or unsuitable.
+- If the user did not name a model, use these defaults immediately (do not scan the catalog first):
+  - T2I: `google/nano-banana-2-lite`
+  - T2V: `bytedance/seedance-2.0-mini-t2v`
+  - I2I: `google/nano-banana-2-lite-edit`
+  - I2V: `bytedance/seedance-2.0-fast-i2v`
+  - V2V: `bytedance/seedance-2.0-fast-v2v`
+- Full policy and examples: plugin skill `skills/modellix/SKILL.md` and `references/cli-playbook.md`.

@@ -3,6 +3,12 @@
 All notable changes to this project are documented here. The format loosely follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and versions use [Semantic Versioning](https://semver.org/).
 
+## [3.4.0] - 2026-07-27
+
+### Added
+
+- Open Plugins always-on rules under [`rules/`](rules/): `cli-and-defaults.mdc`, `paid-submit-safety.mdc`, and `credentials-and-docs.mdc` (short session guardrails; full playbooks stay in `skills/modellix/`).
+
 ## [3.3.0] - 2026-07-27
 
 ### Added

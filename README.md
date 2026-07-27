@@ -13,6 +13,7 @@ Official install guide: [docs.modellix.ai/ways-to-use/plugin](https://docs.model
 - Default models when the user does not specify one
 - Model discovery via `modellix-cli model list` / `model describe`, plus live docs at [llms.txt](https://docs.modellix.ai/llms.txt)
 - Optional **Docs MCP** (`.mcp.json` → [docs.modellix.ai/mcp](https://docs.modellix.ai/mcp)) for searching and reading official documentation — not for running generation tasks
+- Persistent **rules** under `rules/` (Open Plugins `.mdc`): CLI-first defaults, paid-submit safety, credential/docs guardrails
 - Retry and error guidance aligned with CLI exit codes and paid-submit safety
 - Credential handling for `MODELLIX_API_KEY` and CLI auth profiles
 
@@ -343,6 +344,7 @@ Request-body schemas come from each model’s docs (prefer the plugin Docs MCP w
 ├── package.json                    # ClawHub OpenClaw + Pi package (@modellix/modellix-plugin)
 ├── openclaw.plugin.json            # OpenClaw package manifest (skills bundle)
 ├── .mcp.json                       # Docs MCP → https://docs.modellix.ai/mcp (read-only docs search)
+├── rules/                          # Open Plugins always-on guardrails (.mdc)
 ├── .opencode/skills/modellix       # Symlink → skills/modellix (OpenCode skill discovery)
 ├── .pi/skills/modellix             # Symlink → skills/modellix (Pi local skill discovery)
 ├── .plugin/plugin.json             # Vendor-neutral Open Plugins manifest

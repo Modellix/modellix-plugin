@@ -2,7 +2,7 @@
 name: modellix
 description: Integrate Modellix's unified API for AI image and video generation into applications. Use this skill whenever the user wants to generate images from text, create videos from text or images, edit images, do virtual try-on, or call any Modellix model API. Also trigger when the user mentions Modellix, model-as-a-service for media generation, or needs to work with providers like Qwen, Wan, Seedream, Seedance, Kling, Hailuo, or MiniMax through a unified API. Prefer modellix-cli (model run --wait, task download, doctor, model list) over hand-rolled REST polling whenever the CLI is available.
 license: MIT
-version: 3.3.0
+version: 3.4.0
 author: Modellix
 primaryCredential: MODELLIX_API_KEY
 primaryEnv: MODELLIX_API_KEY
@@ -20,7 +20,7 @@ metadata:
 
 # Modellix Skill
 
-Modellix is a Model-as-a-Service (MaaS) platform for async image/video generation. Prefer the official CLI (`modellix-cli`) so submit, wait, and download stay one coherent workflow.
+Modellix is a Model-as-a-Service (MaaS) platform for async image/video generation. Prefer the official CLI (`modellix-cli`) so submit, wait, and download stay one coherent workflow. Persistent session guardrails also ship as Open Plugins rules under `rules/*.mdc`.
 
 ## Official Docs
 
@@ -178,7 +178,7 @@ modellix-cli task download <task_id> --output-dir ./outputs --json
 
 If download fails with `Resource host resolves to a private or reserved network address` (common when a local proxy/VPN maps CDN hosts like `file.modellix.ai` into `198.18.0.0/15`), retry with `--allow-private-network` for trusted Modellix CDN hosts, or fall back to downloading the `result.resources[].url` with `curl`/`wget`.
 
-Resource URLs expire in about 24 hours — persist promptly. If downloading manually (REST path), name files:
+Resource URLs expire in about 7 days — persist promptly. If downloading manually (REST path), name files:
 
 ```
 modellix-{model_slug}-{timestamp}.{ext}
@@ -281,6 +281,6 @@ Read only what the task needs:
 - [ ] Model chosen (default table or user/catalog)
 - [ ] Body schema checked against model doc when non-trivial
 - [ ] Used `model run --wait` (or `task wait`) instead of hand-rolled poll loops
-- [ ] Results downloaded (`task download` or manual persist before 24h expiry)
+- [ ] Results downloaded (`task download` or manual persist before 7-day expiry)
 - [ ] No blind retry after unknown paid submission
 - [ ] REST used only when CLI path unavailable

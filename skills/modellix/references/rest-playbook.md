@@ -90,7 +90,7 @@ Non-retryable:
 
 ## Notes
 
-- Task outputs expire after 24 hours — download promptly.
+- Task outputs expire after 7 days — download promptly.
 - Parameter shapes vary per model; verify against the model `.md` from https://docs.modellix.ai/llms.txt (or `docs_url` from CLI `model describe` when available).
 - Default T2I slug when the user omits a model: `google/nano-banana-2-lite`.
 - Default T2V slug when the user omits a model: `bytedance/seedance-2.0-mini-t2v`.
