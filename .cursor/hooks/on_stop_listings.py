@@ -53,9 +53,7 @@ def main() -> int:
             "A successful `git push` to main just finished "
             f"(tip `{tip}`). Community listing check reports all tracked awesome-list "
             "skill/plugin entries are already on the current Modellix URLs. Briefly confirm that to the "
-            "user in Chinese, and mention manual plugin directories in "
-            "`.cursor/hooks/community-listings.json` → `manual_channels` only if relevant. "
-            "Do not open unnecessary PRs."
+            "user in Chinese. Do not open unnecessary PRs."
         )
         emit({"followup_message": followup})
         return 0
@@ -86,9 +84,7 @@ def main() -> int:
         "4. For **issue_form** targets (awesome-copilot): do **not** PR `plugins/external.json`. "
         "Cut a matching GitHub release tag + full SHA, then open the External plugin issue form "
         "from `issue_url` / notes. Acknowledge paid-API guidance if relevant.\n"
-        "5. Remind the user about `manual_channels` (cursor.directory / official marketplaces) "
-        "when install URLs or packaging changed.\n"
-        "6. Reply to the user in Chinese with PR/issue URLs or exact next steps. Do not commit "
+        "5. Reply to the user in Chinese with PR/issue URLs or exact next steps. Do not commit "
         "unrelated files."
     )
     emit({"followup_message": followup})

@@ -77,8 +77,6 @@ Update: re-open `/plugins` and update, or re-add the marketplace and reinstall.
 
 #### Cursor
 
-Install (community): submit or browse via [cursor.directory](https://cursor.directory/plugins/new) — paste `https://github.com/Modellix/modellix-plugin`.
-
 Install (local):
 
 ```bash

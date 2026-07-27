@@ -288,4 +288,4 @@ After `git push` to `main`, project Cursor hooks (`.cursor/hooks.json`) run a co
 python3 .cursor/hooks/sync_community_listings.py --check
 ```
 
-Do not invent listing targets in this file; edit the JSON. Official marketplaces (`manual_channels`) stay human-submitted. Awesome Copilot is `issue_form` — never PR `plugins/external.json` directly.
+Do not invent listing targets in this file; edit the JSON. Awesome Copilot is `issue_form` — never PR `plugins/external.json` directly.

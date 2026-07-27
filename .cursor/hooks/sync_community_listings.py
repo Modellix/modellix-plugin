@@ -222,7 +222,6 @@ def check_all(config: dict[str, Any]) -> dict[str, Any]:
         "targets": targets,
         "needs_action": needs,
         "errors": errors,
-        "manual_channels": config.get("manual_channels") or [],
         "gh_available": bool(shutil.which("gh")),
     }
 
@@ -450,10 +449,6 @@ def format_human(report: dict[str, Any]) -> str:
             lines.append(
                 f"- {t['id']}: {t.get('apply_status')} — {t.get('pr_url') or t.get('apply_detail') or ''}"
             )
-    lines.append("")
-    lines.append("### Manual plugin directories (not auto-checked for content)")
-    for ch in report.get("manual_channels") or []:
-        lines.append(f"- {ch['title']}: {ch['url']} ({ch.get('notes') or ''})")
     lines.append("")
     lines.append(
         "Config source of truth: `.cursor/hooks/community-listings.json`. "
