@@ -233,6 +233,8 @@ On push to `main`, [`skill_update.yml`](.github/workflows/skill_update.yml):
 3. Publishes `skills/modellix` to ClawHub as skill `modellix/modellix` by running the `clawhub` CLI inline (requires `CLAWHUB_TOKEN`). ClawHub's reusable [`skill-publish.yml`](https://github.com/openclaw/clawhub/blob/main/.github/workflows/skill-publish.yml) is intentionally **not** used: its status map only knows `would-publish` / `published` / `unchanged`, so a successful submit returning `pending-publication` (queued for security scans) is reported as `Invalid publish output`. The inline step accepts `published`, `pending-publication`, `submitted`, and `unchanged`.
 4. Publishes the repo root as OpenClaw **bundle-plugin** package `@modellix/modellix-plugin` via [`package-publish.yml`](https://github.com/openclaw/clawhub/blob/main/.github/workflows/package-publish.yml) (same token). This is a content/skill bundle (`openclaw.plugin.json` + Open Plugins manifests), not a code plugin with `openclaw.extensions`.
 
+ClawHub refuses to republish an existing package version, so `sync-clawhub-package` runs only when the `check-package-version` job sees a new `package.json` version (or on `workflow_dispatch`). Bump the version whenever packaged content changes; docs-only pushes intentionally skip the package publish. Skill publishes need no gate — the CLI reports `unchanged` and exits cleanly.
+
 Caller jobs that use a ClawHub reusable workflow must grant every permission its nested job requests, otherwise GitHub rejects the workflow file ("requesting `id-token: write`, but is only allowed `id-token: none`"). `package-publish.yml` currently needs `actions: read`, `contents: read`, and `id-token: write`.
 
 OpenClaw install paths:

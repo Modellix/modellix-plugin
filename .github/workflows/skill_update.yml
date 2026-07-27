@@ -62,9 +62,9 @@ jobs:
       SKILL_PATH: skills/modellix
       SKILL_OWNER: modellix
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v7
         with:
           node-version: 22
 
@@ -120,9 +120,48 @@ jobs:
           print(f"ClawHub skill publish status: {status}")
           PY
 
+  # ClawHub rejects republishing an existing package version, so only publish
+  # when package.json version changed (or on a manual dispatch).
+  check-package-version:
+    runs-on: ubuntu-latest
+    outputs:
+      changed: ${{ steps.check.outputs.changed }}
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 2
+
+      - id: check
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+        run: |
+          python3 - <<'PY'
+          import json, os, subprocess
+          from pathlib import Path
+
+          def version(blob):
+              return json.loads(blob)["version"]
+
+          current = version(Path("package.json").read_text(encoding="utf-8"))
+          previous = None
+          if os.environ["EVENT_NAME"] == "push":
+              result = subprocess.run(
+                  ["git", "show", "HEAD~1:package.json"], capture_output=True, text=True
+              )
+              if result.returncode == 0:
+                  previous = version(result.stdout)
+
+          changed = previous is None or previous != current
+          print(f"Package version: {previous} -> {current} (publish: {changed})")
+          with Path(os.environ["GITHUB_OUTPUT"]).open("a", encoding="utf-8") as fh:
+              fh.write(f"changed={str(changed).lower()}\n")
+          PY
+
   # Publish this Open Plugins repo as an OpenClaw bundle-plugin package
   # (@modellix/modellix-plugin). Skill-only content; no native runtime entrypoint.
   sync-clawhub-package:
+    needs: check-package-version
+    if: needs.check-package-version.outputs.changed == 'true'
     permissions:
       actions: read
       contents: read
