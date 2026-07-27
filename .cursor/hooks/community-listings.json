@@ -1,0 +1,110 @@
+{
+  "canonical": {
+    "skill_url": "https://github.com/Modellix/modellix-plugin/tree/main/skills/modellix",
+    "repo_url": "https://github.com/Modellix/modellix-plugin",
+    "marketplace_source": "Modellix/modellix-plugin",
+    "clawhub_url": "https://clawhub.ai/modellix/modellix",
+    "docs_llms": "https://docs.modellix.ai/llms.txt",
+    "cli_npm": "https://www.npmjs.com/package/modellix-cli",
+    "short_description": "Unified API for AI image and video generation",
+    "stale_url_substrings": [
+      "Modellix/modellix-skill",
+      "github.com/Modellix/modellix-skill",
+      "tree/main/modellix-skill"
+    ]
+  },
+  "targets": [
+    {
+      "id": "awesome-agent-skills",
+      "repo": "VoltAgent/awesome-agent-skills",
+      "kind": "readme_link",
+      "path": "README.md",
+      "match_regex": "(?i)modellix",
+      "desired_snippet": "- **[Modellix/modellix](https://github.com/Modellix/modellix-plugin/tree/main/skills/modellix)** - Unified API for AI image and video generation",
+      "pr_title": "Add skill: Modellix/modellix",
+      "example_pr": "https://github.com/VoltAgent/awesome-agent-skills/pull/801",
+      "notes": "Community Skills → Development and Testing. Description ≤10 words."
+    },
+    {
+      "id": "awesome-openclaw-skills",
+      "repo": "VoltAgent/awesome-openclaw-skills",
+      "kind": "readme_link",
+      "path": "README.md",
+      "match_regex": "(?i)\\[modellix\\]|clawhub\\.ai/modellix",
+      "desired_snippet": "- [modellix](https://clawhub.ai/modellix/modellix) - Unified API for AI image and video generation.",
+      "extra_paths": ["categories/image-and-video-generation.md"],
+      "pr_title": "Add skill: modellix/modellix",
+      "example_pr": "https://github.com/VoltAgent/awesome-openclaw-skills/pull/536",
+      "notes": "Image & Video Generation. Use ClawHub URL only (no clawskills.sh)."
+    },
+    {
+      "id": "awesome-claude-skills",
+      "repo": "ComposioHQ/awesome-claude-skills",
+      "kind": "readme_link",
+      "path": "README.md",
+      "match_regex": "(?i)\\[Modellix\\]|modellix-plugin|modellix-skill",
+      "desired_snippet": "- [Modellix](https://github.com/Modellix/modellix-plugin/tree/main/skills/modellix) - Generate images and videos via Modellix's unified model API and CLI. *By [Modellix](https://modellix.ai)*",
+      "pr_title": "Add Modellix skill",
+      "example_pr": "https://github.com/ComposioHQ/awesome-claude-skills/pull/1355",
+      "notes": "Creative & Media, alphabetical by display name."
+    },
+    {
+      "id": "agentic-awesome-skills",
+      "repo": "sickn33/agentic-awesome-skills",
+      "kind": "vendored_skill",
+      "path": "skills/modellix/SKILL.md",
+      "match_regex": "(?i)modellix",
+      "desired_source_repo": "Modellix/modellix-plugin",
+      "pr_title": "feat: add modellix for AI image and video generation",
+      "example_pr": "https://github.com/sickn33/agentic-awesome-skills/pull/867",
+      "notes": "Vendored SKILL.md only. Do not edit CATALOG.md or data/*.json."
+    },
+    {
+      "id": "anthropics-skills",
+      "repo": "anthropics/skills",
+      "kind": "manual",
+      "path": "README.md",
+      "match_regex": "(?i)modellix",
+      "desired_snippet": "- **Modellix** - [Modellix Skill for AI image and video generation](https://github.com/Modellix/modellix-plugin/tree/main/skills/modellix)",
+      "pr_title": "Add Modellix to Partner Skills",
+      "example_pr": "https://github.com/anthropics/skills/pull/1445",
+      "notes": "Partner Skills bullet only. Do not add folders under ./skills/."
+    },
+    {
+      "id": "qoder-community",
+      "repo": "Qoder-AI/qoder-community",
+      "kind": "manual",
+      "path": "src/content/skills/modellix.md",
+      "match_regex": "(?i)modellix",
+      "pr_title": "Add Modellix skill for AI image and video generation",
+      "example_pr": "https://github.com/Qoder-AI/qoder-community/pull/79",
+      "notes": "EN + ZH content files. githubUrl must point at skills/modellix."
+    }
+  ],
+  "manual_channels": [
+    {
+      "id": "cursor-directory",
+      "title": "cursor.directory",
+      "url": "https://cursor.directory/plugins/new",
+      "notes": "Paste https://github.com/Modellix/modellix-plugin"
+    },
+    {
+      "id": "cursor-marketplace",
+      "title": "Cursor Marketplace",
+      "url": "https://cursor.com/marketplace/publish",
+      "notes": "Public + open-source; re-reviewed on updates"
+    },
+    {
+      "id": "claude-plugins",
+      "title": "Claude plugin directory",
+      "url": "https://platform.claude.com/plugins/submit",
+      "notes": "Run claude plugin validate . first"
+    },
+    {
+      "id": "codex-plugins",
+      "title": "Codex plugins",
+      "url": "https://developers.openai.com/codex/submit-plugins",
+      "notes": "Needs listing copy plus 5 positive / 3 negative test cases"
+    }
+  ]
+}

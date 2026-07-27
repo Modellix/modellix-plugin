@@ -54,13 +54,13 @@ ln -s "$PWD/modellix-plugin" ~/.cursor/plugins/local/modellix
 The skill can still be installed on its own, without the plugin wrapper:
 
 ```bash
-npx skills add https://github.com/Modellix/modellix-plugin/tree/main/skills/modellix
+npx skills add https://github.com/Modellix/modellix-plugin --skill modellix
 ```
 
 Cursor:
 
 ```bash
-npx skills add https://github.com/Modellix/modellix-plugin/tree/main/skills/modellix --agent cursor
+npx skills add https://github.com/Modellix/modellix-plugin --skill modellix --agent cursor
 ```
 
 Update installed skills:

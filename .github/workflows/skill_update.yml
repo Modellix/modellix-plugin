@@ -9,12 +9,14 @@ on:
     secrets:
       SMITHERY_TOKEN:
         required: false
+      CLAWHUB_TOKEN:
+        required: false
 
 jobs:
   sync-smithery:
     runs-on: ubuntu-latest
     steps:
-      # Sync action 1/3: update Smithery registry via API.
+      # Sync action 1/2: update Smithery registry via API.
       - name: Update Smithery skill
         env:
           SMITHERY_TOKEN: ${{ secrets[format('{0}', 'SMITHERY_TOKEN')] || '' }}
@@ -40,4 +42,15 @@ jobs:
 
       - name: Add skill via npx
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-        run: npx skills add https://github.com/Modellix/modellix-plugin/tree/main/skills/modellix
+        run: npx skills add https://github.com/Modellix/modellix-plugin --skill modellix
+
+  # Publish skills/modellix to ClawHub (owner modellix, slug modellix).
+  # Requires repository secret CLAWHUB_TOKEN. Unchanged content is skipped.
+  sync-clawhub:
+    uses: openclaw/clawhub/.github/workflows/skill-publish.yml@main
+    with:
+      owner: modellix
+      skill_path: skills/modellix
+      dry_run: false
+    secrets:
+      clawhub_token: ${{ secrets.CLAWHUB_TOKEN }}

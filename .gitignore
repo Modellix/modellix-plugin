@@ -7,3 +7,6 @@ modellix-workspace/
 # Local-only maintainer notes
 .gitmessage.txt
 modellix-plugin-packaging-guide.md
+
+# Cursor hook runtime state (generated after git push)
+.cursor/hooks/state/

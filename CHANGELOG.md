@@ -9,14 +9,17 @@ All notable changes to this project are documented here. The format loosely foll
 
 - Updated default models: Image editing / I2I is now `google/nano-banana-2-lite-edit` (was `bytedance/seedream-5.0-lite-edit`); Video-to-video (V2V) is now `bytedance/seedance-2.0-fast-v2v` (was `bytedance/seedance-2.0-v2v`).
 - Updated `SKILL.md`, `references/capability-matrix.md`, `README.md`, and `AGENTS.md` default-model tables and examples to match.
+- Prefer `npx skills add https://github.com/Modellix/modellix-plugin --skill modellix` for Agent Skills installs.
+- `skill_update.yml` also publishes to ClawHub via the reusable skill-publish workflow (`CLAWHUB_TOKEN`).
+- Added project Cursor hooks that, after a successful `git push` to main, check external skill-directory listings and follow up via `stop` (`community-listings.json` is now the source of truth; the long AGENTS.md playbook was removed).
 
 ## [3.0.0] - 2026-07-27
 
 ### Changed
 
 - **Breaking (install paths):** the repository is now an [Open Plugins](https://open-plugins.com/plugin-builders/specification) package. The repository root is the plugin root and the skill moved from `modellix-skill/` to `skills/modellix/`.
-- Skill-only install URL is now `https://github.com/Modellix/modellix-plugin/tree/main/skills/modellix`.
-- `.github/workflows/skill_update.yml` publishes the new path. The Smithery registry slug (`modellix/modellix-skill`) is unchanged so existing installs keep resolving.
+- Skill-only install is now `npx skills add https://github.com/Modellix/modellix-plugin --skill modellix`.
+- `.github/workflows/skill_update.yml` publishes the new path to Smithery, runs `npx skills add ... --skill modellix`, and publishes `skills/modellix` to ClawHub (`modellix/modellix`). The Smithery registry slug (`modellix/modellix-skill`) is unchanged so existing installs keep resolving.
 - Repository renamed to `Modellix/modellix-plugin`; all documentation URLs updated.
 
 ### Added
