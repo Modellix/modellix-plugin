@@ -46,9 +46,11 @@ jobs:
 
   # Publish skills/modellix to ClawHub (owner modellix, slug modellix).
   # Requires repository secret CLAWHUB_TOKEN. Unchanged content is skipped.
-  # Caller must grant id-token: write — the reusable workflow requests it for OIDC.
+  # Caller must grant whatever the reusable workflow's nested job requests
+  # (currently contents + id-token; package-publish also needs actions: read).
   sync-clawhub-skill:
     permissions:
+      actions: read
       contents: read
       id-token: write
     uses: openclaw/clawhub/.github/workflows/skill-publish.yml@main
@@ -63,6 +65,7 @@ jobs:
   # (@modellix/modellix-plugin). Skill-only content; no native runtime entrypoint.
   sync-clawhub-package:
     permissions:
+      actions: read
       contents: read
       id-token: write
     uses: openclaw/clawhub/.github/workflows/package-publish.yml@main
