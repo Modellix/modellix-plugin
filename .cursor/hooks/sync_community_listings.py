@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Check / refresh Modellix listings in external skill directories.
+"""Check / refresh Modellix listings in external skill and plugin directories.
 
 Usage:
   python3 .cursor/hooks/sync_community_listings.py --check
@@ -8,7 +8,8 @@ Usage:
 
 --check (default): read-only status against public GitHub contents.
 --apply: for targets with stale URLs, open update PRs via `gh` when available.
-         Missing first-time listings are reported for the agent to create (not auto-appended).
+         Missing first-time listings (and issue_form targets) are reported for the
+         agent to create (not auto-appended / not auto-issued).
 """
 
 from __future__ import annotations
@@ -101,8 +102,18 @@ def classify_target(target: dict[str, Any], canonical: dict[str, Any]) -> dict[s
 
     if err == "missing" or text is None and err == "missing":
         result["status"] = "missing"
-        result["action"] = "create_pr"
-        result["detail"] = f"{path} not found on {repo}@{branch}; needs first-time listing PR"
+        if target["kind"] == "issue_form":
+            result["action"] = "create_issue"
+            result["detail"] = (
+                f"{path} has no Modellix entry on {repo}@{branch}; open the External plugin "
+                f"issue form: {target.get('issue_url') or 'see notes'}"
+            )
+            result["issue_url"] = target.get("issue_url")
+        else:
+            result["action"] = "create_pr"
+            result["detail"] = f"{path} not found on {repo}@{branch}; needs first-time listing PR"
+        if target.get("desired_snippet"):
+            result["desired_snippet"] = target["desired_snippet"]
         return result
     if text is None:
         result["status"] = "error"
@@ -127,6 +138,52 @@ def classify_target(target: dict[str, Any], canonical: dict[str, Any]) -> dict[s
             return result
         result["status"] = "ok"
         result["detail"] = "Vendored skill present with current source_repo"
+        return result
+
+    if target["kind"] == "file_entry":
+        desired = target.get("desired_snippet") or ""
+        if not matched_lines:
+            result["status"] = "missing"
+            result["action"] = "create_pr"
+            result["detail"] = f"{path} exists but has no Modellix match"
+            result["desired_snippet"] = desired
+            return result
+        desired_ok = (not desired) or (
+            desired in text
+            or desired.rstrip("\n") in text
+            or (desired.rstrip("\n") + "\n") in text
+        )
+        if stale or not desired_ok:
+            result["status"] = "stale"
+            result["action"] = "update_pr"
+            result["detail"] = "File present but content/URLs are outdated"
+            result["desired_snippet"] = desired
+            return result
+        result["status"] = "ok"
+        result["detail"] = f"{path} present with current content"
+        return result
+
+    if target["kind"] == "issue_form":
+        if not matched_lines:
+            result["status"] = "missing"
+            result["action"] = "create_issue"
+            result["detail"] = (
+                "Not listed in plugins/external.json yet; submit via External plugin issue form "
+                f"({target.get('issue_url') or 'see notes'}). Do not PR external.json."
+            )
+            result["issue_url"] = target.get("issue_url")
+            return result
+        if stale:
+            result["status"] = "stale"
+            result["action"] = "create_issue"
+            result["detail"] = (
+                "Listed but URLs look stale; open a follow-up issue or maintainer-approved "
+                "external.json update PR after cutting a new release tag."
+            )
+            result["issue_url"] = target.get("issue_url")
+            return result
+        result["status"] = "ok"
+        result["detail"] = "Listed in plugins/external.json"
         return result
 
     if not matched_lines:
@@ -332,6 +389,19 @@ def apply_updates(config: dict[str, Any], report: dict[str, Any]) -> dict[str, A
             continue
         if item["status"] == "stale" and target["kind"] == "readme_link":
             applied.append(apply_readme_update(target, canonical, item))
+        elif target["kind"] == "issue_form":
+            applied.append(
+                {
+                    **item,
+                    "apply_status": "manual",
+                    "apply_detail": (
+                        "Open the External plugin issue form (never PR plugins/external.json). "
+                        f"{target.get('issue_url') or ''} Cut a matching release tag + full SHA first. "
+                        f"{target.get('notes') or ''}"
+                    ),
+                    "issue_url": target.get("issue_url"),
+                }
+            )
         elif item["status"] == "missing":
             applied.append(
                 {
@@ -344,7 +414,7 @@ def apply_updates(config: dict[str, Any], report: dict[str, Any]) -> dict[str, A
                     "desired_snippet": target.get("desired_snippet"),
                 }
             )
-        elif target["kind"] in {"manual", "vendored_skill"}:
+        elif target["kind"] in {"manual", "vendored_skill", "file_entry"}:
             applied.append(
                 {
                     **item,

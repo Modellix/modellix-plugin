@@ -52,7 +52,7 @@ def main() -> int:
         followup = (
             "A successful `git push` to main just finished "
             f"(tip `{tip}`). Community listing check reports all tracked awesome-list "
-            "entries are already on the current Modellix URLs. Briefly confirm that to the "
+            "skill/plugin entries are already on the current Modellix URLs. Briefly confirm that to the "
             "user in Chinese, and mention manual plugin directories in "
             "`.cursor/hooks/community-listings.json` → `manual_channels` only if relevant. "
             "Do not open unnecessary PRs."
@@ -69,7 +69,7 @@ def main() -> int:
 
     followup = (
         "A successful `git push` to main just finished "
-        f"(tip `{tip}`). External skill-directory listings need attention "
+        f"(tip `{tip}`). External skill/plugin-directory listings need attention "
         f"({', '.join(ids) if ids else 'see report'}). "
         f"{report_hint}"
         "Follow the playbook encoded in `.cursor/hooks/community-listings.json` "
@@ -78,12 +78,17 @@ def main() -> int:
         "2. For **stale** `readme_link` targets, run "
         "`python3 .cursor/hooks/sync_community_listings.py --apply` if `gh` is authenticated; "
         "otherwise open update PRs yourself with English titles/bodies, replacing old "
-        "`modellix-skill` URLs with the canonical `modellix-plugin` skill URL.\n"
-        "3. For **missing** / **manual** / **vendored_skill** targets, open or refresh PRs "
-        "using each target's `desired_snippet`, `pr_title`, and `notes` from the JSON config.\n"
-        "4. Remind the user about `manual_channels` (cursor.directory / official marketplaces) "
+        "`modellix-skill` URLs with the canonical `modellix-plugin` skill/plugin URL.\n"
+        "3. For **missing** `readme_link` / `file_entry` / `manual` / `vendored_skill` targets, "
+        "open or refresh PRs using each target's `desired_snippet`, `pr_title`, and `notes` "
+        "(awesome-opencode: add `data/plugins/modellix.yaml` only; "
+        "composio awesome-claude-plugins: README link under Image and Video Generation).\n"
+        "4. For **issue_form** targets (awesome-copilot): do **not** PR `plugins/external.json`. "
+        "Cut a matching GitHub release tag + full SHA, then open the External plugin issue form "
+        "from `issue_url` / notes. Acknowledge paid-API guidance if relevant.\n"
+        "5. Remind the user about `manual_channels` (cursor.directory / official marketplaces) "
         "when install URLs or packaging changed.\n"
-        "5. Reply to the user in Chinese with PR URLs or exact next steps. Do not commit "
+        "6. Reply to the user in Chinese with PR/issue URLs or exact next steps. Do not commit "
         "unrelated files."
     )
     emit({"followup_message": followup})

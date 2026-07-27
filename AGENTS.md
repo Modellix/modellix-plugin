@@ -315,5 +315,6 @@ Rules that stay here (hooks enforce the rest):
 - Chat with the human maintainer about PR URLs may be Chinese.
 - Do not invent listing targets: edit `community-listings.json` when URLs or directories change.
 - Official plugin markets (`manual_channels` in that JSON) stay human-submitted; the hook only reminds.
+- Tracked plugin directories in `targets` include Composio `awesome-claude-plugins` (`readme_link`), Awesome OpenCode (`file_entry` YAML), and GitHub Awesome Copilot (`issue_form` against `plugins/external.json` — never PR that file directly).
 
 Canonical links live in `community-listings.json` → `canonical` (skill URL, repo URL, ClawHub, etc.).

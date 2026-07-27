@@ -81,6 +81,39 @@
       "pr_title": "Add Modellix skill for AI image and video generation",
       "example_pr": "https://github.com/Qoder-AI/qoder-community/pull/79",
       "notes": "EN + ZH content files. githubUrl must point at skills/modellix."
+    },
+    {
+      "id": "awesome-claude-plugins",
+      "repo": "composio-community/awesome-claude-plugins",
+      "kind": "readme_link",
+      "path": "README.md",
+      "match_regex": "(?i)\\[modellix\\]|Modellix/modellix-plugin",
+      "desired_snippet": "- [modellix](https://github.com/Modellix/modellix-plugin) - Unified API for AI image and video generation via Modellix CLI and Claude Code plugin.",
+      "pr_title": "Add Modellix plugin for image and video generation",
+      "example_pr": "https://github.com/composio-community/awesome-claude-plugins/pull/376",
+      "notes": "Image and Video Generation. External GitHub link only (do not vendor the plugin tree)."
+    },
+    {
+      "id": "awesome-opencode",
+      "repo": "awesome-opencode/awesome-opencode",
+      "kind": "file_entry",
+      "path": "data/plugins/modellix.yaml",
+      "match_regex": "(?i)Modellix/modellix-plugin|name:\\s*Modellix",
+      "desired_snippet": "name: Modellix\nrepo: https://github.com/Modellix/modellix-plugin\ntagline: Unified API for AI image and video generation\ndescription: OpenCode-compatible plugin/skill for async image and video generation via Modellix CLI (model run --wait, task download) with default T2I/T2V/I2I/I2V/V2V models.\n",
+      "pr_title": "docs: add modellix to plugins",
+      "example_pr": "https://github.com/awesome-opencode/awesome-opencode/pull/552",
+      "notes": "Add YAML under data/plugins/ only. Do not edit README.md (auto-generated)."
+    },
+    {
+      "id": "awesome-copilot",
+      "repo": "github/awesome-copilot",
+      "kind": "issue_form",
+      "path": "plugins/external.json",
+      "match_regex": "(?i)Modellix/modellix-plugin|\"name\"\\s*:\\s*\"modellix\"",
+      "pr_title": "[External Plugin]: modellix",
+      "issue_url": "https://github.com/github/awesome-copilot/issues/new?template=external-plugin.yml",
+      "example_pr": "https://github.com/github/awesome-copilot/issues/2447",
+      "notes": "Do NOT PR plugins/external.json. Open the External plugin issue form. Cut a matching release tag (e.g. v3.2.2) + full SHA first. Paid API: see discussion #968."
     }
   ],
   "manual_channels": [
