@@ -46,20 +46,79 @@ jobs:
 
   # Publish skills/modellix to ClawHub (owner modellix, slug modellix).
   # Requires repository secret CLAWHUB_TOKEN. Unchanged content is skipped.
-  # Caller must grant whatever the reusable workflow's nested job requests
-  # (currently contents + id-token; package-publish also needs actions: read).
+  #
+  # This runs the ClawHub CLI directly instead of openclaw/clawhub's reusable
+  # skill-publish.yml: that workflow only maps would-publish/published/unchanged,
+  # so a successful submit that returns "pending-publication" (queued for security
+  # scans) is reported as a failed publish.
   sync-clawhub-skill:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
     permissions:
-      actions: read
       contents: read
-      id-token: write
-    uses: openclaw/clawhub/.github/workflows/skill-publish.yml@main
-    with:
-      owner: modellix
-      skill_path: skills/modellix
-      dry_run: false
-    secrets:
-      clawhub_token: ${{ secrets.CLAWHUB_TOKEN }}
+    env:
+      CLAWHUB_CLI_VERSION: 0.23.1
+      CLAWHUB_REGISTRY: https://clawhub.ai
+      SKILL_PATH: skills/modellix
+      SKILL_OWNER: modellix
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Write ClawHub config
+        env:
+          CLAWHUB_TOKEN: ${{ secrets.CLAWHUB_TOKEN }}
+        run: |
+          if [ -z "${CLAWHUB_TOKEN:-}" ]; then
+            echo "::error::CLAWHUB_TOKEN is not set. Please configure it in repository secrets."
+            exit 1
+          fi
+          python3 - <<'PY'
+          import json, os
+          from pathlib import Path
+
+          path = Path(os.environ["RUNNER_TEMP"]) / "clawhub-config.json"
+          path.write_text(
+              json.dumps({"registry": os.environ["CLAWHUB_REGISTRY"], "token": os.environ["CLAWHUB_TOKEN"]}) + "\n",
+              encoding="utf-8",
+          )
+          path.chmod(0o600)
+          PY
+          echo "CLAWHUB_CONFIG_PATH=$RUNNER_TEMP/clawhub-config.json" >> "$GITHUB_ENV"
+
+      - name: Publish skill to ClawHub
+        run: |
+          python3 - <<'PY'
+          import json, os, subprocess, sys
+
+          skill_path = os.environ["SKILL_PATH"]
+          command = [
+              "npx", "--yes", f"clawhub@{os.environ['CLAWHUB_CLI_VERSION']}",
+              "--registry", os.environ["CLAWHUB_REGISTRY"],
+              "skill", "publish", skill_path,
+              "--json",
+              "--owner", os.environ["SKILL_OWNER"],
+              "--source-repo", os.environ["GITHUB_REPOSITORY"],
+              "--source-commit", os.environ["GITHUB_SHA"],
+              "--source-ref", os.environ["GITHUB_REF"],
+              "--source-path", skill_path,
+          ]
+          completed = subprocess.run(command, capture_output=True, text=True)
+          sys.stderr.write(completed.stderr)
+          print(completed.stdout)
+          if completed.returncode != 0:
+              raise SystemExit(f"clawhub skill publish exited with {completed.returncode}")
+
+          status = json.loads(completed.stdout).get("status")
+          # "pending-publication" and "submitted" mean the upload landed and is
+          # waiting on ClawHub security scans, so both are successful outcomes.
+          if status not in {"published", "pending-publication", "submitted", "unchanged"}:
+              raise SystemExit(f"Unexpected publish status: {status!r}")
+          print(f"ClawHub skill publish status: {status}")
+          PY
 
   # Publish this Open Plugins repo as an OpenClaw bundle-plugin package
   # (@modellix/modellix-plugin). Skill-only content; no native runtime entrypoint.

@@ -230,8 +230,10 @@ On push to `main`, [`skill_update.yml`](.github/workflows/skill_update.yml):
 
 1. `PUT` Smithery skill `modellix/modellix-skill` with the git URL of `skills/modellix/` (requires `SMITHERY_TOKEN` secret). The Smithery slug stays `modellix-skill` to preserve existing installs; only the git URL changed.
 2. After 60s, runs `npx skills add https://github.com/Modellix/modellix-plugin --skill modellix`.
-3. Publishes `skills/modellix` to ClawHub as skill `modellix/modellix` via [`skill-publish.yml`](https://github.com/openclaw/clawhub/blob/main/.github/workflows/skill-publish.yml) (requires `CLAWHUB_TOKEN`).
+3. Publishes `skills/modellix` to ClawHub as skill `modellix/modellix` by running the `clawhub` CLI inline (requires `CLAWHUB_TOKEN`). ClawHub's reusable [`skill-publish.yml`](https://github.com/openclaw/clawhub/blob/main/.github/workflows/skill-publish.yml) is intentionally **not** used: its status map only knows `would-publish` / `published` / `unchanged`, so a successful submit returning `pending-publication` (queued for security scans) is reported as `Invalid publish output`. The inline step accepts `published`, `pending-publication`, `submitted`, and `unchanged`.
 4. Publishes the repo root as OpenClaw **bundle-plugin** package `@modellix/modellix-plugin` via [`package-publish.yml`](https://github.com/openclaw/clawhub/blob/main/.github/workflows/package-publish.yml) (same token). This is a content/skill bundle (`openclaw.plugin.json` + Open Plugins manifests), not a code plugin with `openclaw.extensions`.
+
+Caller jobs that use a ClawHub reusable workflow must grant every permission its nested job requests, otherwise GitHub rejects the workflow file ("requesting `id-token: write`, but is only allowed `id-token: none`"). `package-publish.yml` currently needs `actions: read`, `contents: read`, and `id-token: write`.
 
 OpenClaw install paths:
 
