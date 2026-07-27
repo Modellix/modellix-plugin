@@ -51,9 +51,9 @@ When the user does **not** name a model, use these defaults immediately (do not 
 |---|---|
 | Text-to-image (T2I) | `google/nano-banana-2-lite` |
 | Text-to-video (T2V) | `bytedance/seedance-2.0-mini-t2v` |
-| Image editing / I2I | `bytedance/seedream-5.0-lite-edit` |
+| Image editing / I2I | `google/nano-banana-2-lite-edit` |
 | Image-to-video / I2V | `bytedance/seedance-2.0-fast-i2v` |
-| Video-to-video (V2V) | `bytedance/seedance-2.0-v2v` |
+| Video-to-video (V2V) | `bytedance/seedance-2.0-fast-v2v` |
 
 ## API Key Lifecycle Policy
 
@@ -191,7 +191,7 @@ modellix-cli model run \
 
 ```bash
 modellix-cli model run \
-  --model-slug bytedance/seedream-5.0-lite-edit \
+  --model-slug google/nano-banana-2-lite-edit \
   --body '{"prompt":"Convert to watercolor style","image":["https://example.com/input.jpg"]}' \
   --wait --timeout 5m --json
 ```
@@ -209,7 +209,7 @@ modellix-cli model run \
 
 ```bash
 modellix-cli model run \
-  --model-slug bytedance/seedance-2.0-v2v \
+  --model-slug bytedance/seedance-2.0-fast-v2v \
   --body '{"video_urls":["https://example.com/source.mp4"]}' \
   --wait --timeout 10m --json
 ```

@@ -35,9 +35,9 @@ CLI command policy:
 | --- | --- |
 | T2I | `google/nano-banana-2-lite` |
 | T2V | `bytedance/seedance-2.0-mini-t2v` |
-| I2I | `bytedance/seedream-5.0-lite-edit` |
+| I2I | `google/nano-banana-2-lite-edit` |
 | I2V | `bytedance/seedance-2.0-fast-i2v` |
-| V2V | `bytedance/seedance-2.0-v2v` |
+| V2V | `bytedance/seedance-2.0-fast-v2v` |
 
 ## Fallback Rules
 

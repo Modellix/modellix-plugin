@@ -126,9 +126,9 @@ Used when the user does **not** name a model:
 | --- | --- |
 | Text-to-image (T2I) | `google/nano-banana-2-lite` |
 | Text-to-video (T2V) | `bytedance/seedance-2.0-mini-t2v` |
-| Image editing / I2I | `bytedance/seedream-5.0-lite-edit` |
+| Image editing / I2I | `google/nano-banana-2-lite-edit` |
 | Image-to-video / I2V | `bytedance/seedance-2.0-fast-i2v` |
-| Video-to-video (V2V) | `bytedance/seedance-2.0-v2v` |
+| Video-to-video (V2V) | `bytedance/seedance-2.0-fast-v2v` |
 
 To discover or inspect other models:
 

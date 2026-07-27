@@ -3,6 +3,13 @@
 All notable changes to this project are documented here. The format loosely follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and versions use [Semantic Versioning](https://semver.org/).
 
+## [3.1.0] - 2026-07-27
+
+### Changed
+
+- Updated default models: Image editing / I2I is now `google/nano-banana-2-lite-edit` (was `bytedance/seedream-5.0-lite-edit`); Video-to-video (V2V) is now `bytedance/seedance-2.0-fast-v2v` (was `bytedance/seedance-2.0-v2v`).
+- Updated `SKILL.md`, `references/capability-matrix.md`, `README.md`, and `AGENTS.md` default-model tables and examples to match.
+
 ## [3.0.0] - 2026-07-27
 
 ### Changed
