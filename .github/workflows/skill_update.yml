@@ -5,6 +5,11 @@ on:
     branches:
       - main
   workflow_dispatch:
+    inputs:
+      force_publish:
+        description: Publish skill and package even when nothing changed
+        type: boolean
+        default: false
   workflow_call:
     secrets:
       SMITHERY_TOKEN:
@@ -46,7 +51,7 @@ jobs:
 
   # ClawHub rejects republishing an existing package version, and every skill
   # publish burns a new version number, so only publish what actually changed.
-  # Manual dispatches always publish.
+  # Use the force_publish dispatch input to override.
   detect-changes:
     runs-on: ubuntu-latest
     outputs:
@@ -59,7 +64,7 @@ jobs:
 
       - id: check
         env:
-          EVENT_NAME: ${{ github.event_name }}
+          FORCE: ${{ github.event.inputs.force_publish || 'false' }}
           SKILL_PATH: skills/modellix
         run: |
           python3 - <<'PY'
@@ -69,29 +74,25 @@ jobs:
           def version(blob):
               return json.loads(blob)["version"]
 
-          is_push = os.environ["EVENT_NAME"] == "push"
+          force = os.environ["FORCE"] == "true"
 
           current = version(Path("package.json").read_text(encoding="utf-8"))
           previous = None
-          if is_push:
-              result = subprocess.run(
-                  ["git", "show", "HEAD~1:package.json"], capture_output=True, text=True
-              )
-              if result.returncode == 0:
-                  previous = version(result.stdout)
-          package_changed = previous is None or previous != current
+          result = subprocess.run(
+              ["git", "show", "HEAD~1:package.json"], capture_output=True, text=True
+          )
+          if result.returncode == 0:
+              previous = version(result.stdout)
+          package_changed = force or previous is None or previous != current
           print(f"Package version: {previous} -> {current} (publish: {package_changed})")
 
           skill_path = os.environ["SKILL_PATH"]
-          skill_changed = True
-          if is_push:
-              result = subprocess.run(
-                  ["git", "diff", "--name-only", "HEAD~1", "HEAD", "--", skill_path],
-                  capture_output=True,
-                  text=True,
-              )
-              if result.returncode == 0:
-                  skill_changed = bool(result.stdout.strip())
+          result = subprocess.run(
+              ["git", "diff", "--name-only", "HEAD~1", "HEAD", "--", skill_path],
+              capture_output=True,
+              text=True,
+          )
+          skill_changed = force or result.returncode != 0 or bool(result.stdout.strip())
           print(f"Skill files changed: {skill_changed}")
 
           with Path(os.environ["GITHUB_OUTPUT"]).open("a", encoding="utf-8") as fh:
