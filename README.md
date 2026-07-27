@@ -12,6 +12,7 @@ Official install guide: [docs.modellix.ai/ways-to-use/plugin](https://docs.model
 - REST fallback when the CLI is unavailable
 - Default models when the user does not specify one
 - Model discovery via `modellix-cli model list` / `model describe`, plus live docs at [llms.txt](https://docs.modellix.ai/llms.txt)
+- Optional **Docs MCP** (`.mcp.json` → [docs.modellix.ai/mcp](https://docs.modellix.ai/mcp)) for searching and reading official documentation — not for running generation tasks
 - Retry and error guidance aligned with CLI exit codes and paid-submit safety
 - Credential handling for `MODELLIX_API_KEY` and CLI auth profiles
 
@@ -312,7 +313,7 @@ modellix-cli model list --type text-to-image --output slugs
 modellix-cli model describe <provider/model> --json
 ```
 
-Request-body schemas come from each model’s docs (`docs_url` from `model describe`, or links in [llms.txt](https://docs.modellix.ai/llms.txt)).
+Request-body schemas come from each model’s docs (prefer the plugin Docs MCP when connected; otherwise `docs_url` from `model describe`, or links in [llms.txt](https://docs.modellix.ai/llms.txt)).
 
 ## Execution guidance
 
@@ -341,6 +342,7 @@ Request-body schemas come from each model’s docs (`docs_url` from `model descr
 ├── CHANGELOG.md
 ├── package.json                    # ClawHub OpenClaw + Pi package (@modellix/modellix-plugin)
 ├── openclaw.plugin.json            # OpenClaw package manifest (skills bundle)
+├── .mcp.json                       # Docs MCP → https://docs.modellix.ai/mcp (read-only docs search)
 ├── .opencode/skills/modellix       # Symlink → skills/modellix (OpenCode skill discovery)
 ├── .pi/skills/modellix             # Symlink → skills/modellix (Pi local skill discovery)
 ├── .plugin/plugin.json             # Vendor-neutral Open Plugins manifest
@@ -371,6 +373,7 @@ Current version: see [`.plugin/plugin.json`](.plugin/plugin.json) (kept in sync 
 - Models index: [llms.txt](https://docs.modellix.ai/llms.txt)
 - Plugin guide: [ways-to-use/plugin](https://docs.modellix.ai/ways-to-use/plugin)
 - Agent skill guide: [ways-to-use/skill](https://docs.modellix.ai/ways-to-use/skill.md)
+- Docs MCP: [ways-to-use/mcp](https://docs.modellix.ai/ways-to-use/mcp) ([endpoint](https://docs.modellix.ai/mcp))
 - REST API: [ways-to-use/api](https://docs.modellix.ai/ways-to-use/api.md)
 - CLI package: [npmjs.com/package/modellix-cli](https://www.npmjs.com/package/modellix-cli)
 - Pricing: [get-started/pricing](https://docs.modellix.ai/get-started/pricing)

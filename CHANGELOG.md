@@ -3,6 +3,13 @@
 All notable changes to this project are documented here. The format loosely follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and versions use [Semantic Versioning](https://semver.org/).
 
+## [3.3.0] - 2026-07-27
+
+### Added
+
+- Open Plugins Docs MCP via root [`.mcp.json`](.mcp.json) pointing at the remote server https://docs.modellix.ai/mcp (`modellix-docs`). Read-only documentation search/filesystem tools only — not generation, auth, or downloads.
+- Skill / capability-matrix / README / AGENTS guidance: prefer Docs MCP for product/API/schema lookup when connected; keep CLI npm/`--help` as the source of truth for CLI flags; execution policy stays in `skills/modellix/SKILL.md`.
+
 ## [3.2.2] - 2026-07-27
 
 ### Changed

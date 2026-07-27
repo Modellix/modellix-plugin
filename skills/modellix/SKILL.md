@@ -2,7 +2,7 @@
 name: modellix
 description: Integrate Modellix's unified API for AI image and video generation into applications. Use this skill whenever the user wants to generate images from text, create videos from text or images, edit images, do virtual try-on, or call any Modellix model API. Also trigger when the user mentions Modellix, model-as-a-service for media generation, or needs to work with providers like Qwen, Wan, Seedream, Seedance, Kling, Hailuo, or MiniMax through a unified API. Prefer modellix-cli (model run --wait, task download, doctor, model list) over hand-rolled REST polling whenever the CLI is available.
 license: MIT
-version: 3.2.2
+version: 3.3.0
 author: Modellix
 primaryCredential: MODELLIX_API_KEY
 primaryEnv: MODELLIX_API_KEY
@@ -27,9 +27,22 @@ Modellix is a Model-as-a-Service (MaaS) platform for async image/video generatio
 - AI Onboarding: https://docs.modellix.ai/get-started.md
 - REST API: https://docs.modellix.ai/ways-to-use/api.md
 - Full Models Index: https://docs.modellix.ai/llms.txt
+- Docs MCP (search / read docs): https://docs.modellix.ai/mcp
 - CLI package (source of truth for CLI behavior): https://www.npmjs.com/package/modellix-cli
 
-Do not rely on the website CLI guide page for command syntax; use this skill, `references/cli-playbook.md`, npm README, or `modellix-cli --help`.
+### Documentation lookup policy
+
+This plugin may expose the **Modellix Docs MCP** (`.mcp.json` → `https://docs.modellix.ai/mcp`). It is a **read-only documentation** server (`search_modellix`, docs filesystem query, optional feedback). It does **not** submit generation tasks, poll, download, or handle API keys.
+
+When looking up product/API/install docs or request-body schema:
+
+1. Prefer Docs MCP when the host has it connected (search, then read the matching page / OpenAPI chunk).
+2. Else use `modellix-cli model describe <slug> --json` → `docs_url`, or browse https://docs.modellix.ai/llms.txt and fetch the model `.md`.
+3. For **CLI command syntax and flags**, prefer this skill, `references/cli-playbook.md`, the npm README, or `modellix-cli --help` — do **not** trust website CLI pages over the CLI package (docs can lag).
+
+If the Docs MCP exposes a skill resource, treat **this** `SKILL.md` as the execution policy source of truth (CLI-first, defaults, paid-submit safety).
+
+Do not rely on the website CLI guide page for command syntax.
 
 ## Execution Policy (CLI-first)
 
@@ -132,8 +145,8 @@ When CLI is unavailable:
 
 1. If the user did not specify a model: use the **Default Models** table (do not scan the catalog first).
 2. If they named a model or need discovery: `modellix-cli model list` / `modellix-cli model describe <slug>` (describe returns `docs_url`).
-3. If CLI is unavailable: browse https://docs.modellix.ai/llms.txt for links, then fetch the target model `.md`.
-4. For request body schema: fetch the model doc (`docs_url` or the matching docs link) and read the OpenAPI path / `model_id`. Do **not** invent slugs from filenames (decimals often matter, e.g. `bytedance/seedance-2.0-mini-t2v`).
+3. For request body schema: prefer Docs MCP when available; else fetch the model doc (`docs_url` or the matching link from https://docs.modellix.ai/llms.txt) and read the OpenAPI path / `model_id`. Do **not** invent slugs from filenames (decimals often matter, e.g. `bytedance/seedance-2.0-mini-t2v`).
+4. If CLI is unavailable for discovery: use Docs MCP or browse `llms.txt`, then fetch the target model `.md`.
 
 ### 3) Run and wait
 
