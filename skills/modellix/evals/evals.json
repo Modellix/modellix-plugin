@@ -39,6 +39,45 @@
         "Did not skip auth/environment check and jump straight to model run",
         "Did not print or log the raw API key value"
       ]
+    },
+    {
+      "id": 4,
+      "prompt": "Synthesize speech that says 'Welcome to Modellix' — I don't care which TTS model you use. Use the skill default, wait for completion, and save the audio locally.",
+      "expected_output": "Uses default TTS model alibaba/qwen-audio-3.0-tts-flash with text + a Flash-compatible voice (e.g. longanhuan_v3.6) via model run --wait, then task download. Does not invent a different default slug unless the user named one.",
+      "files": [],
+      "assertions": [
+        "Used model slug alibaba/qwen-audio-3.0-tts-flash (skill default for unspecified TTS)",
+        "Request body included required text and voice fields",
+        "Submitted via modellix-cli model run with wait (or model run + task wait)",
+        "Saved at least one audio file locally under the run outputs directory",
+        "Did not print or log the raw API key value"
+      ]
+    },
+    {
+      "id": 5,
+      "prompt": "Transcribe this public audio URL with whatever STT model the skill recommends by default: https://example.com/meeting.mp3 — wait and show me the result (download if needed).",
+      "expected_output": "Uses default STT model openai/whisper-1 with body url set to the given audio URL via model run --wait (and download/persist of the transcript resource when applicable).",
+      "files": [],
+      "assertions": [
+        "Used model slug openai/whisper-1 (skill default for unspecified STT)",
+        "Request body used the provided public audio url (not a file upload path)",
+        "Submitted via modellix-cli model run with wait (or model run + task wait)",
+        "Did not invent a different default STT slug unless the user named one",
+        "Did not print or log the raw API key value"
+      ]
+    },
+    {
+      "id": 6,
+      "prompt": "Clone the speaker from https://example.com/reference.wav and say 'There is a large garden behind my house.' — pick the skill's default speech-to-speech model and save the audio.",
+      "expected_output": "Uses default STS model alibaba/cosyvoice-clone with required model (cosyvoice-v3.5-plus or cosyvoice-v3.5-flash), url, and text via model run --wait, then task download.",
+      "files": [],
+      "assertions": [
+        "Used model slug alibaba/cosyvoice-clone (skill default for unspecified STS)",
+        "Request body included model, url, and text",
+        "Submitted via modellix-cli model run with wait (or model run + task wait)",
+        "Saved at least one audio file locally under the run outputs directory",
+        "Did not print or log the raw API key value"
+      ]
     }
   ]
 }

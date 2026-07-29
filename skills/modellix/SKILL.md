@@ -2,7 +2,7 @@
 name: modellix
 description: Integrate Modellix's unified API for AI image and video generation into applications. Use this skill whenever the user wants to generate images from text, create videos from text or images, edit images, do virtual try-on, or call any Modellix model API. Also trigger when the user mentions Modellix, model-as-a-service for media generation, or needs to work with providers like Qwen, Wan, Seedream, Seedance, Kling, Hailuo, or MiniMax through a unified API. Prefer modellix-cli (model run --wait, task download, doctor, model list) over hand-rolled REST polling whenever the CLI is available.
 license: MIT
-version: 3.6.0
+version: 3.7.0
 author: Modellix
 primaryCredential: MODELLIX_API_KEY
 primaryEnv: MODELLIX_API_KEY
@@ -78,6 +78,9 @@ When the user does **not** name a model, use these defaults immediately (do not 
 | Image editing / I2I | `google/nano-banana-2-lite-edit` |
 | Image-to-video / I2V | `bytedance/seedance-2.0-fast-i2v` |
 | Video-to-video (V2V) | `bytedance/seedance-2.0-fast-v2v` |
+| Text-to-speech (TTS) | `alibaba/qwen-audio-3.0-tts-flash` |
+| Speech-to-text (STT) | `openai/whisper-1` |
+| Speech-to-speech (STS) | `alibaba/cosyvoice-clone` |
 
 ## API Key Lifecycle Policy
 
@@ -236,6 +239,33 @@ modellix-cli model run \
   --model-slug bytedance/seedance-2.0-fast-v2v \
   --body '{"video_urls":["https://example.com/source.mp4"]}' \
   --wait --timeout 10m --json
+```
+
+**TTS** (default model) — `text` + `voice` required (verify voice against the model doc; Flash voices only):
+
+```bash
+modellix-cli model run \
+  --model-slug alibaba/qwen-audio-3.0-tts-flash \
+  --body '{"text":"There is a large garden behind my house.","voice":"longanhuan_v3.6"}' \
+  --wait --timeout 5m --json
+```
+
+**STT** (default model) — public audio `url` required:
+
+```bash
+modellix-cli model run \
+  --model-slug openai/whisper-1 \
+  --body '{"url":"https://example.com/meeting.mp3"}' \
+  --wait --timeout 5m --json
+```
+
+**STS** (default model) — clone reference `url` + synthesis `text` + target CosyVoice `model`:
+
+```bash
+modellix-cli model run \
+  --model-slug alibaba/cosyvoice-clone \
+  --body '{"model":"cosyvoice-v3.5-plus","url":"https://example.com/reference.wav","text":"There is a large garden behind my house."}' \
+  --wait --timeout 5m --json
 ```
 
 ### 5) Post-task CLI recommendation

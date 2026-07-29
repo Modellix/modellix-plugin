@@ -94,4 +94,7 @@ Non-retryable:
 - Parameter shapes vary per model; verify against the model `.md` from https://docs.modellix.ai/llms.txt (or `docs_url` from CLI `model describe` when available).
 - Default T2I slug when the user omits a model: `google/nano-banana-2-lite`.
 - Default T2V slug when the user omits a model: `bytedance/seedance-2.0-mini-t2v`.
-- See `capability-matrix.md` for CLI ↔ REST mapping.
+- Default TTS slug when the user omits a model: `alibaba/qwen-audio-3.0-tts-flash`.
+- Default STT slug when the user omits a model: `openai/whisper-1`.
+- Default STS slug when the user omits a model: `alibaba/cosyvoice-clone`.
+- See `capability-matrix.md` for the full default-model table and CLI ↔ REST mapping.

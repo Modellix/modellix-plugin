@@ -171,6 +171,9 @@ When the user does not name a model (keep `SKILL.md` + examples + evals in sync)
 | I2I | `google/nano-banana-2-lite-edit` |
 | I2V | `bytedance/seedance-2.0-fast-i2v` |
 | V2V | `bytedance/seedance-2.0-fast-v2v` |
+| TTS | `alibaba/qwen-audio-3.0-tts-flash` |
+| STT | `openai/whisper-1` |
+| STS | `alibaba/cosyvoice-clone` |
 
 Verify via OpenAPI / `model describe`. Changing defaults → bump version everywhere + update evals.
 

@@ -39,6 +39,9 @@ CLI command policy:
 | I2I | `google/nano-banana-2-lite-edit` |
 | I2V | `bytedance/seedance-2.0-fast-i2v` |
 | V2V | `bytedance/seedance-2.0-fast-v2v` |
+| TTS | `alibaba/qwen-audio-3.0-tts-flash` |
+| STT | `openai/whisper-1` |
+| STS | `alibaba/cosyvoice-clone` |
 
 ## Fallback Rules
 

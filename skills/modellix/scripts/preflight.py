@@ -85,7 +85,10 @@ def main() -> int:
             notes.append("doctor failed; CLI may still work if the key/profile is valid.")
         notes.append(
             "Defaults when user omits model: T2I=google/nano-banana-2-lite, "
-            "T2V=bytedance/seedance-2.0-mini-t2v."
+            "T2V=bytedance/seedance-2.0-mini-t2v, "
+            "TTS=alibaba/qwen-audio-3.0-tts-flash, "
+            "STT=openai/whisper-1, "
+            "STS=alibaba/cosyvoice-clone."
         )
     elif api_key_available:
         notes.append("REST fallback is available because an API key exists.")

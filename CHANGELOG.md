@@ -3,6 +3,12 @@
 All notable changes to this project are documented here. The format loosely follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and versions use [Semantic Versioning](https://semver.org/).
 
+## [3.7.0] - 2026-07-29
+
+### Added
+
+- Default models when the user omits a slug for speech tasks: TTS `alibaba/qwen-audio-3.0-tts-flash`, STT `openai/whisper-1`, STS `alibaba/cosyvoice-clone` (synced across `SKILL.md`, rules, playbooks, README, AGENTS, evals).
+
 ## [3.6.0] - 2026-07-27
 
 ### Added

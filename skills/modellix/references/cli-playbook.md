@@ -72,6 +72,12 @@ When the user did not specify a model, use skill defaults instead of listing fir
 
 - T2I: `google/nano-banana-2-lite`
 - T2V: `bytedance/seedance-2.0-mini-t2v`
+- I2I: `google/nano-banana-2-lite-edit`
+- I2V: `bytedance/seedance-2.0-fast-i2v`
+- V2V: `bytedance/seedance-2.0-fast-v2v`
+- TTS: `alibaba/qwen-audio-3.0-tts-flash`
+- STT: `openai/whisper-1`
+- STS: `alibaba/cosyvoice-clone`
 
 `--model-slug` must be exact `provider/model` as returned by the catalog.
 

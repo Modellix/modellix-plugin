@@ -100,7 +100,7 @@
       "kind": "file_entry",
       "path": "data/plugins/modellix.yaml",
       "match_regex": "(?i)Modellix/modellix-plugin|name:\\s*Modellix",
-      "desired_snippet": "name: Modellix\nrepo: https://github.com/Modellix/modellix-plugin\ntagline: Unified API for AI image and video generation\ndescription: OpenCode-compatible plugin/skill for async image and video generation via Modellix CLI (model run --wait, task download) with default T2I/T2V/I2I/I2V/V2V models.\n",
+      "desired_snippet": "name: Modellix\nrepo: https://github.com/Modellix/modellix-plugin\ntagline: Unified API for AI image and video generation\ndescription: OpenCode-compatible plugin/skill for async image and video generation via Modellix CLI (model run --wait, task download) with default T2I/T2V/I2I/I2V/V2V/TTS/STT/STS models.\n",
       "pr_title": "docs: add modellix to plugins",
       "example_pr": "https://github.com/awesome-opencode/awesome-opencode/pull/552",
       "notes": "Add YAML under data/plugins/ only. Do not edit README.md (auto-generated)."

@@ -306,6 +306,9 @@ Used when the user does **not** name a model:
 | Image editing / I2I | `google/nano-banana-2-lite-edit` |
 | Image-to-video / I2V | `bytedance/seedance-2.0-fast-i2v` |
 | Video-to-video (V2V) | `bytedance/seedance-2.0-fast-v2v` |
+| Text-to-speech (TTS) | `alibaba/qwen-audio-3.0-tts-flash` |
+| Speech-to-text (STT) | `openai/whisper-1` |
+| Speech-to-speech (STS) | `alibaba/cosyvoice-clone` |
 
 To discover or inspect other models:
 

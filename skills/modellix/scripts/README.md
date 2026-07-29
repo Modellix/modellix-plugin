@@ -54,4 +54,4 @@ Key behavior:
 - Optional `--output-dir` triggers `task download` after a successful CLI wait
 - REST path: submit with limited retries on `429/500/503`, then poll until terminal
 - `--model-slug` is required in `provider/model` format
-- Skill defaults when user omits a model: T2I=`google/nano-banana-2-lite`, T2V=`bytedance/seedance-2.0-mini-t2v`
+- Skill defaults when user omits a model: T2I=`google/nano-banana-2-lite`, T2V=`bytedance/seedance-2.0-mini-t2v`, TTS=`alibaba/qwen-audio-3.0-tts-flash`, STT=`openai/whisper-1`, STS=`alibaba/cosyvoice-clone` (full table in `SKILL.md`)
