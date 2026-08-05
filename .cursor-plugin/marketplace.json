@@ -1,0 +1,17 @@
+{
+  "name": "modellix",
+  "owner": {
+    "name": "Modellix",
+    "email": "support@modellix.ai"
+  },
+  "metadata": {
+    "description": "Official Modellix plugins for Cursor."
+  },
+  "plugins": [
+    {
+      "name": "modellix",
+      "source": "./",
+      "description": "Run AI image, video, and audio workflows through the Modellix CLI and API."
+    }
+  ]
+}

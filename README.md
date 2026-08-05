@@ -1,6 +1,6 @@
 # Modellix Plugin
 
-Agent plugin for [Modellix](https://modellix.ai), a unified Model-as-a-Service (MaaS) platform for image and video generation.
+Agent plugin for [Modellix](https://modellix.ai), a unified Model-as-a-Service (MaaS) platform for image, video, and audio workflows.
 
 This repository follows the [Open Plugins](https://open-plugins.com/plugin-builders/specification) specification: the repository root **is** the plugin root, and the skill ships as `skills/modellix/`. The same layout installs into Cursor, Claude Code, Codex, OpenClaw, OpenCode, Pi, Hermes, and any Agent Skills host.
 
@@ -13,7 +13,7 @@ Official install guide: [docs.modellix.ai/ways-to-use/plugin](https://docs.model
 - Default models when the user does not specify one
 - Model discovery via `modellix-cli model list` / `model describe`, plus live docs at [llms.txt](https://docs.modellix.ai/llms.txt)
 - Optional **Docs MCP** (`.mcp.json` → [docs.modellix.ai/mcp](https://docs.modellix.ai/mcp)) for searching and reading official documentation — not for running generation tasks
-- Slash **commands** under `commands/`: `/modellix:image`, `/modellix:video`, `/modellix:doctor`, `/modellix:models`, `/modellix:tasks`, `/modellix:download`
+- Slash **commands** under `commands/`: `/modellix:image`, `/modellix:video`, `/modellix:audio`, `/modellix:doctor`, `/modellix:models`, `/modellix:tasks`, `/modellix:download`
 - Persistent **rules** under `rules/` (Open Plugins `.mdc`): CLI-first defaults, paid-submit safety, credential/docs guardrails
 - Optional **hooks** under `hooks/`: confirm before a repeated paid submit or an unbounded `model batch`, and remind the agent to download results before they expire
 - Retry and error guidance aligned with CLI exit codes and paid-submit safety
@@ -23,6 +23,7 @@ Official install guide: [docs.modellix.ai/ways-to-use/plugin](https://docs.model
 
 - A Modellix API key from the [Console](https://modellix.ai/console/api-key)
 - Recommended: [modellix-cli](https://www.npmjs.com/package/modellix-cli) (Node.js 18.17+)
+- Optional hooks: Python 3.9+; a cross-platform Node launcher finds `py`, `python`, or `python3` and fails open when Python is unavailable
 
 ```bash
 npm i -g modellix-cli@latest
@@ -31,7 +32,7 @@ modellix-cli doctor --json
 
 ## Install and update
 
-After install, set `MODELLIX_API_KEY` (see [Setup](#setup)).
+After install, use an existing authenticated CLI profile or set `MODELLIX_API_KEY` (see [Setup](#setup)).
 
 Prefer **Plugin** when the host supports Open Plugins / marketplace plugins. Use **Skill** when you only need the Agent Skill (`skills/modellix`), or when the host has no plugin marketplace.
 
@@ -77,7 +78,15 @@ Update: re-open `/plugins` and update, or re-add the marketplace and reinstall.
 
 #### Cursor
 
-Install (local):
+Official Marketplace (after approval):
+
+```text
+/add-plugin modellix
+```
+
+GitHub or local checkout: open **Customize → Plugins → + Add**, choose this repository, then install **Modellix** from the `modellix` marketplace declared in `.cursor-plugin/marketplace.json`.
+
+For symlink-based development:
 
 ```bash
 git clone https://github.com/Modellix/modellix-plugin.git
@@ -234,7 +243,7 @@ ln -sfn /path/to/modellix-plugin/skills/modellix ~/.pi/agent/skills/modellix
 
 #### Hermes Agent
 
-[Hermes](https://hermes-agent.nousresearch.com/) uses Agent Skills (`SKILL.md`), not Open Plugins. Short listing blurb: **Unified API for AI image and video generation**.
+[Hermes](https://hermes-agent.nousresearch.com/) uses Agent Skills (`SKILL.md`), not Open Plugins. Short listing blurb: **Unified API for AI image, video, and audio workflows**.
 
 Install:
 
@@ -327,6 +336,10 @@ Request-body schemas come from each model’s docs (prefer the plugin Docs MCP w
 4. Optional helpers in `skills/modellix/scripts/` wrap CLI/REST; if they fail, call the CLI commands directly.
 5. CLI behavior source of truth: [npm modellix-cli](https://www.npmjs.com/package/modellix-cli) and `modellix-cli --help` (not the website CLI guide page, which may lag).
 
+## Security and data handling
+
+Prompts and public media inputs are sent to `https://api.modellix.ai` only when a documented generation, editing, transcription, or speech task is invoked. The Docs MCP is read-only and connects only to `https://docs.modellix.ai/mcp`; it does not receive the API key or submit tasks. Spend-safety hook state contains hashes, model slugs, task ids, and timestamps, never prompts, request bodies, complete commands, or keys. See [SECURITY.md](SECURITY.md) and the [Modellix Privacy Policy](https://www.modellix.ai/privacy).
+
 ## Hooks (spend and result safety)
 
 Hosts that support Open Plugins hooks load three lightweight guards. They only react to `modellix-cli` commands and never change the CLI workflow itself:
@@ -337,24 +350,25 @@ Hosts that support Open Plugins hooks load three lightweight guards. They only r
 | Task watch | After a `modellix-cli` command | Records task ids from the output and clears them once `task download` succeeds |
 | Stop reminder | When the agent tries to finish | Sends one follow-up if tasks were generated but never downloaded (resource URLs expire in about 7 days) |
 
-Config lives in [`hooks/hooks.json`](hooks/hooks.json) (Open Plugins / Claude Code event names) and [`hooks/cursor-hooks.json`](hooks/cursor-hooks.json) (Cursor event names); each manifest points at exactly one of them, so a host never runs both. Scripts are Python 3 stdlib only, keep per-session state in a temp file (command fingerprints and task ids, never prompts or keys), and fail open — if anything goes wrong the command proceeds. Hosts without hook support (Pi, Hermes, OpenCode, Codex) simply ignore this directory.
+Config lives in [`hooks/hooks.json`](hooks/hooks.json) (Open Plugins / Claude Code event names) and [`hooks/cursor-hooks.json`](hooks/cursor-hooks.json) (Cursor event names); each manifest points at exactly one of them, so a host never runs both. Hook logic is Python 3 stdlib only, while `scripts/run_python_hook.mjs` selects the available Python 3 command across platforms. Per-session state stores command fingerprints, model slugs, and task ids—never prompts or keys—and every hook fails open. Hosts without hook support (Pi, Hermes, OpenCode, Codex) ignore this directory.
 
 Plugin-level `scripts/` holds these hook scripts; the CLI/REST helpers used by the skill live in `skills/modellix/scripts/`.
 
 ## Slash commands
 
-Hosts that support Open Plugins commands expose six shortcuts. Each one routes to the same `modellix-cli` workflow the skill teaches — they add no separate runtime:
+Hosts that support Open Plugins commands expose seven shortcuts. Each one routes to the same `modellix-cli` workflow the skill teaches—they add no separate runtime:
 
 | Command | Use it for |
 | --- | --- |
 | `/modellix:image [prompt] [image url]` | Text-to-image, or image editing when input images are given |
 | `/modellix:video [prompt] [image or video url]` | Text-to-video, image-to-video, or video-to-video |
+| `/modellix:audio [tts\|stt\|sts] [text or audio url]` | Text-to-speech, speech-to-text, or speech-to-speech |
 | `/modellix:doctor [profile]` | CLI install, credential resolution, connectivity, balance |
 | `/modellix:models [term or slug]` | Find a model and its request-body schema |
 | `/modellix:tasks [task id]` | Task status, plus recovery after a timeout or unknown submission |
 | `/modellix:download [task id] [dir]` | Fetch results into `./outputs` before the ~7-day expiry |
 
-The two paid commands (`image`, `video`) set `disable-model-invocation: true`, so only a human can trigger them; the read-only four can also be called by the agent. Hosts without command support (Pi, Hermes, OpenCode, the ClawHub skill bundle) ignore [`commands/`](commands/) and keep using the skill.
+The three paid commands (`image`, `video`, `audio`) set `disable-model-invocation: true`, so only a human can trigger them; the read-only four can also be called by the agent. Hosts without command support (Pi, Hermes, OpenCode, the ClawHub skill bundle) ignore [`commands/`](commands/) and keep using the skill.
 
 ## Supported task types
 
@@ -365,31 +379,38 @@ The two paid commands (`image`, `video`) set `disable-model-invocation: true`, s
 | `text-to-video` | Create videos from text descriptions |
 | `image-to-video` | Convert static images into video sequences |
 | `video-to-video` | Transform existing videos |
+| `text-to-speech` | Synthesize speech from text |
+| `speech-to-text` | Transcribe public audio resources |
+| `speech-to-speech` | Clone or transform a voice from reference audio |
 
 ## Repository structure
 
 ```text
 .
 ├── README.md                       # This file (humans)
+├── SECURITY.md                     # Credential, network, local-state, and disclosure policy
 ├── AGENTS.md                       # Maintainer / coding-agent instructions
 ├── CHANGELOG.md
 ├── package.json                    # ClawHub OpenClaw + Pi package (@modellix/modellix-plugin)
 ├── openclaw.plugin.json            # OpenClaw package manifest (skills bundle)
 ├── .mcp.json                       # Docs MCP → https://docs.modellix.ai/mcp (read-only docs search)
-├── commands/                       # Slash commands (/modellix:image, :video, :doctor, :models, :tasks, :download)
+├── commands/                       # Slash commands (:image, :video, :audio, :doctor, :models, :tasks, :download)
 ├── rules/                          # Open Plugins always-on guardrails (.mdc)
 ├── hooks/                          # Hook configs: hooks.json (Open Plugins/Claude), cursor-hooks.json (Cursor)
-├── scripts/                        # Plugin-level hook scripts (Python, stdlib only)
+├── scripts/                        # Hook logic (Python stdlib) + cross-platform Node launcher
 ├── .opencode/skills/modellix       # Symlink → skills/modellix (OpenCode skill discovery)
 ├── .pi/skills/modellix             # Symlink → skills/modellix (Pi local skill discovery)
 ├── .plugin/plugin.json             # Vendor-neutral Open Plugins manifest
-├── .cursor-plugin/plugin.json      # Cursor manifest (+ MODELLIX_API_KEY variable)
+├── .cursor-plugin/
+│   ├── plugin.json                 # Cursor manifest (+ optional MODELLIX_API_KEY variable)
+│   └── marketplace.json            # Single-repository Cursor marketplace entry
 ├── .claude-plugin/
 │   ├── plugin.json
 │   └── marketplace.json            # Claude Code marketplace entry
 ├── .codex-plugin/plugin.json
 ├── .agents/plugins/marketplace.json # Codex / vendor-neutral marketplace entry
 ├── assets/logo.svg
+├── tests/                           # Repository and paid-safety regression tests (not packaged)
 ├── skills/
 │   └── modellix/                   # Skill package (SKILL.md, scripts, references, assets, evals)
 └── .github/workflows/              # Publish sync (Smithery / skills add / ClawHub)

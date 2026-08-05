@@ -78,13 +78,6 @@ def main() -> int:
             "Set `--max-tasks N` to bound the spend before submitting."
         )
 
-    submits = state.setdefault("submits", {})
-    record = submits.setdefault(fp, {"count": 0, "status": "unknown", "task_ids": []})
-    record["count"] = int(record.get("count") or 0) + 1
-    record["slug"] = lib.model_slug(command)
-    record["kind"] = lib.submit_kind(command)
-    record["command"] = lib.redact(command)[:400]
-
     if reason:
         lib.save_state(key, state)
         return lib.emit(lib.ask(reason))

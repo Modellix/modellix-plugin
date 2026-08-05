@@ -20,7 +20,7 @@ import time
 from pathlib import Path
 from typing import Any
 
-STATE_VERSION = 1
+STATE_VERSION = 2
 STATE_TTL_SECONDS = 24 * 60 * 60
 DEDUPE_WINDOW_SECONDS = 5
 
@@ -29,12 +29,14 @@ PAID_SUBMIT_RE = re.compile(r"\bmodellix-cli\b[^|;&]*?\bmodel\s+(run|invoke|batc
 DOWNLOAD_RE = re.compile(r"\bmodellix-cli\b[^|;&]*?\btask\s+download\b")
 SECRET_FLAG_RE = re.compile(r"(--api-key[=\s]+)(\S+)")
 SECRET_ENV_RE = re.compile(r"(MODELLIX_API_KEY=)(\S+)")
-TASK_ID_RE = re.compile(r"[\"']?task[_-]?id[\"']?\s*[:=]\s*[\"']?([A-Za-z0-9][\w.-]{5,})")
+TASK_ID_RE = re.compile(
+    r"[\"']?task[_-]?id[\"']?\s*[:=]\s*[\"']?([A-Za-z0-9][\w.-]{5,})",
+    re.IGNORECASE,
+)
 PRIVATE_NETWORK_RE = re.compile(r"private or reserved network", re.IGNORECASE)
 SUCCESS_STATUS_RE = re.compile(r"[\"']?status[\"']?\s*[:=]\s*[\"']?(succeeded|completed|success)", re.I)
 
 FAILURE_MARKERS = (
-    "error",
     "failed",
     "timed out",
     "timeout",
@@ -110,10 +112,26 @@ def normalize(payload: dict[str, Any]) -> dict[str, Any]:
     return {
         "command": command if isinstance(command, str) else "",
         "output": _as_text(output),
+        "exit_code": _exit_code(payload, output),
         "session_id": str(session_id),
         "tool_name": str(payload.get("tool_name") or ""),
         "cwd": str(payload.get("cwd") or os.getenv("CURSOR_PROJECT_DIR") or os.getcwd()),
     }
+
+
+def _exit_code(payload: dict[str, Any], output: Any) -> int | None:
+    """Read a shell exit code from common Cursor and Claude payload shapes."""
+    values = [payload.get("exit_code"), payload.get("exitCode")]
+    if isinstance(output, dict):
+        values.extend((output.get("exit_code"), output.get("exitCode")))
+    for value in values:
+        if isinstance(value, bool):
+            continue
+        try:
+            return int(value)
+        except (TypeError, ValueError):
+            continue
+    return None
 
 
 def redact(command: str) -> str:
@@ -216,15 +234,45 @@ def _empty_state() -> dict[str, Any]:
     }
 
 
+def _cleanup_stale_files(directory: Path) -> None:
+    """Best-effort removal of expired state without exposing its contents."""
+    cutoff = time.time() - STATE_TTL_SECONDS
+    try:
+        candidates = directory.glob("*.json")
+        for candidate in candidates:
+            try:
+                if candidate.stat().st_mtime < cutoff:
+                    candidate.unlink(missing_ok=True)
+            except OSError:
+                continue
+    except OSError:
+        pass
+
+
 def load_state(key: str) -> dict[str, Any]:
     path = state_path(key)
+    _cleanup_stale_files(path.parent)
     try:
         state = json.loads(path.read_text(encoding="utf-8"))
-    except Exception:  # noqa: BLE001 - missing or corrupt state degrades to allow-all
+    except FileNotFoundError:
+        return _empty_state()
+    except Exception:  # noqa: BLE001 - corrupt state degrades to allow-all
+        try:
+            path.unlink(missing_ok=True)
+        except OSError:
+            pass
         return _empty_state()
     if not isinstance(state, dict) or state.get("version") != STATE_VERSION:
+        try:
+            path.unlink(missing_ok=True)
+        except OSError:
+            pass
         return _empty_state()
     if int(time.time()) - int(state.get("updated_at") or 0) > STATE_TTL_SECONDS:
+        try:
+            path.unlink(missing_ok=True)
+        except OSError:
+            pass
         return _empty_state()
     for field in ("submits", "pending_tasks", "notices", "recent_events"):
         if not isinstance(state.get(field), dict):
@@ -239,6 +287,7 @@ def save_state(key: str, state: dict[str, Any]) -> None:
     try:
         path.parent.mkdir(parents=True, exist_ok=True)
         os.chmod(path.parent, 0o700)
+        _cleanup_stale_files(path.parent)
     except Exception:  # noqa: BLE001
         return
     try:
@@ -280,16 +329,40 @@ def looks_succeeded(output: str) -> bool:
     return bool(SUCCESS_STATUS_RE.search(output))
 
 
-def looks_failed(output: str) -> bool:
+def looks_failed(output: str, exit_code: int | None = None) -> bool:
     """Heuristic failure check; an explicit success status always wins.
 
     CLI JSON often carries fields like `"error": null`, so the success status is
     checked first to avoid marking a completed task as failed.
     """
+    if exit_code is not None:
+        return exit_code != 0
     if looks_succeeded(output):
         return False
+    try:
+        payload = json.loads(output)
+    except (json.JSONDecodeError, TypeError, ValueError):
+        payload = None
+    if isinstance(payload, dict):
+        if payload.get("ok") is False:
+            return True
+        error = payload.get("error")
+        if error not in (None, "", False, {}, []):
+            return True
+        code = payload.get("code")
+        try:
+            if code is not None and int(code) != 0:
+                return True
+            if code is not None and int(code) == 0:
+                return False
+        except (TypeError, ValueError):
+            pass
+        if payload.get("ok") is True or ("error" in payload and error in (None, "", False, {}, [])):
+            return False
     lowered = output.lower()
-    return any(marker in lowered for marker in FAILURE_MARKERS)
+    if any(marker in lowered for marker in FAILURE_MARKERS):
+        return True
+    return bool(re.search(r"(?:^|\n)\s*(?:error|fatal):", output, re.IGNORECASE))
 
 
 def extract_task_ids(output: str) -> list[str]:
@@ -321,7 +394,7 @@ def advise(message: str) -> dict[str, Any]:
     so advisory text goes through `systemMessage` there.
     """
     if is_cursor_host():
-        return {"permission": "allow", "agent_message": message}
+        return {"agent_message": message}
     return {"systemMessage": message}
 
 

@@ -1,17 +1,23 @@
 {
   "name": "@modellix/modellix-plugin",
-  "version": "3.7.0",
-  "description": "Unified API/CLI for AI image and video generation via Modellix",
+  "version": "3.8.0",
+  "description": "Unified API/CLI for AI image, video, and audio workflows via Modellix",
   "type": "module",
   "license": "MIT",
+  "scripts": {
+    "test": "node ./scripts/run_python_tests.mjs"
+  },
   "keywords": [
     "openclaw",
     "clawhub",
     "pi-package",
     "pi",
     "modellix",
+    "cursor-plugin",
     "image-generation",
     "video-generation",
+    "audio-generation",
+    "speech-to-text",
     "ai"
   ],
   "homepage": "https://docs.modellix.ai/ways-to-use/plugin",
@@ -24,6 +30,7 @@
   },
   "author": {
     "name": "Modellix",
+    "email": "support@modellix.ai",
     "url": "https://modellix.ai"
   },
   "files": [
@@ -33,7 +40,11 @@
     "rules/**",
     "hooks/**",
     "scripts/**",
+    "!scripts/**/__pycache__/**",
+    "!scripts/**/*.pyc",
     "skills/**",
+    "!skills/**/__pycache__/**",
+    "!skills/**/*.pyc",
     ".opencode/skills/**",
     ".pi/skills/**",
     ".plugin/**",
@@ -43,6 +54,7 @@
     ".agents/plugins/**",
     "assets/**",
     "README.md",
+    "SECURITY.md",
     "LICENSE",
     "CHANGELOG.md"
   ],

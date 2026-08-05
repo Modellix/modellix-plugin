@@ -25,8 +25,8 @@ import urllib.request
 from typing import Any, Dict, Optional, Tuple
 
 BASE_URL = "https://api.modellix.ai/api/v1"
-RETRYABLE_STATUS = {429, 500, 503}
-MAX_RETRIES = 3
+RETRYABLE_READ_STATUS = {408, 429, 500, 502, 503, 504}
+MAX_READ_RETRIES = 3
 
 
 def parse_args() -> argparse.Namespace:
@@ -93,6 +93,14 @@ def timeout_to_seconds(timeout: str) -> int:
     return max(1, int(float(value)))
 
 
+def child_env(api_key: Optional[str]) -> Dict[str, str]:
+    """Pass an explicit key through the child environment, never process arguments."""
+    env = os.environ.copy()
+    if api_key:
+        env["MODELLIX_API_KEY"] = api_key
+    return env
+
+
 def run_cli(args: argparse.Namespace) -> Dict[str, Any]:
     cmd = [
         "modellix-cli",
@@ -110,11 +118,21 @@ def run_cli(args: argparse.Namespace) -> Dict[str, Any]:
     else:
         cmd.extend(["--body", args.body])
 
-    if args.api_key:
-        cmd.extend(["--api-key", args.api_key])
-
     # Paid POST must not be auto-retried by this wrapper.
-    proc = subprocess.run(cmd, check=False, capture_output=True, text=True)
+    try:
+        proc = subprocess.run(
+            cmd,
+            check=False,
+            capture_output=True,
+            text=True,
+            env=child_env(get_api_key(args)),
+            timeout=timeout_to_seconds(args.timeout) + 30,
+        )
+    except subprocess.TimeoutExpired as exc:
+        raise RuntimeError(
+            "CLI model run exceeded its local deadline. The paid submission outcome may be "
+            "unknown; check `modellix-cli task history` before submitting again."
+        ) from exc
     if proc.returncode != 0:
         detail = proc.stderr.strip() or proc.stdout.strip()
         raise RuntimeError(
@@ -137,9 +155,13 @@ def run_cli_download(task_id: str, output_dir: str, api_key: Optional[str]) -> D
         output_dir,
         "--json",
     ]
-    if api_key:
-        cmd.extend(["--api-key", api_key])
-    proc = subprocess.run(cmd, check=False, capture_output=True, text=True)
+    proc = subprocess.run(
+        cmd,
+        check=False,
+        capture_output=True,
+        text=True,
+        env=child_env(api_key),
+    )
     if proc.returncode != 0:
         raise RuntimeError(
             f"CLI task download failed: {proc.stderr.strip() or proc.stdout.strip()}"
@@ -176,18 +198,20 @@ def http_request(
 def run_rest_submit(args: argparse.Namespace, body: Dict[str, Any], api_key: str) -> Dict[str, Any]:
     provider, model_id = parse_model_slug(args.model_slug)
     url = f"{BASE_URL}/{provider}/{model_id}/async"
-    attempts = 0
-    wait = args.initial_wait
-    while True:
+    try:
         result = http_request(url=url, method="POST", api_key=api_key, body=body)
-        code = int(result.get("code", 500))
-        if code == 0:
-            return result
-        if code not in RETRYABLE_STATUS or attempts >= MAX_RETRIES:
-            raise RuntimeError(f"REST invoke failed: {json.dumps(result, ensure_ascii=False)}")
-        attempts += 1
-        time.sleep(wait)
-        wait = min(wait * 2, args.max_wait)
+    except (urllib.error.URLError, TimeoutError, OSError) as exc:
+        raise RuntimeError(
+            "REST paid submit hit a transport error and was not retried. Its outcome may be "
+            "unknown; inspect task history or the console before another submit."
+        ) from exc
+    code = int(result.get("code", 500))
+    if code == 0:
+        return result
+    raise RuntimeError(
+        "REST submit did not succeed and was not retried because this is a paid POST. "
+        f"Inspect task history or the console before another submit: {json.dumps(result, ensure_ascii=False)}"
+    )
 
 
 def run_rest_poll(task_id: str, api_key: str) -> Dict[str, Any]:
@@ -264,7 +288,7 @@ def main() -> int:
         )
         return 0
 
-    # REST fallback: submit once with limited retries on clear retryable codes only.
+    # REST fallback: submit once; only subsequent task-status reads may retry.
     submit_payload = run_rest_submit(args, body, api_key or "")
     task_id = extract_task_id(submit_payload)
     if not task_id:
@@ -275,6 +299,7 @@ def main() -> int:
     timeout_seconds = timeout_to_seconds(args.timeout)
     started = time.time()
     wait = args.initial_wait
+    read_failures = 0
     poll_payload: Dict[str, Any] = {}
     while True:
         if time.time() - started > timeout_seconds:
@@ -282,7 +307,26 @@ def main() -> int:
                 f"Polling timed out for {task_id}. Remote task may still be running."
             )
         time.sleep(wait)
-        poll_payload = run_rest_poll(task_id, api_key or "")
+        try:
+            poll_payload = run_rest_poll(task_id, api_key or "")
+        except (urllib.error.URLError, TimeoutError, OSError) as exc:
+            if read_failures < MAX_READ_RETRIES:
+                read_failures += 1
+                wait = min(wait * 2, args.max_wait)
+                continue
+            raise RuntimeError(
+                f"REST task read failed after {MAX_READ_RETRIES} retries: {exc}"
+            ) from exc
+        code = int(poll_payload.get("code", 500))
+        if code != 0:
+            if code in RETRYABLE_READ_STATUS and read_failures < MAX_READ_RETRIES:
+                read_failures += 1
+                wait = min(wait * 2, args.max_wait)
+                continue
+            raise RuntimeError(
+                f"REST task read failed: {json.dumps(poll_payload, ensure_ascii=False)}"
+            )
+        read_failures = 0
         status = str(poll_payload.get("data", {}).get("status", "")).lower()
         if status in {"success", "failed"}:
             break

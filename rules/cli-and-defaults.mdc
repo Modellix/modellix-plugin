@@ -1,5 +1,5 @@
 ---
-description: Prefer modellix-cli and use skill default models when none named.
+description: Prefer modellix-cli and use image, video, or audio defaults when no model is named.
 alwaysApply: true
 ---
 

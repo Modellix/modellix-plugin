@@ -13,7 +13,7 @@
       "source": {
         "path": "./"
       },
-      "description": "Unified API/CLI for AI image and video generation via Modellix"
+      "description": "Unified API/CLI for AI image, video, and audio workflows via Modellix"
     }
   ]
 }

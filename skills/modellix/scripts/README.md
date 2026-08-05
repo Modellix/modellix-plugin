@@ -18,9 +18,9 @@ python scripts/preflight.py --json
 Checks:
 
 - `modellix-cli` availability
-- Doctor result (Node, auth source, connectivity, balance) when CLI exists
+- Doctor result (Node, auth source, connectivity, balance) when CLI exists; a failed doctor check blocks a ready recommendation
 - `MODELLIX_API_KEY` / discoverable profile auth
-- Recommended mode (`cli` or `rest`)
+- Recommended mode (`cli`, `rest`, or `none` when readiness is not verified)
 
 Credential handling policy:
 
@@ -52,6 +52,7 @@ Key behavior:
 - Mode `auto` (default): use CLI when installed, otherwise REST
 - CLI path: single `modellix-cli model run --wait --json` (no hand-rolled poll loop; no paid-submit auto-retry)
 - Optional `--output-dir` triggers `task download` after a successful CLI wait
-- REST path: submit with limited retries on `429/500/503`, then poll until terminal
+- REST path: submit a paid POST exactly once, then retry only safe task-status reads on transient `408`/`429`/`5xx` responses or transport failures
+- An explicit `--api-key` is passed to child CLI processes through `MODELLIX_API_KEY`, never as a process argument
 - `--model-slug` is required in `provider/model` format
 - Skill defaults when user omits a model: T2I=`google/nano-banana-2-lite`, T2V=`bytedance/seedance-2.0-mini-t2v`, TTS=`alibaba/qwen-audio-3.0-tts-flash`, STT=`openai/whisper-1`, STS=`alibaba/cosyvoice-clone` (full table in `SKILL.md`)

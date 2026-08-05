@@ -3,21 +3,21 @@
   "hooks": {
     "beforeShellExecution": [
       {
-        "command": "python3 \"${CURSOR_PLUGIN_ROOT}/scripts/modellix_run_guard.py\"",
+        "command": "node \"${CURSOR_PLUGIN_ROOT}/scripts/run_python_hook.mjs\" modellix_run_guard",
         "matcher": "modellix-cli",
         "timeout": 10
       }
     ],
     "afterShellExecution": [
       {
-        "command": "python3 \"${CURSOR_PLUGIN_ROOT}/scripts/modellix_task_watch.py\"",
+        "command": "node \"${CURSOR_PLUGIN_ROOT}/scripts/run_python_hook.mjs\" modellix_task_watch",
         "matcher": "modellix-cli",
         "timeout": 10
       }
     ],
     "stop": [
       {
-        "command": "python3 \"${CURSOR_PLUGIN_ROOT}/scripts/modellix_stop_reminder.py\"",
+        "command": "node \"${CURSOR_PLUGIN_ROOT}/scripts/run_python_hook.mjs\" modellix_stop_reminder",
         "loop_limit": 1,
         "timeout": 10
       }

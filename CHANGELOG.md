@@ -3,6 +3,30 @@
 All notable changes to this project are documented here. The format loosely follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and versions use [Semantic Versioning](https://semver.org/).
 
+## [3.8.0] - 2026-08-05
+
+### Added
+
+- `/modellix:audio` for TTS, STT, and STS workflows, plus audio-aware skill triggers, metadata, supported-task documentation, and repository regression tests.
+- Cursor Marketplace metadata (`displayName`, publisher, category, tags, explicit components, and `.cursor-plugin/marketplace.json`) aligned with the official Cursor schemas.
+- Cross-platform `scripts/run_python_hook.mjs`, which locates Python 3 on Windows, macOS, or Linux and keeps optional hooks fail-open.
+
+### Fixed
+
+- Paid REST submissions are sent exactly once; only safe task-status reads retry transient `408`/`429`/`5xx` responses and transport failures.
+- Hook state no longer persists the original CLI command or request body, preventing user prompts from being written to the temporary state file.
+- Hook result detection uses shell exit codes and structured JSON so successful output containing `"error": null` is not treated as failed.
+- Paid-attempt counters are recorded only after shell execution, so a rejected confirmation is never mistaken for a submitted task.
+- Explicit CLI API keys are passed through the child environment rather than process arguments.
+- The task-result schema now accepts CLI raw output and the optional download result.
+- Preflight no longer recommends execution after a failed `modellix-cli doctor` check or echoes malformed doctor output.
+- The vendor-neutral Open Plugins `name` is lowercase again, restoring v1.0 identifier conformance while Cursor uses `displayName` for presentation.
+
+### Security
+
+- Removed repository-level `.cursor/hooks.json` and community-listing scripts that injected unrelated assistant follow-ups and caused the Cursor Directory security scan to hide the plugin.
+- Pinned GitHub Actions and the ClawHub reusable workflow to immutable commit SHAs, with read-only default workflow permissions.
+
 ## [3.7.0] - 2026-07-29
 
 ### Added

@@ -1,24 +1,40 @@
 {
   "name": "modellix",
-  "version": "3.7.0",
-  "description": "Unified API/CLI for AI image and video generation via Modellix",
+  "displayName": "Modellix",
+  "version": "3.8.0",
+  "description": "Unified API/CLI for AI image, video, and audio workflows via Modellix",
   "author": {
     "name": "Modellix",
-    "url": "https://modellix.ai"
+    "email": "support@modellix.ai"
   },
+  "publisher": "Modellix",
   "homepage": "https://docs.modellix.ai/ways-to-use/plugin",
   "repository": "https://github.com/Modellix/modellix-plugin",
   "license": "MIT",
-  "logo": "assets/logo.svg",
+  "logo": "./assets/logo.svg",
   "keywords": [
     "ai",
     "image",
     "video",
+    "audio",
+    "speech",
     "generation",
     "api",
     "modellix"
   ],
+  "category": "Productivity",
+  "tags": [
+    "modellix",
+    "image-generation",
+    "video-generation",
+    "audio-generation",
+    "speech-to-text"
+  ],
+  "skills": "./skills/",
+  "rules": "./rules/",
+  "commands": "./commands/",
   "hooks": "./hooks/cursor-hooks.json",
+  "mcpServers": "./.mcp.json",
   "variables": {
     "type": "object",
     "properties": {
@@ -27,9 +43,6 @@
         "title": "Modellix API Key",
         "description": "API key for Modellix CLI and REST API. Create one at https://modellix.ai/console/api-key"
       }
-    },
-    "required": [
-      "MODELLIX_API_KEY"
-    ]
+    }
   }
 }

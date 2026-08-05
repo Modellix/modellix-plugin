@@ -21,8 +21,8 @@ modellix-cli model list --type text-to-image --output slugs
 modellix-cli model list --provider <provider> --limit 20 --json
 ```
 
-Valid types: `text-to-image`, `image-to-image`, `text-to-video`, `image-to-video`, `video-to-video`.
+Common types include `text-to-image`, `image-to-image`, `text-to-video`, `image-to-video`, `video-to-video`, `text-to-speech`, `speech-to-text`, and `speech-to-speech`. Treat the live catalog as authoritative.
 
 3. For the request-body schema, read the model docs: prefer the Docs MCP when the host has it connected, otherwise the `docs_url` returned by `model describe`, or the matching entry in https://docs.modellix.ai/llms.txt.
 4. Never invent a slug from a documentation filename — decimals matter (`bytedance/seedance-2.0-mini-t2v`, not `seedance-2-0-mini-t2v`).
-5. Report the candidate slugs, what each is good for, and the required body fields. Then point at `/modellix:image` or `/modellix:video` to run one.
+5. Report the candidate slugs, what each is good for, and the required body fields. Then point at `/modellix:image`, `/modellix:video`, or `/modellix:audio` to run one.

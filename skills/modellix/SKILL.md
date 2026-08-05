@@ -1,8 +1,8 @@
 ---
 name: modellix
-description: Integrate Modellix's unified API for AI image and video generation into applications. Use this skill whenever the user wants to generate images from text, create videos from text or images, edit images, do virtual try-on, or call any Modellix model API. Also trigger when the user mentions Modellix, model-as-a-service for media generation, or needs to work with providers like Qwen, Wan, Seedream, Seedance, Kling, Hailuo, or MiniMax through a unified API. Prefer modellix-cli (model run --wait, task download, doctor, model list) over hand-rolled REST polling whenever the CLI is available.
+description: Integrate Modellix's unified API for AI image, video, and audio workflows. Use this skill whenever the user wants to generate or edit images, create or transform videos, synthesize speech, transcribe audio, clone a voice, do virtual try-on, or call any Modellix model API. Also trigger when the user mentions Modellix, model-as-a-service for media generation, or providers such as Qwen, Wan, Seedream, Seedance, Kling, Hailuo, MiniMax, Whisper, or CosyVoice through a unified API. Prefer modellix-cli (model run --wait, task download, doctor, model list) over hand-rolled REST polling whenever the CLI is available.
 license: MIT
-version: 3.7.0
+version: 3.8.0
 author: Modellix
 primaryCredential: MODELLIX_API_KEY
 primaryEnv: MODELLIX_API_KEY
@@ -15,12 +15,12 @@ required_environment_variables:
     required_for: Modellix CLI and REST API access
 metadata:
   hermes:
-    tags: [creative, image-generation, video-generation, modellix, cli, api]
+    tags: [creative, image-generation, video-generation, audio-generation, speech-to-text, modellix, cli, api]
 ---
 
 # Modellix Skill
 
-Modellix is a Model-as-a-Service (MaaS) platform for async image/video generation. Prefer the official CLI (`modellix-cli`) so submit, wait, and download stay one coherent workflow. Persistent session guardrails also ship as Open Plugins rules under `rules/*.mdc`.
+Modellix is a Model-as-a-Service (MaaS) platform for asynchronous image, video, and audio workflows. Prefer the official CLI (`modellix-cli`) so submit, wait, and download stay one coherent workflow. Persistent session guardrails also ship as Open Plugins rules under `rules/*.mdc`.
 
 ## Official Docs
 

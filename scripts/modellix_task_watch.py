@@ -38,7 +38,7 @@ def main() -> int:
         lib.save_state(key, state)
         return lib.emit()
 
-    failed = lib.looks_failed(output)
+    failed = lib.looks_failed(output, event["exit_code"])
     pending = state.setdefault("pending_tasks", {})
 
     if lib.is_download(command):
@@ -58,8 +58,11 @@ def main() -> int:
     if lib.is_paid_submit(command):
         fp = lib.fingerprint(command)
         record = state.setdefault("submits", {}).setdefault(
-            fp, {"count": 1, "status": "unknown", "task_ids": []}
+            fp, {"count": 0, "status": "unknown", "task_ids": []}
         )
+        record["count"] = int(record.get("count") or 0) + 1
+        record["slug"] = lib.model_slug(command)
+        record["kind"] = lib.submit_kind(command)
         record["status"] = "failed" if failed else ("succeeded" if task_ids else "unknown")
         record["last_watch_at"] = time.time()
         for task_id in task_ids:

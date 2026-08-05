@@ -1,7 +1,7 @@
 {
-  "name": "Modellix",
-  "version": "3.7.0",
-  "description": "Unified API/CLI for AI image and video generation via Modellix",
+  "name": "modellix",
+  "version": "3.8.0",
+  "description": "Unified API/CLI for AI image, video, and audio workflows via Modellix",
   "author": {
     "name": "Modellix",
     "url": "https://modellix.ai"
@@ -14,6 +14,8 @@
     "ai",
     "image",
     "video",
+    "audio",
+    "speech",
     "generation",
     "api",
     "modellix"

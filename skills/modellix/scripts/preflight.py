@@ -45,13 +45,14 @@ def main() -> int:
 
     notes: list[str] = []
     cli_available = shutil.which("modellix-cli") is not None
-    api_key_available = bool((os.getenv("MODELLIX_API_KEY") or "").strip())
+    env_key_available = bool((os.getenv("MODELLIX_API_KEY") or "").strip())
+    api_key_available = env_key_available
     doctor_ok: bool | None = None
     doctor_payload: dict[str, Any] | None = None
 
     if not cli_available:
         notes.append(
-            "modellix-cli not found. Using REST fallback. "
+            "modellix-cli not found. REST fallback requires MODELLIX_API_KEY. "
             "Recommend: npm i -g modellix-cli@latest"
         )
     else:
@@ -59,7 +60,7 @@ def main() -> int:
         if doctor_payload is not None:
             notes.append("Ran modellix-cli doctor --json.")
         elif doctor_raw:
-            notes.append(f"doctor output not JSON-parseable: {doctor_raw[:200]}")
+            notes.append("doctor output was not valid JSON; inspect `modellix-cli doctor` directly.")
         if doctor_ok:
             notes.append(
                 "CLI path ready. Canonical flow: model run --wait -> task download."
@@ -78,11 +79,9 @@ def main() -> int:
             "Configure MODELLIX_API_KEY or run: modellix-cli auth login"
         )
 
-    recommended_mode = "rest"
-    if cli_available and api_key_available:
+    recommended_mode = "none"
+    if cli_available and doctor_ok is True:
         recommended_mode = "cli"
-        if doctor_ok is False:
-            notes.append("doctor failed; CLI may still work if the key/profile is valid.")
         notes.append(
             "Defaults when user omits model: T2I=google/nano-banana-2-lite, "
             "T2V=bytedance/seedance-2.0-mini-t2v, "
@@ -90,8 +89,11 @@ def main() -> int:
             "STT=openai/whisper-1, "
             "STS=alibaba/cosyvoice-clone."
         )
-    elif api_key_available:
+    elif not cli_available and env_key_available:
+        recommended_mode = "rest"
         notes.append("REST fallback is available because an API key exists.")
+    elif cli_available and doctor_ok is False:
+        notes.append("No execution mode is recommended until the failed doctor checks are fixed.")
     else:
         notes.append("Neither CLI-auth nor REST-auth is ready. Configure API key first.")
 
@@ -116,8 +118,8 @@ def main() -> int:
             print("notes:")
             for note in notes:
                 print(f"- {note}")
-    # Exit 0 when a usable path exists; 1 when neither CLI nor REST auth is ready.
-    return 0 if api_key_available else 1
+    # Exit 0 only when the preflight can recommend a usable execution path.
+    return 0 if recommended_mode != "none" else 1
 
 
 if __name__ == "__main__":

@@ -75,17 +75,27 @@ curl -X GET "https://api.modellix.ai/api/v1/tasks/<task_id>" \
 
 ## Retry Policy
 
-Retryable:
+Create-task `POST`:
+
+- Submit once. Do not automatically repeat a paid POST, including after `429`, `500`, `503`, a timeout, or a network error.
+- When the response is ambiguous, inspect `modellix-cli task history`, the Modellix console, or any returned task id before another paid submission.
+
+Safe task-status `GET` reads may retry:
+
+- `408` (request timeout)
 - `429` (too many requests)
 - `500` (internal server error)
+- `502` (bad gateway)
 - `503` (service unavailable)
+- `504` (gateway timeout)
+- transient transport failures
 
 Strategy:
-- Exponential backoff (`1s -> 2s -> 4s`)
-- Max 3 retries for `500`/`503`
+- Exponential backoff (`1s -> 2s -> 4s`) for reads only
+- Max 3 retries for transient read failures
 - Respect `X-RateLimit-Reset` for `429` when available
 
-Non-retryable:
+Non-retryable reads:
 - `400`, `401`, `402`, `404`
 
 ## Notes

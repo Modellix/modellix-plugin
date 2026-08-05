@@ -5,14 +5,14 @@
     "url": "https://modellix.ai"
   },
   "metadata": {
-    "description": "Official Modellix plugins for AI image and video generation",
-    "version": "3.7.0"
+    "description": "Official Modellix plugins for AI image, video, and audio workflows",
+    "version": "3.8.0"
   },
   "plugins": [
     {
       "name": "modellix",
       "source": "./",
-      "description": "Unified API/CLI for AI image and video generation via Modellix"
+      "description": "Unified API/CLI for AI image, video, and audio workflows via Modellix"
     }
   ]
 }

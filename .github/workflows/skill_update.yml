@@ -1,5 +1,8 @@
 name: Skill Update
 
+permissions:
+  contents: read
+
 on:
   push:
     branches:
@@ -18,7 +21,29 @@ on:
         required: false
 
 jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7
+        with:
+          node-version: 22
+
+      - name: Run repository tests
+        run: npm test
+
+      - name: Compile Python helpers
+        run: python3 -m py_compile scripts/*.py skills/modellix/scripts/*.py
+
+      - name: Clean Python build artifacts
+        run: python3 skills/modellix/scripts/clean_build_artifacts.py
+
+      - name: Check package contents
+        run: npm pack --dry-run
+
   sync-smithery:
+    needs: validate
     runs-on: ubuntu-latest
     steps:
       # Sync action 1/2: update Smithery registry via API.
@@ -47,18 +72,19 @@ jobs:
 
       - name: Add skill via npx
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-        run: npx skills add https://github.com/Modellix/modellix-plugin --skill modellix
+        run: npx --yes skills add https://github.com/Modellix/modellix-plugin --skill modellix
 
   # ClawHub rejects republishing an existing package version, and every skill
   # publish burns a new version number, so only publish what actually changed.
   # Use the force_publish dispatch input to override.
   detect-changes:
+    needs: validate
     runs-on: ubuntu-latest
     outputs:
       package: ${{ steps.check.outputs.package }}
       skill: ${{ steps.check.outputs.skill }}
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
           fetch-depth: 2
 
@@ -120,9 +146,9 @@ jobs:
       SKILL_PATH: skills/modellix
       SKILL_OWNER: modellix
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
 
-      - uses: actions/setup-node@v7
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7
         with:
           node-version: 22
 
@@ -204,7 +230,7 @@ jobs:
       actions: read
       contents: read
       id-token: write
-    uses: openclaw/clawhub/.github/workflows/package-publish.yml@main
+    uses: openclaw/clawhub/.github/workflows/package-publish.yml@459caf625079449a47bb6c4034ee0c3ea2e964b9
     with:
       owner: modellix
       family: bundle-plugin
