@@ -246,9 +246,6 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
-      id-token: write
-    env:
-      NPM_CLI_VERSION: 12.0.2
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
 
@@ -257,10 +254,9 @@ jobs:
           node-version: 22
           registry-url: https://registry.npmjs.org
 
-      - name: Install trusted-publishing npm CLI
-        run: npm install --global "npm@${NPM_CLI_VERSION}"
-
       - name: Publish package to npm
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: |
           PACKAGE_NAME=$(node --input-type=module -e "import p from './package.json' with { type: 'json' }; process.stdout.write(p.name)")
           PACKAGE_VERSION=$(node --input-type=module -e "import p from './package.json' with { type: 'json' }; process.stdout.write(p.version)")
