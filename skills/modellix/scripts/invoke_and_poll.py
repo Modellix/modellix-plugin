@@ -16,13 +16,14 @@ from __future__ import annotations
 import argparse
 import json
 import os
-import shutil
 import subprocess
 import sys
 import time
 import urllib.error
 import urllib.request
 from typing import Any, Dict, Optional, Tuple
+
+from cli_runtime import CliRuntime, resolve_cli_runtime
 
 BASE_URL = "https://api.modellix.ai/api/v1"
 RETRYABLE_READ_STATUS = {408, 429, 500, 502, 503, 504}
@@ -101,9 +102,9 @@ def child_env(api_key: Optional[str]) -> Dict[str, str]:
     return env
 
 
-def run_cli(args: argparse.Namespace) -> Dict[str, Any]:
+def run_cli(args: argparse.Namespace, cli_path: str = "modellix-cli") -> Dict[str, Any]:
     cmd = [
-        "modellix-cli",
+        cli_path,
         "model",
         "run",
         "--model-slug",
@@ -145,9 +146,14 @@ def run_cli(args: argparse.Namespace) -> Dict[str, Any]:
         raise RuntimeError(f"CLI returned non-JSON stdout: {proc.stdout[:500]}") from exc
 
 
-def run_cli_download(task_id: str, output_dir: str, api_key: Optional[str]) -> Dict[str, Any]:
+def run_cli_download(
+    task_id: str,
+    output_dir: str,
+    api_key: Optional[str],
+    cli_path: str = "modellix-cli",
+) -> Dict[str, Any]:
     cmd = [
-        "modellix-cli",
+        cli_path,
         "task",
         "download",
         task_id,
@@ -219,12 +225,11 @@ def run_rest_poll(task_id: str, api_key: str) -> Dict[str, Any]:
     return http_request(url=url, method="GET", api_key=api_key)
 
 
-def pick_mode(args: argparse.Namespace, api_key: Optional[str]) -> str:
+def pick_mode(args: argparse.Namespace, runtime: CliRuntime | None) -> str:
     if args.mode in {"cli", "rest"}:
         return args.mode
-    has_cli = shutil.which("modellix-cli") is not None
     # CLI can authenticate via saved profile even without env key.
-    return "cli" if has_cli else "rest"
+    return "cli" if runtime and runtime.available else "rest"
 
 
 def extract_task_id(payload: Dict[str, Any]) -> Optional[str]:
@@ -267,7 +272,14 @@ def main() -> int:
     args = parse_args()
     body = load_body(args)
     api_key = get_api_key(args)
-    mode = pick_mode(args, api_key)
+    # Resolve/update the CLI before any paid submission, then pin this workflow
+    # to the resolved executable path.
+    runtime = resolve_cli_runtime() if args.mode != "rest" else None
+    mode = pick_mode(args, runtime)
+
+    if mode == "cli" and (runtime is None or not runtime.available):
+        warning = f" {runtime.update_warning}" if runtime and runtime.update_warning else ""
+        raise RuntimeError(f"modellix-cli is unavailable after preflight.{warning}")
 
     if mode == "rest" and not api_key:
         raise RuntimeError("Missing API key. Set MODELLIX_API_KEY or pass --api-key.")
@@ -275,13 +287,17 @@ def main() -> int:
     download_payload: Optional[Dict[str, Any]] = None
 
     if mode == "cli":
-        result_payload = run_cli(args)
+        cli_path = runtime.path if runtime and runtime.path else "modellix-cli"
+        result_payload = run_cli(args, cli_path)
         task_id = extract_task_id(result_payload)
         if args.output_dir and task_id:
-            download_payload = run_cli_download(task_id, args.output_dir, api_key)
+            download_payload = run_cli_download(task_id, args.output_dir, api_key, cli_path)
+        normalized = normalize_output(mode, result_payload, download_payload)
+        if runtime:
+            normalized["cli_runtime"] = runtime.to_dict()
         print(
             json.dumps(
-                normalize_output(mode, result_payload, download_payload),
+                normalized,
                 ensure_ascii=False,
                 indent=2,
             )

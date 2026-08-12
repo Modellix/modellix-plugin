@@ -1,12 +1,12 @@
 # Scripts
 
-These scripts are optional helpers for automation. The default execution path is the CLI:
+These stdlib-only scripts provide deterministic CLI update and execution handling. The default execution path remains:
 
 `modellix-cli model run --wait` → `modellix-cli task download`
 
 ## preflight.py
 
-Environment check for CLI-first routing. Prefers `modellix-cli doctor --json` when the CLI is installed.
+Environment check for CLI-first routing. Before doctor or any paid submit, it queries the public npm `latest` tag and installs the exact release only when the CLI is missing or older. It never downgrades a newer installed CLI.
 
 Usage:
 
@@ -18,6 +18,8 @@ python scripts/preflight.py --json
 Checks:
 
 - `modellix-cli` availability
+- Installed and public-latest CLI versions, update source, and any non-fatal update warning
+- Safe automatic upgrade before execution; `MODELLIX_CLI_AUTO_UPDATE=0|false|off` disables it
 - Doctor result (Node, auth source, connectivity, balance) when CLI exists; a failed doctor check blocks a ready recommendation
 - `MODELLIX_API_KEY` / discoverable profile auth
 - Recommended mode (`cli`, `rest`, or `none` when readiness is not verified)
@@ -49,7 +51,7 @@ python scripts/invoke_and_poll.py \
 
 Key behavior:
 
-- Mode `auto` (default): use CLI when installed, otherwise REST
+- Mode `auto` (default): resolve/update CLI before paid submission, pin that executable for submit/wait/download, otherwise use REST
 - CLI path: single `modellix-cli model run --wait --json` (no hand-rolled poll loop; no paid-submit auto-retry)
 - Optional `--output-dir` triggers `task download` after a successful CLI wait
 - REST path: submit a paid POST exactly once, then retry only safe task-status reads on transient `408`/`429`/`5xx` responses or transport failures

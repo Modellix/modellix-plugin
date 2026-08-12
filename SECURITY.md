@@ -15,6 +15,8 @@ The latest released version receives security fixes. Please update before report
 
 ## Network and user data
 
+- Before the first CLI use in a workflow, `preflight.py` queries only the public npm registry for `modellix-cli@latest`. If a newer version is available, it globally installs that exact version with lifecycle scripts disabled, then verifies the CLI-reported version before use. Set `MODELLIX_CLI_AUTO_UPDATE=0` to opt out.
+- npm registry checks and installs use a clean public-registry configuration that removes npm auth/token/password environment variables and does not read the user's npm config. Update failures retain a working installed CLI; the updater never downgrades and never runs after a paid submit has started.
 - Generation, editing, transcription, and speech inputs are sent only when a user or agent invokes the documented Modellix CLI or REST workflow. Prompts and public media URLs are sent to `https://api.modellix.ai`.
 - Result downloads may connect to the HTTPS resource hosts returned by the Modellix API, including `file.modellix.ai`. Generated results are retained for about seven days; save required outputs promptly.
 - The optional Docs MCP connects only to `https://docs.modellix.ai/mcp` for documentation search and reading. It does not receive the Modellix API key and cannot submit paid tasks.
@@ -23,6 +25,8 @@ The latest released version receives security fixes. Please update before report
 ## Local state
 
 Spend-safety hooks keep a small file under the operating-system temporary directory. It contains hashed command fingerprints, model slugs, task ids, timestamps, and reminder flags. It never contains request bodies, prompts, media, API keys, or complete shell commands. State expires after 24 hours, and stale files are removed when hooks next load or save state.
+
+The CLI updater uses a user-local cache/state directory only for npm cache data and a short-lived concurrency lock; it does not store Modellix or npm credentials.
 
 Repository-level maintainer hooks and marketing follow-ups are intentionally excluded from the installable plugin artifact.
 

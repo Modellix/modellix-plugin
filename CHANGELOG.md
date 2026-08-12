@@ -3,6 +3,19 @@
 All notable changes to this project are documented here. The format loosely follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and versions use [Semantic Versioning](https://semver.org/).
 
+## [3.9.0] - 2026-08-12
+
+### Added
+
+- Agent Plugins 1.0.0 portable core with schema-declared root `plugin.json`, fixed `skills/` discovery, and root `mcp.json` using the current Streamable HTTP transport.
+- Automatic `modellix-cli` preflight: compare against the public npm `latest` tag, install a newer exact version before execution, never downgrade, and pin the resolved executable through the paid workflow.
+- Regression coverage for Agent Plugins layout, CLI version validation, exact-version updates, offline fallback, and downgrade prevention.
+
+### Changed
+
+- Host-specific Cursor, Claude, Codex, legacy Open Plugins, rules, commands, hooks, and `.mcp.json` files are documented as adapters layered on the portable Agent Plugins core.
+- Plugin and skill metadata version is now `3.9.0`.
+
 ## [3.8.0] - 2026-08-05
 
 ### Added

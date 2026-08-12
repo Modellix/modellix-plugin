@@ -2,12 +2,13 @@
 
 Use this reference when `modellix-cli` is available. Command behavior source of truth: npm package `modellix-cli` and `modellix-cli --help` (not the website CLI guide page).
 
-## Install
+## Automatic version preflight
 
 ```bash
-npm install -g modellix-cli@latest
-modellix-cli --version
+python3 scripts/preflight.py --json
 ```
+
+Run preflight before the first CLI command in each workflow. It compares the installed CLI with the public npm `latest` tag, installs the exact newer version before execution, never downgrades, and falls back to the working installed CLI if the registry or install is unavailable. Set `MODELLIX_CLI_AUTO_UPDATE=0` only to pin the installed version. If Python is unavailable, inspect/install `modellix-cli@latest` manually before `doctor`.
 
 ## Authentication and profiles
 

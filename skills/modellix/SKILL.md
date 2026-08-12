@@ -2,25 +2,17 @@
 name: modellix
 description: Integrate Modellix's unified API for AI image, video, and audio workflows. Use this skill whenever the user wants to generate or edit images, create or transform videos, synthesize speech, transcribe audio, clone a voice, do virtual try-on, or call any Modellix model API. Also trigger when the user mentions Modellix, model-as-a-service for media generation, or providers such as Qwen, Wan, Seedream, Seedance, Kling, Hailuo, MiniMax, Whisper, or CosyVoice through a unified API. Prefer modellix-cli (model run --wait, task download, doctor, model list) over hand-rolled REST polling whenever the CLI is available.
 license: MIT
-version: 3.8.0
-author: Modellix
-primaryCredential: MODELLIX_API_KEY
-primaryEnv: MODELLIX_API_KEY
-requiredEnv:
-  - MODELLIX_API_KEY
-required_environment_variables:
-  - name: MODELLIX_API_KEY
-    prompt: Enter your Modellix API key
-    help: Get one at https://modellix.ai/console/api-key
-    required_for: Modellix CLI and REST API access
+compatibility: Requires network access and Node.js 18.17+; Python 3.10+ enables automatic CLI updates and bundled helpers.
 metadata:
-  hermes:
-    tags: [creative, image-generation, video-generation, audio-generation, speech-to-text, modellix, cli, api]
+  author: Modellix
+  version: "3.9.0"
+  modellix-primary-credential: MODELLIX_API_KEY
+  modellix-hermes-tags: creative,image-generation,video-generation,audio-generation,speech-to-text,modellix,cli,api
 ---
 
 # Modellix Skill
 
-Modellix is a Model-as-a-Service (MaaS) platform for asynchronous image, video, and audio workflows. Prefer the official CLI (`modellix-cli`) so submit, wait, and download stay one coherent workflow. Persistent session guardrails also ship as Open Plugins rules under `rules/*.mdc`.
+Modellix is a Model-as-a-Service (MaaS) platform for asynchronous image, video, and audio workflows. Prefer the official CLI (`modellix-cli`) so submit, wait, and download stay one coherent workflow. Host-specific persistent session guardrails also ship under `rules/*.mdc`.
 
 ## Official Docs
 
@@ -48,13 +40,14 @@ Do not rely on the website CLI guide page for command syntax.
 
 Choose the path in this order:
 
-1. **CLI** when `modellix-cli` is available (install with `npm i -g modellix-cli@latest` if missing and install is allowed).
+1. **CLI** after `scripts/preflight.py --json` resolves it. Preflight checks public npm `latest`, installs only a newer exact version before execution, and keeps an existing CLI when update infrastructure is unavailable.
 2. **REST** only when CLI is not installed, unsuitable, or missing a needed capability.
 3. Prefer machine-readable output (`--json` or `--quiet`) for automation.
 
 Canonical single-task flow:
 
 ```bash
+python3 scripts/preflight.py --json
 modellix-cli doctor --json
 modellix-cli model run \
   --model-slug <provider/model> \
@@ -118,30 +111,32 @@ If the user provides a new key: update session first; if they requested persiste
 
 ## Preflight and Deterministic Execution
 
-Preferred checks:
+Required first-workflow check when Python 3 is available:
 
 ```bash
-modellix-cli doctor --json
+python3 scripts/preflight.py --json
 ```
 
-Bundled helpers (optional):
+Bundled helpers:
 
-1. `scripts/preflight.py` — wraps `doctor` when CLI exists; otherwise lightweight env/`which` checks and recommends `cli` or `rest`.
-2. `scripts/invoke_and_poll.py` — CLI path uses `model run --wait`; REST path keeps submit+poll fallback.
+1. `scripts/preflight.py` — checks public npm `latest`, safely updates a missing/older global CLI before paid work, pins newer local installs instead of downgrading, wraps `doctor`, and recommends `cli`, `rest`, or `none`.
+2. `scripts/invoke_and_poll.py` — performs the same resolution before submission, pins the resolved executable for the workflow, uses `model run --wait` on CLI, and otherwise keeps the REST submit+poll fallback.
+
+Set `MODELLIX_CLI_AUTO_UPDATE=0` (also accepts `false` or `off`) only when the environment must keep its installed CLI version. A registry/install failure is non-destructive: use the existing CLI if it still passes doctor, or REST when no CLI is usable and a session API key exists. Never update or swap the CLI after a paid submission has started.
 
 When preflight/doctor reports missing credentials, apply the lifecycle above.
 
 When CLI is unavailable:
 
 1. Use REST (`references/rest-playbook.md`).
-2. After the task, recommend: `npm i -g modellix-cli@latest`.
+2. Report the preflight update warning; do not repeatedly attempt installation inside the same paid workflow.
 
 ## Core Workflow
 
 ### 1) Ready the environment
 
 - Discover or request API key (lifecycle above).
-- Run `modellix-cli doctor --json` when CLI is present.
+- Run `scripts/preflight.py --json`; continue only with the CLI path whose doctor check passed, or with an authenticated REST fallback.
 - Continue only when auth and connectivity look healthy (or REST key is set).
 
 ### 2) Select model

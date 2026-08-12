@@ -2,7 +2,7 @@
 """
 Cross-platform preflight check for CLI-first routing.
 
-Prefers `modellix-cli doctor --json` when the CLI is installed.
+Refreshes `modellix-cli` from the public npm latest tag, then runs doctor.
 """
 
 from __future__ import annotations
@@ -10,16 +10,22 @@ from __future__ import annotations
 import argparse
 import json
 import os
-import shutil
 import subprocess
 from typing import Any
 
+from cli_runtime import CliRuntime, resolve_cli_runtime
 
-def _run_doctor() -> tuple[bool, dict[str, Any] | None, str]:
+
+def _run_doctor(
+    cli_path: str, profile: str | None = None
+) -> tuple[bool, dict[str, Any] | None, str]:
     """Return (ok, parsed_json_or_none, raw_or_error)."""
     try:
+        command = [cli_path, "doctor", "--json"]
+        if profile:
+            command.extend(["--profile", profile])
         proc = subprocess.run(
-            ["modellix-cli", "doctor", "--json"],
+            command,
             check=False,
             capture_output=True,
             text=True,
@@ -41,22 +47,40 @@ def _run_doctor() -> tuple[bool, dict[str, Any] | None, str]:
 def main() -> int:
     parser = argparse.ArgumentParser(description="Check Modellix CLI and API key readiness.")
     parser.add_argument("--json", action="store_true", help="Emit JSON output")
+    parser.add_argument("--profile", help="Optional Modellix CLI profile for doctor")
     args = parser.parse_args()
 
     notes: list[str] = []
-    cli_available = shutil.which("modellix-cli") is not None
+    runtime: CliRuntime = resolve_cli_runtime()
+    cli_available = runtime.available
     env_key_available = bool((os.getenv("MODELLIX_API_KEY") or "").strip())
     api_key_available = env_key_available
     doctor_ok: bool | None = None
     doctor_payload: dict[str, Any] | None = None
 
+    if runtime.updated:
+        notes.append(
+            f"Updated modellix-cli to {runtime.installed_version} before this workflow."
+        )
+    elif runtime.source == "installed-current" and runtime.installed_version:
+        notes.append(f"modellix-cli {runtime.installed_version} is current.")
+    elif runtime.source == "installed-newer" and runtime.installed_version:
+        notes.append(
+            f"Installed modellix-cli {runtime.installed_version} is newer than npm latest "
+            f"{runtime.latest_version}; kept the installed version."
+        )
+    if runtime.update_warning:
+        notes.append(runtime.update_warning)
+
     if not cli_available:
         notes.append(
-            "modellix-cli not found. REST fallback requires MODELLIX_API_KEY. "
-            "Recommend: npm i -g modellix-cli@latest"
+            "modellix-cli is unavailable after the automatic update check. "
+            "REST fallback requires MODELLIX_API_KEY."
         )
     else:
-        doctor_ok, doctor_payload, doctor_raw = _run_doctor()
+        doctor_ok, doctor_payload, doctor_raw = _run_doctor(
+            runtime.path or "modellix-cli", args.profile
+        )
         if doctor_payload is not None:
             notes.append("Ran modellix-cli doctor --json.")
         elif doctor_raw:
@@ -100,6 +124,12 @@ def main() -> int:
     result = {
         "cli_available": cli_available,
         "cli_missing": not cli_available,
+        "cli_path": runtime.path,
+        "cli_version": runtime.installed_version,
+        "cli_latest_version": runtime.latest_version,
+        "cli_source": runtime.source,
+        "cli_updated": runtime.updated,
+        "cli_update_warning": runtime.update_warning,
         "api_key_available": api_key_available,
         "doctor_ok": doctor_ok,
         "doctor": doctor_payload,
@@ -111,6 +141,9 @@ def main() -> int:
         print(json.dumps(result, ensure_ascii=False, indent=2))
     else:
         print(f"cli_available      : {result['cli_available']}")
+        print(f"cli_version        : {result['cli_version']}")
+        print(f"cli_latest_version : {result['cli_latest_version']}")
+        print(f"cli_source         : {result['cli_source']}")
         print(f"api_key_available  : {result['api_key_available']}")
         print(f"doctor_ok          : {result['doctor_ok']}")
         print(f"recommended_mode   : {result['recommended_mode']}")

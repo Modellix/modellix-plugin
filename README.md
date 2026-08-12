@@ -2,19 +2,19 @@
 
 Agent plugin for [Modellix](https://modellix.ai), a unified Model-as-a-Service (MaaS) platform for image, video, and audio workflows.
 
-This repository follows the [Open Plugins](https://open-plugins.com/plugin-builders/specification) specification: the repository root **is** the plugin root, and the skill ships as `skills/modellix/`. The same layout installs into Cursor, Claude Code, Codex, OpenClaw, OpenCode, Pi, Hermes, and any Agent Skills host.
+This repository conforms to the [Agent Plugins 1.0.0 specification](https://agent-plugins.org/specification): root [`plugin.json`](plugin.json) is the portable manifest, [`skills/`](skills/) is the fixed skill location, and root [`mcp.json`](mcp.json) declares the portable Docs MCP. Cursor, Claude Code, Codex, OpenClaw, OpenCode, Pi, and Hermes adapters remain alongside that core for hosts with additional or legacy capabilities.
 
 Official install guide: [docs.modellix.ai/ways-to-use/plugin](https://docs.modellix.ai/ways-to-use/plugin).
 
 ## What this plugin provides
 
-- CLI-first workflow: `modellix-cli doctor` → `model run --wait` → `task download`
+- CLI-first workflow: automatic latest-version preflight → `modellix-cli doctor` → `model run --wait` → `task download`
 - REST fallback when the CLI is unavailable
 - Default models when the user does not specify one
 - Model discovery via `modellix-cli model list` / `model describe`, plus live docs at [llms.txt](https://docs.modellix.ai/llms.txt)
-- Optional **Docs MCP** (`.mcp.json` → [docs.modellix.ai/mcp](https://docs.modellix.ai/mcp)) for searching and reading official documentation — not for running generation tasks
+- Optional **Docs MCP** (`mcp.json`, plus host adapter `.mcp.json` → [docs.modellix.ai/mcp](https://docs.modellix.ai/mcp)) for searching and reading official documentation — not for running generation tasks
 - Slash **commands** under `commands/`: `/modellix:image`, `/modellix:video`, `/modellix:audio`, `/modellix:doctor`, `/modellix:models`, `/modellix:tasks`, `/modellix:download`
-- Persistent **rules** under `rules/` (Open Plugins `.mdc`): CLI-first defaults, paid-submit safety, credential/docs guardrails
+- Persistent host **rules** under `rules/` (`.mdc`): CLI-first defaults, paid-submit safety, credential/docs guardrails
 - Optional **hooks** under `hooks/`: confirm before a repeated paid submit or an unbounded `model batch`, and remind the agent to download results before they expire
 - Retry and error guidance aligned with CLI exit codes and paid-submit safety
 - Credential handling for `MODELLIX_API_KEY` and CLI auth profiles
@@ -22,19 +22,20 @@ Official install guide: [docs.modellix.ai/ways-to-use/plugin](https://docs.model
 ## Requirements
 
 - A Modellix API key from the [Console](https://modellix.ai/console/api-key)
-- Recommended: [modellix-cli](https://www.npmjs.com/package/modellix-cli) (Node.js 18.17+)
-- Optional hooks: Python 3.9+; a cross-platform Node launcher finds `py`, `python`, or `python3` and fails open when Python is unavailable
+- [modellix-cli](https://www.npmjs.com/package/modellix-cli) requires Node.js 18.17+; the plugin preflight installs or refreshes it automatically from the public npm `latest` tag
+- Python 3.10+ for automatic CLI preflight and optional hooks; direct CLI/REST use remains available when Python is unavailable
 
 ```bash
-npm i -g modellix-cli@latest
-modellix-cli doctor --json
+python3 skills/modellix/scripts/preflight.py --json
 ```
+
+Preflight checks the installed version, upgrades only to a newer exact public npm version, then runs `doctor`. Registry/install failure keeps a working installed CLI; if no CLI is usable it recommends REST when `MODELLIX_API_KEY` is available. Set `MODELLIX_CLI_AUTO_UPDATE=0` only when an environment must pin its installed CLI.
 
 ## Install and update
 
 After install, use an existing authenticated CLI profile or set `MODELLIX_API_KEY` (see [Setup](#setup)).
 
-Prefer **Plugin** when the host supports Open Plugins / marketplace plugins. Use **Skill** when you only need the Agent Skill (`skills/modellix`), or when the host has no plugin marketplace.
+Prefer **Plugin** when the host supports Agent Plugins or marketplace plugins. Use **Skill** when you only need the Agent Skill (`skills/modellix`), or when the host has no plugin marketplace.
 
 ### 1) Plugin
 
@@ -103,7 +104,7 @@ git -C ~/.cursor/plugins/local/modellix pull   # when the symlink points at a cl
 
 #### OpenClaw (bundle plugin)
 
-ClawHub package `@modellix/modellix-plugin` — Open Plugins layout as a content/skill bundle (not a TypeScript runtime plugin).
+ClawHub package `@modellix/modellix-plugin` — plugin content/skill bundle (not a TypeScript runtime plugin).
 
 Install:
 
@@ -119,7 +120,7 @@ Update: reinstall from the same ClawHub/git/path source (or `git pull` if you li
 
 #### Pi (package)
 
-[Pi](https://github.com/badlogic/pi-mono) loads this repo as a [Pi package](https://docs.pi.dev/packages) (skills only — not an Open Plugins marketplace plugin). `package.json` declares `pi-package` and `pi.skills`; the repo also exposes `.pi/skills/modellix` → `skills/modellix` for local discovery.
+[Pi](https://github.com/badlogic/pi-mono) loads this repo as a [Pi package](https://docs.pi.dev/packages) (skills only — not an Agent Plugins marketplace client). `package.json` declares `pi-package` and `pi.skills`; the repo also exposes `.pi/skills/modellix` → `skills/modellix` for local discovery.
 
 Install:
 
@@ -243,7 +244,7 @@ ln -sfn /path/to/modellix-plugin/skills/modellix ~/.pi/agent/skills/modellix
 
 #### Hermes Agent
 
-[Hermes](https://hermes-agent.nousresearch.com/) uses Agent Skills (`SKILL.md`), not Open Plugins. Short listing blurb: **Unified API for AI image, video, and audio workflows**.
+[Hermes](https://hermes-agent.nousresearch.com/) consumes the Agent Skill (`SKILL.md`) rather than the full plugin package. Short listing blurb: **Unified API for AI image, video, and audio workflows**.
 
 Install:
 
@@ -265,7 +266,7 @@ skills:
     - ~/.agents/skills
 ```
 
-Update: re-run `hermes skills install ...`, or `git pull` on a symlink checkout. After install, start a new session and invoke `/modellix` (or load the skill via Hermes skill tools). Set `MODELLIX_API_KEY` in the environment or `~/.hermes/.env` (Hermes may prompt securely on first load when the skill declares `required_environment_variables`).
+Update: re-run `hermes skills install ...`, or `git pull` on a symlink checkout. After install, start a new session and invoke `/modellix` (or load the skill via Hermes skill tools). Set `MODELLIX_API_KEY` in the environment or `~/.hermes/.env`.
 
 ## Setup
 
@@ -281,7 +282,7 @@ export MODELLIX_API_KEY="your_api_key"
 - REST requires `MODELLIX_API_KEY`.
 - CLI may use the env var **or** a saved profile (`modellix-cli auth login` / `init`).
 - In Cursor, the key can also be set as the `MODELLIX_API_KEY` plugin variable.
-- In Hermes, prefer `~/.hermes/.env` or the secure prompt when the skill loads (`required_environment_variables`).
+- In Hermes, prefer `~/.hermes/.env` or a session environment variable.
 - Prefer session-only keys; persist only when you explicitly ask for it.
 - Never commit API keys or print them in logs.
 
@@ -330,10 +331,10 @@ Request-body schemas come from each model’s docs (prefer the plugin Docs MCP w
 
 ## Execution guidance
 
-1. Prefer CLI when installed; otherwise use REST ([API guide](https://docs.modellix.ai/ways-to-use/api.md)).
+1. Run `skills/modellix/scripts/preflight.py --json` before the first CLI command in a workflow; it refreshes to a newer npm `latest` release before any paid submit. Prefer the resolved CLI, otherwise use REST ([API guide](https://docs.modellix.ai/ways-to-use/api.md)).
 2. Do not hand-roll `task get` polling loops when `model run --wait` or `task wait` is available.
 3. Do not blindly retry a paid `model run` after an unknown submission outcome — check `modellix-cli task history` first.
-4. Optional helpers in `skills/modellix/scripts/` wrap CLI/REST; if they fail, call the CLI commands directly.
+4. `preflight.py` owns the automatic update check; `invoke_and_poll.py` pins the resolved executable for the complete submit/wait/download workflow. Update failure retains an existing CLI and never triggers a paid retry.
 5. CLI behavior source of truth: [npm modellix-cli](https://www.npmjs.com/package/modellix-cli) and `modellix-cli --help` (not the website CLI guide page, which may lag).
 
 ## Security and data handling
@@ -342,7 +343,7 @@ Prompts and public media inputs are sent to `https://api.modellix.ai` only when 
 
 ## Hooks (spend and result safety)
 
-Hosts that support Open Plugins hooks load three lightweight guards. They only react to `modellix-cli` commands and never change the CLI workflow itself:
+Hosts that support the packaged hook adapters load three lightweight guards. Hooks are outside the Agent Plugins 1.0.0 core; they only react to `modellix-cli` commands and never change the CLI workflow itself:
 
 | Hook | Trigger | Behavior |
 | --- | --- | --- |
@@ -350,13 +351,13 @@ Hosts that support Open Plugins hooks load three lightweight guards. They only r
 | Task watch | After a `modellix-cli` command | Records task ids from the output and clears them once `task download` succeeds |
 | Stop reminder | When the agent tries to finish | Sends one follow-up if tasks were generated but never downloaded (resource URLs expire in about 7 days) |
 
-Config lives in [`hooks/hooks.json`](hooks/hooks.json) (Open Plugins / Claude Code event names) and [`hooks/cursor-hooks.json`](hooks/cursor-hooks.json) (Cursor event names); each manifest points at exactly one of them, so a host never runs both. Hook logic is Python 3 stdlib only, while `scripts/run_python_hook.mjs` selects the available Python 3 command across platforms. Per-session state stores command fingerprints, model slugs, and task ids—never prompts or keys—and every hook fails open. Hosts without hook support (Pi, Hermes, OpenCode, Codex) ignore this directory.
+Config lives in [`hooks/hooks.json`](hooks/hooks.json) (legacy Open Plugins / Claude Code event names) and [`hooks/cursor-hooks.json`](hooks/cursor-hooks.json) (Cursor event names); each host manifest points at exactly one of them, so a host never runs both. Hook logic is Python 3 stdlib only, while `scripts/run_python_hook.mjs` selects the available Python 3 command across platforms. Per-session state stores command fingerprints, model slugs, and task ids—never prompts or keys—and every hook fails open. Hosts without hook support (Pi, Hermes, OpenCode, Codex) ignore this directory.
 
 Plugin-level `scripts/` holds these hook scripts; the CLI/REST helpers used by the skill live in `skills/modellix/scripts/`.
 
 ## Slash commands
 
-Hosts that support Open Plugins commands expose seven shortcuts. Each one routes to the same `modellix-cli` workflow the skill teaches—they add no separate runtime:
+Hosts that support the packaged command adapters expose seven shortcuts. Commands are outside the Agent Plugins 1.0.0 core; each routes to the same `modellix-cli` workflow the skill teaches and adds no separate runtime:
 
 | Command | Use it for |
 | --- | --- |
@@ -393,14 +394,16 @@ The three paid commands (`image`, `video`, `audio`) set `disable-model-invocatio
 ├── CHANGELOG.md
 ├── package.json                    # ClawHub OpenClaw + Pi package (@modellix/modellix-plugin)
 ├── openclaw.plugin.json            # OpenClaw package manifest (skills bundle)
-├── .mcp.json                       # Docs MCP → https://docs.modellix.ai/mcp (read-only docs search)
+├── plugin.json                     # Agent Plugins 1.0.0 portable manifest
+├── mcp.json                        # Agent Plugins 1.0.0 Docs MCP (streamable-http)
+├── .mcp.json                       # Cursor/legacy host Docs MCP adapter
 ├── commands/                       # Slash commands (:image, :video, :audio, :doctor, :models, :tasks, :download)
-├── rules/                          # Open Plugins always-on guardrails (.mdc)
-├── hooks/                          # Hook configs: hooks.json (Open Plugins/Claude), cursor-hooks.json (Cursor)
+├── rules/                          # Host-extension always-on guardrails (.mdc)
+├── hooks/                          # Host adapters: hooks.json (legacy/Claude), cursor-hooks.json (Cursor)
 ├── scripts/                        # Hook logic (Python stdlib) + cross-platform Node launcher
 ├── .opencode/skills/modellix       # Symlink → skills/modellix (OpenCode skill discovery)
 ├── .pi/skills/modellix             # Symlink → skills/modellix (Pi local skill discovery)
-├── .plugin/plugin.json             # Vendor-neutral Open Plugins manifest
+├── .plugin/plugin.json             # Legacy Open Plugins host adapter
 ├── .cursor-plugin/
 │   ├── plugin.json                 # Cursor manifest (+ optional MODELLIX_API_KEY variable)
 │   └── marketplace.json            # Single-repository Cursor marketplace entry
@@ -416,13 +419,13 @@ The three paid commands (`image`, `video`, `audio`) set `disable-model-invocatio
 └── .github/workflows/              # Publish sync (Smithery / skills add / ClawHub)
 ```
 
-`skills/modellix/` sits on the Open Plugins default discovery path, so no `skills` field is needed in the Open Plugins manifests. Pi uses `package.json#pi.skills`; Hermes installs the skill tree only (no Hermes-specific plugin manifest).
+`skills/modellix/` is discovered from the fixed Agent Plugins `skills/` location without a manifest path field. Pi uses `package.json#pi.skills`; Hermes installs the skill tree only (no Hermes-specific plugin manifest).
 
 ## Maintaining this plugin
 
 See [AGENTS.md](AGENTS.md) for sources of truth, update checklists, smoke tests, versioning, and PR conventions.
 
-Current version: see [`.plugin/plugin.json`](.plugin/plugin.json) (kept in sync with [`skills/modellix/skill.json`](skills/modellix/skill.json)).
+Current version: see [`plugin.json`](plugin.json) (kept in sync with host manifests and [`skills/modellix/skill.json`](skills/modellix/skill.json)).
 
 ## Links
 

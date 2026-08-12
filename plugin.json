@@ -1,15 +1,16 @@
 {
+  "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
   "name": "modellix",
   "version": "3.9.0",
   "description": "Unified API/CLI for AI image, video, and audio workflows via Modellix",
   "author": {
     "name": "Modellix",
+    "email": "support@modellix.ai",
     "url": "https://modellix.ai"
   },
   "homepage": "https://docs.modellix.ai/ways-to-use/plugin",
   "repository": "https://github.com/Modellix/modellix-plugin",
   "license": "MIT",
-  "logo": "assets/logo.svg",
   "keywords": [
     "ai",
     "image",
@@ -19,6 +20,5 @@
     "generation",
     "api",
     "modellix"
-  ],
-  "hooks": "./hooks/hooks.json"
+  ]
 }

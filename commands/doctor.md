@@ -7,14 +7,13 @@ Diagnose the Modellix setup. Optional profile: $ARGUMENTS
 
 Read-only: never submit a paid task from this command.
 
-1. Check the CLI, and offer `npm i -g modellix-cli@latest` if it is missing:
+1. Run the packaged preflight so a missing/older CLI is refreshed from public npm before doctor:
 
 ```bash
-modellix-cli --version
-modellix-cli doctor --json
+python3 skills/modellix/scripts/preflight.py --json
 ```
 
-Add `--profile $ARGUMENTS` when a profile was given.
+Add `--profile $ARGUMENTS` when a profile was given. `MODELLIX_CLI_AUTO_UPDATE=0` pins the installed version; otherwise update failure safely retains an existing CLI or reports the REST fallback.
 
 2. Read the report: Node.js version, key source, API connectivity, key validity, balance. `doctor` never prints the key itself.
 3. If no credential resolves, follow the API key lifecycle in `skills/modellix/SKILL.md`: discover the session env `MODELLIX_API_KEY` and saved profiles first, ask the user only when nothing is available, and keep it session-only unless they ask to persist (`modellix-cli auth login`).

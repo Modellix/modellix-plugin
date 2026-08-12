@@ -1,6 +1,6 @@
 {
   "name": "modellix",
-  "version": "3.8.0",
+  "version": "3.9.0",
   "description": "Unified API/CLI for AI image, video, and audio workflows via Modellix",
   "author": {
     "name": "Modellix",
@@ -9,7 +9,6 @@
   "homepage": "https://docs.modellix.ai/ways-to-use/plugin",
   "repository": "https://github.com/Modellix/modellix-plugin",
   "license": "MIT",
-  "logo": "assets/logo.svg",
   "keywords": [
     "ai",
     "image",
@@ -19,5 +18,26 @@
     "generation",
     "api",
     "modellix"
-  ]
+  ],
+  "skills": "./skills/",
+  "mcpServers": "./.mcp.json",
+  "interface": {
+    "displayName": "Modellix",
+    "shortDescription": "Create AI images, video, and audio",
+    "longDescription": "Run Modellix image, video, speech, and audio workflows through the official CLI or REST fallback, with model discovery and paid-submit safety guidance.",
+    "developerName": "Modellix",
+    "category": "Productivity",
+    "capabilities": [
+      "Interactive",
+      "Write"
+    ],
+    "websiteURL": "https://modellix.ai",
+    "privacyPolicyURL": "https://www.modellix.ai/privacy",
+    "defaultPrompt": [
+      "Generate an image with Modellix and save it locally.",
+      "Create a video from my prompt with Modellix.",
+      "Transcribe an audio file with Modellix."
+    ],
+    "logo": "./assets/logo.svg"
+  }
 }

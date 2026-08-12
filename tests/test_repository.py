@@ -23,6 +23,7 @@ class RepositoryTests(unittest.TestCase):
     def test_versions_are_synchronized(self):
         expected = read_json("package.json")["version"]
         versions = {
+            read_json("plugin.json")["version"],
             read_json(".plugin/plugin.json")["version"],
             read_json(".cursor-plugin/plugin.json")["version"],
             read_json(".claude-plugin/plugin.json")["version"],
@@ -31,8 +32,65 @@ class RepositoryTests(unittest.TestCase):
             read_json("skills/modellix/skill.json")["version"],
         }
         skill_text = (ROOT / "skills/modellix/SKILL.md").read_text(encoding="utf-8")
-        versions.add(re.search(r"(?m)^version:\s*(\S+)$", skill_text).group(1))
+        versions.add(
+            re.search(
+                r'(?m)^  version:\s*["\']?([^"\'\s]+)["\']?$', skill_text
+            ).group(1)
+        )
         self.assertEqual(versions, {expected})
+
+    def test_agent_plugins_1_0_core_layout(self):
+        manifest = read_json("plugin.json")
+        mcp = read_json("mcp.json")
+        self.assertEqual(
+            manifest["$schema"],
+            "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
+        )
+        self.assertEqual(
+            set(manifest)
+            - {
+                "$schema",
+                "name",
+                "version",
+                "description",
+                "author",
+                "homepage",
+                "repository",
+                "license",
+                "keywords",
+                "extensions",
+            },
+            set(),
+        )
+        self.assertEqual(
+            mcp["$schema"],
+            "https://agent-plugins.org/schemas/1.0.0/mcp.schema.json",
+        )
+        self.assertEqual(set(mcp), {"$schema", "mcpServers"})
+        docs_server = mcp["mcpServers"]["modellix-docs"]
+        self.assertEqual(docs_server["type"], "streamable-http")
+        self.assertTrue(docs_server["url"].startswith("https://"))
+        self.assertTrue((ROOT / "skills/modellix/SKILL.md").is_file())
+
+    def test_agent_skill_frontmatter_uses_standard_fields(self):
+        text = (ROOT / "skills/modellix/SKILL.md").read_text(encoding="utf-8")
+        frontmatter = text.split("---", 2)[1]
+        top_level = {
+            line.split(":", 1)[0]
+            for line in frontmatter.splitlines()
+            if line and not line[0].isspace()
+        }
+        self.assertEqual(
+            top_level,
+            {"name", "description", "license", "compatibility", "metadata"},
+        )
+        metadata_lines = [
+            line.strip()
+            for line in frontmatter.splitlines()
+            if line.startswith("  ") and not line.startswith("    ")
+        ]
+        self.assertTrue(metadata_lines)
+        self.assertTrue(all(": " in line for line in metadata_lines))
 
     def test_cursor_manifest_matches_official_surface(self):
         manifest = read_json(".cursor-plugin/plugin.json")
@@ -68,6 +126,7 @@ class RepositoryTests(unittest.TestCase):
 
     def test_all_plugin_identifiers_are_lowercase(self):
         for path in (
+            "plugin.json",
             ".plugin/plugin.json",
             ".cursor-plugin/plugin.json",
             ".claude-plugin/plugin.json",
@@ -116,6 +175,8 @@ class RepositoryTests(unittest.TestCase):
 
     def test_package_excludes_python_build_artifacts(self):
         files = read_json("package.json")["files"]
+        self.assertIn("plugin.json", files)
+        self.assertIn("mcp.json", files)
         self.assertIn("!scripts/**/*.pyc", files)
         self.assertIn("!skills/**/*.pyc", files)
         self.assertIn("!scripts/**/__pycache__/**", files)

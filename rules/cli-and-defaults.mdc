@@ -4,7 +4,8 @@ alwaysApply: true
 ---
 
 - Prefer `modellix-cli` over hand-rolled REST polling when the CLI is available.
-- Canonical flow: `doctor` → `model run --wait` → `task download`. Prefer `--json`.
+- Before the first CLI command in a workflow, run `skills/modellix/scripts/preflight.py --json`; it resolves public npm `latest` before paid work and keeps an existing CLI on update failure. Never change CLI versions after submission starts.
+- Canonical flow: automatic preflight/`doctor` → `model run --wait` → `task download`. Prefer `--json`.
 - Do not reinvent poll loops when CLI `--wait` / `task wait` exists. Use REST only if CLI is missing or unsuitable.
 - If the user did not name a model, use these defaults immediately (do not scan the catalog first):
   - T2I: `google/nano-banana-2-lite`

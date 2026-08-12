@@ -4,30 +4,32 @@ Instructions for coding agents that maintain this **Modellix plugin** package. H
 
 ## Project overview
 
-This repository is an [Open Plugins](https://open-plugins.com/plugin-builders/specification) **v1** plugin: **the git repository root is the plugin root**. It ships one Agent Skill at `skills/modellix/` for Modellix image, video, and audio workflows (CLI-first, REST fallback), a read-only **Docs MCP** at `.mcp.json`, always-on **rules**, spend-safety **hooks**, and seven slash **commands**. Hosts that consume it include Cursor, Claude Code, Codex, OpenClaw/ClawHub, OpenCode, Pi, Hermes, and any Agent Skills host.
+This repository conforms to [Agent Plugins](https://agent-plugins.org/specification) **1.0.0**: **the git repository root is the plugin root**, root `plugin.json` is the portable manifest, `skills/modellix/` is the fixed Agent Skill location, and root `mcp.json` declares the read-only **Docs MCP**. Cursor, Claude Code, Codex, legacy Open Plugins, OpenClaw/ClawHub, OpenCode, Pi, and Hermes adapters add host capabilities such as rules, hooks, and seven slash commands without changing the portable core.
 
-There is no application runtime or unit-test suite. The product is manifests + skill markdown + thin Python helpers.
+There is no application runtime. The product is manifests + skill markdown + thin stdlib Python helpers, covered by repository regression tests.
 
 ```text
 modellix-plugin/                 ← plugin root (= repo root)
-├── .plugin/plugin.json          ← vendor-neutral Open Plugins manifest (edit first)
+├── plugin.json                  ← Agent Plugins 1.0.0 portable manifest (edit first)
+├── mcp.json                     ← Agent Plugins Docs MCP (streamable-http)
+├── .plugin/plugin.json          ← legacy Open Plugins host adapter
 ├── .cursor-plugin/              ← Cursor plugin.json + single-repo marketplace.json
 ├── .claude-plugin/              ← Claude Code plugin.json + marketplace.json
 ├── .codex-plugin/plugin.json
 ├── .agents/plugins/marketplace.json
 ├── assets/logo.svg
-├── skills/modellix/             ← Open Plugins default skills/ discovery
+├── skills/modellix/             ← Agent Plugins fixed skills/ discovery
 │   ├── SKILL.md
 │   ├── skill.json
 │   ├── references/              ← cli / rest / capability playbooks
-│   ├── scripts/                 ← optional CLI wrappers (stdlib Python)
+│   ├── scripts/                 ← CLI update/preflight + execution helpers (stdlib Python)
 │   ├── assets/
 │   └── evals/
 ├── openclaw.plugin.json         ← ClawHub bundle-plugin (skills only; no extensions)
-├── .mcp.json                    ← Docs MCP → https://docs.modellix.ai/mcp (search/read docs only)
+├── .mcp.json                    ← Cursor/legacy Docs MCP adapter (`type: http`)
 ├── commands/                    ← slash commands (thin prompts routing to the CLI flow)
-├── rules/                       ← Open Plugins always-on .mdc guardrails
-├── hooks/                       ← hooks.json (Open Plugins/Claude) + cursor-hooks.json (Cursor)
+├── rules/                       ← host-specific always-on .mdc guardrails
+├── hooks/                       ← hooks.json (legacy/Claude) + cursor-hooks.json (Cursor)
 ├── scripts/                     ← plugin-level hook scripts + cross-platform Node launcher
 ├── package.json                 ← ClawHub + Pi (`pi-package`, pi.skills)
 ├── .opencode/skills/modellix → ../../skills/modellix
@@ -35,17 +37,17 @@ modellix-plugin/                 ← plugin root (= repo root)
 └── .github/workflows/skill_update.yml
 ```
 
-## Open Plugins conformance
+## Agent Plugins 1.0.0 core and host adapters
 
-Follow https://open-plugins.com/plugin-builders/specification (and marketplace/install docs on the same site). Rules that matter here:
+Follow https://agent-plugins.org/specification for the portable core. Rules that matter here:
 
 1. **Plugin root = repo root.** All component paths are relative to that root and use `./…`. Never `../` outside the plugin tree.
-2. **Manifests:** Prefer `.plugin/plugin.json` as the source of truth; keep vendor copies (`.cursor-plugin/`, `.claude-plugin/`, `.codex-plugin/`) in sync for shared metadata. Each metadata directory contains **only** `plugin.json`, except Claude and Cursor, which may also carry their host-specific `marketplace.json`. Components live at the plugin root, not inside `.plugin/`.
-3. **Default discovery:** Hosts load `skills/` automatically. Because the skill lives at `skills/modellix/`, Open Plugins manifests **omit** a `skills` field — do not add one unless the skill moves off the default path.
-4. **Do not invent unused components.** Never create top-level `agents/` or `.lsp.json` unless you intend to ship them (hosts auto-discover those paths). This plugin ships `.mcp.json` (Docs MCP), `rules/*.mdc` (always-on guardrails), `hooks/` + `scripts/` (spend-safety hooks), and `commands/*.md` (slash commands). Do not ship repository-level `.cursor/hooks.json` or unrelated stop follow-ups: the repo root is the install artifact, so maintainer automation would affect every installer and fail marketplace security review.
+2. **Portable manifest:** Root `plugin.json` is the source of truth and uses the exact 1.0.0 `$schema`. Its schema is closed; client-specific data must not be added as arbitrary top-level fields. Mirror shared metadata into `.plugin/`, `.cursor-plugin/`, `.claude-plugin/`, `.codex-plugin/`, `skill.json`, and `package.json`.
+3. **Fixed core discovery:** Agent Plugins 1.0.0 discovers only immediate skills under `skills/` and MCP servers from root `mcp.json`. The manifest does not declare paths. Keep root `mcp.json` on `streamable-http`; `.mcp.json` remains a separate Cursor/legacy adapter using its host's `http` spelling.
+4. **Host extensions stay layered.** Agent Plugins 1.0.0 core defines skills and MCP only. This repository additionally ships `.mcp.json`, `rules/*.mdc`, `hooks/` + `scripts/`, and `commands/*.md` for hosts that support them. Never move those fields into root `plugin.json`. Do not ship repository-level `.cursor/hooks.json` or unrelated stop follow-ups: the repo root is the install artifact, so maintainer automation would affect every installer and fail marketplace security review.
 5. **Names:** `name` is lowercase alphanumerics, hyphens, periods; no `--` or `..`. Current name: `modellix`.
 6. **`${PLUGIN_ROOT}`** (Claude also accepts `${CLAUDE_PLUGIN_ROOT}`) for paths that must resolve against the plugin root. Skill-internal refs stay relative to the skill root (`scripts/…`, `references/…`).
-7. **Pi / Hermes** reuse the same `skills/modellix` tree (Pi via `package.json#pi` / symlink; Hermes via skill install + SKILL.md frontmatter). Do not invent Pi-/Hermes-only Open Plugins manifest directories.
+7. **Pi / Hermes** reuse the same `skills/modellix` tree (Pi via `package.json#pi` / symlink; Hermes via skill install + SKILL.md frontmatter). Do not invent Pi-/Hermes-only plugin manifest directories.
 
 ## Sources of truth
 
@@ -54,8 +56,8 @@ Do not invent CLI flags, model slugs, or install paths from memory:
 1. **CLI:** [npm `modellix-cli`](https://www.npmjs.com/package/modellix-cli) + local `modellix-cli --help`
 2. **REST:** https://docs.modellix.ai/ways-to-use/api.md
 3. **Models:** https://docs.modellix.ai/llms.txt → model `.md` / `modellix-cli model describe <slug> --json`
-4. **Docs search (optional host MCP):** https://docs.modellix.ai/mcp via plugin [`.mcp.json`](.mcp.json) — documentation only; not generation
-5. **Plugin format:** https://open-plugins.com/plugin-builders/specification
+4. **Docs search (optional host MCP):** https://docs.modellix.ai/mcp via portable [`mcp.json`](mcp.json) and host adapter [`.mcp.json`](.mcp.json) — documentation only; not generation
+5. **Plugin format:** https://agent-plugins.org/specification and the official `schemas/1.0.0/*.schema.json`
 6. **Published install guide:** https://docs.modellix.ai/ways-to-use/plugin.md (flag drift vs README when install/defaults change)
 7. Do **not** treat `docs.modellix.ai/ways-to-use/cli.md` as authoritative until it matches the npm CLI
 8. Do **not** reintroduce `references/REFERENCE.md` mirroring `llms.txt`
@@ -78,14 +80,12 @@ doctor → (defaults or model list/describe) → model run --wait → task downl
 ## Setup
 
 ```bash
-npm i -g modellix-cli@latest
 export MODELLIX_API_KEY="..."   # session only; never commit
-modellix-cli doctor --json
 python3 skills/modellix/scripts/preflight.py --json
 python3 skills/modellix/scripts/clean_build_artifacts.py
 ```
 
-Python helpers: stdlib only (no pip deps for `preflight.py` / `invoke_and_poll.py`).
+Python helpers: stdlib only (no pip deps for `cli_runtime.py`, `preflight.py`, or `invoke_and_poll.py`). `preflight.py` must resolve/check public npm `latest` before the workflow's first CLI command; update failures retain a working CLI, never downgrade, and never retry a paid submit.
 
 ## Layout and skill rules
 
@@ -97,7 +97,7 @@ Progressive disclosure:
 | `references/cli-playbook.md` | Full CLI surface |
 | `references/rest-playbook.md` | REST only when CLI unavailable |
 | `references/capability-matrix.md` | CLI ↔ REST mapping |
-| `scripts/` | Optional; must not block the direct CLI path |
+| `scripts/` | CLI update/preflight + optional execution wrapper; must retain direct CLI/REST fallback |
 
 Keep a **single** skill tree under `skills/modellix/`. `.opencode/skills/modellix` and `.pi/skills/modellix` are symlinks only — do not duplicate. OpenCode’s JS/TS `.opencode/plugins/` system is unused here.
 
@@ -123,15 +123,15 @@ Invariants when editing commands:
 - **Handle empty arguments.** Ask the user instead of inventing a prompt or a task id.
 - Default slugs appearing in `image.md` / `video.md` / `audio.md` must match the Default models table below, `SKILL.md`, and [`rules/cli-and-defaults.mdc`](rules/cli-and-defaults.mdc).
 
-`commands/` is a default Open Plugins discovery path, so vendor-neutral manifests may omit a `commands` field; the Cursor manifest declares it explicitly for official-schema clarity. ClawHub installs the skill bundle only and will not expose these commands—that is expected.
+`commands/` is a host-extension discovery path, not an Agent Plugins 1.0.0 core component. The Cursor manifest declares it explicitly; compatible legacy hosts may discover it by convention. ClawHub installs the skill bundle only and will not expose these commands—that is expected.
 
 ## Hooks
 
-Two configs, one behavior. Cursor uses camelCase flat entries; Open Plugins/Claude Code use PascalCase nested actions, so a single file cannot serve both. Each manifest points at exactly one config (a manifest `hooks` path replaces default `hooks/hooks.json` discovery), which keeps a host from firing both.
+Two configs, one host-extension behavior. Cursor uses camelCase flat entries; legacy Open Plugins/Claude Code use PascalCase nested actions, so a single file cannot serve both. Agent Plugins 1.0.0 itself does not define hooks. Each host manifest points at exactly one config, which keeps a host from firing both.
 
 | File | Consumed by | Events |
 |------|-------------|--------|
-| [`hooks/hooks.json`](hooks/hooks.json) | `.plugin`, `.claude-plugin` | `PreToolUse` / `PostToolUse` (matcher `Bash`), `Stop`; `${PLUGIN_ROOT}` |
+| [`hooks/hooks.json`](hooks/hooks.json) | legacy `.plugin`, `.claude-plugin` | `PreToolUse` / `PostToolUse` (matcher `Bash`), `Stop`; `${PLUGIN_ROOT}` |
 | [`hooks/cursor-hooks.json`](hooks/cursor-hooks.json) | `.cursor-plugin` | `beforeShellExecution` / `afterShellExecution` (matcher `modellix-cli`), `stop` with `loop_limit: 1`; `${CURSOR_PLUGIN_ROOT}` |
 
 Scripts in `scripts/` (plugin level; the skill's CLI wrappers stay in `skills/modellix/scripts/`):
@@ -155,12 +155,12 @@ Invariants when editing hooks:
 
 ## Manifest rules
 
-- Keep shared metadata in sync across the four Open Plugins `plugin.json` files, `skills/modellix/skill.json`, and root `package.json` (`name`/`version`/`description`/`homepage`/…). Cursor also adds `displayName`, `publisher`, discovery metadata, explicit component paths, and an optional `MODELLIX_API_KEY` variable; `.cursor-plugin/marketplace.json` must resolve back to the repository root.
-- Edit `.plugin/plugin.json` first, then mirror. `homepage` = https://docs.modellix.ai/ways-to-use/plugin
+- Keep shared metadata in sync across root `plugin.json`, the four host `plugin.json` adapters, `skills/modellix/skill.json`, and root `package.json` (`name`/`version`/`description`/`homepage`/…). Cursor also adds `displayName`, `publisher`, discovery metadata, explicit component paths, and an optional `MODELLIX_API_KEY` variable; `.cursor-plugin/marketplace.json` must resolve back to the repository root.
+- Edit root `plugin.json` first, then mirror. `homepage` = https://docs.modellix.ai/ways-to-use/plugin
 - `openclaw.plugin.json`: `skills: ["./skills"]`, empty `configSchema`. Do **not** add `openclaw.extensions` or hooks there — ClawHub treats this as a content bundle.
 - Hook wiring: `.cursor-plugin` → `./hooks/cursor-hooks.json`; `.plugin` and `.claude-plugin` → `./hooks/hooks.json`; `.codex-plugin` stays without hooks.
 - `package.json`: keep `pi-package` keyword and `"pi": { "skills": ["./skills"] }`.
-- Hermes metadata: `skills/modellix/SKILL.md` frontmatter (`metadata.hermes`, `required_environment_variables`).
+- Agent Skills frontmatter: only standard top-level fields. Put string-only host/listing metadata under `metadata`; keep credential hints in `skill.json` and the skill body rather than non-standard top-level YAML fields.
 - Never put credentials in manifests.
 
 ## Default models
@@ -201,7 +201,7 @@ Verify via OpenAPI / `model describe`. Changing defaults → bump version everyw
 
 ```bash
 # Manifests
-python3 -c "import json,glob; [json.load(open(f)) for f in glob.glob('.*-plugin/*.json') + glob.glob('hooks/*.json') + ['.plugin/plugin.json', '.agents/plugins/marketplace.json', 'openclaw.plugin.json', 'package.json', 'skills/modellix/skill.json', '.mcp.json']]"
+python3 -c "import json,glob; [json.load(open(f)) for f in glob.glob('.*-plugin/*.json') + glob.glob('hooks/*.json') + ['plugin.json', 'mcp.json', '.plugin/plugin.json', '.agents/plugins/marketplace.json', 'openclaw.plugin.json', 'package.json', 'skills/modellix/skill.json', '.mcp.json']]"
 
 # Commands (frontmatter present + default slugs consistent)
 python3 -c "import pathlib,sys; [sys.exit(f'bad frontmatter: {p}') for p in sorted(pathlib.Path('commands').glob('*.md')) if not (p.read_text().startswith('---') and 'description:' in p.read_text().split('---')[1])]"
@@ -266,14 +266,14 @@ Bump versions when behavior or packaged content changes.
 - Filename ≠ model slug (`seedance-2-0-…md` vs `bytedance/seedance-2.0-…`).
 - Do not auto-retry ambiguous paid `model run` outcomes.
 - Skill-only path is `skills/modellix`, not the repo root.
-- Version must match across Open Plugins manifests + `skill.json` + `package.json` (+ Claude marketplace `metadata.version`).
+- Version must match across root Agent Plugins manifest + host manifests + `skill.json` + `package.json` (+ Claude marketplace `metadata.version`).
 
 ## Quick file map
 
 | Change | Touch first |
 |--------|-------------|
-| Plugin metadata / logo | `.plugin/plugin.json` → vendor manifests; Cursor-only listing fields in `.cursor-plugin/` |
-| Docs MCP endpoint | `.mcp.json` (keep URL in sync with https://docs.modellix.ai/mcp) |
+| Plugin metadata / logo | root `plugin.json` → host manifests; Cursor-only listing fields in `.cursor-plugin/` |
+| Docs MCP endpoint | root `mcp.json` (`streamable-http`) + `.mcp.json` host adapter (`http`); keep URL in sync |
 | Slash commands | `commands/*.md` (thin prompts; keep default slugs in sync with `SKILL.md`) |
 | Always-on guardrails | `rules/*.mdc` (keep in sync with skill defaults / paid-submit / credential policy) |
 | Hook behavior | `scripts/*.py`, `scripts/run_python_hook.mjs`, and both `hooks/*.json` (keep the two configs equivalent) |
