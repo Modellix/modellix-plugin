@@ -31,7 +31,7 @@ modellix-plugin/                 ← plugin root (= repo root)
 ├── rules/                       ← host-specific always-on .mdc guardrails
 ├── hooks/                       ← hooks.json (legacy/Claude) + cursor-hooks.json (Cursor)
 ├── scripts/                     ← plugin-level hook scripts + cross-platform Node launcher
-├── package.json                 ← ClawHub + Pi (`pi-package`, pi.skills)
+├── package.json                 ← npm + ClawHub + Pi (`bin`, `pi-package`, pi.skills)
 ├── .opencode/skills/modellix → ../../skills/modellix
 ├── .pi/skills/modellix → ../../skills/modellix
 └── .github/workflows/skill_update.yml
@@ -159,7 +159,8 @@ Invariants when editing hooks:
 - Edit root `plugin.json` first, then mirror. `homepage` = https://docs.modellix.ai/ways-to-use/plugin
 - `openclaw.plugin.json`: `skills: ["./skills"]`, empty `configSchema`. Do **not** add `openclaw.extensions` or hooks there — ClawHub treats this as a content bundle.
 - Hook wiring: `.cursor-plugin` → `./hooks/cursor-hooks.json`; `.plugin` and `.claude-plugin` → `./hooks/hooks.json`; `.codex-plugin` stays without hooks.
-- `package.json`: keep `pi-package` keyword and `"pi": { "skills": ["./skills"] }`.
+- `package.json`: keep the `modellix-plugin` installer bin, public npm `publishConfig`, `pi-package` keyword, and `"pi": { "skills": ["./skills"] }`.
+- `scripts/install.mjs`: keep npm installs explicit and reversible. `--host cursor` copies the complete package to Cursor's documented local-plugin directory; `--host portable` requires a target. Existing destinations require `--force` and are moved to a timestamped backup. Never install into the filesystem root, home directory, or inside the package source.
 - Agent Skills frontmatter: only standard top-level fields. Put string-only host/listing metadata under `metadata`; keep credential hints in `skill.json` and the skill body rather than non-standard top-level YAML fields.
 - Never put credentials in manifests.
 
@@ -223,6 +224,9 @@ modellix-cli model run --model-slug google/nano-banana-2-lite --body '{"prompt":
 # modellix-cli task download <task_id> --output-dir ./tmp-out --json --allow-private-network
 
 python3 skills/modellix/scripts/preflight.py --json
+
+# npm installer (no host mutation in dry-run mode)
+node scripts/install.mjs install --host cursor --dry-run
 ```
 
 `skills/modellix/evals/evals.json` is the regression reference; keep run artifacts out of the repo.
@@ -244,6 +248,7 @@ On `main` push, [`.github/workflows/skill_update.yml`](.github/workflows/skill_u
 2. `npx skills add https://github.com/Modellix/modellix-plugin --skill modellix`
 3. ClawHub skill `modellix/modellix` via inline `clawhub` CLI (`CLAWHUB_TOKEN`); accepts `published` / `pending-publication` / `submitted` / `unchanged`; retries on version collision; skips when `skills/` unchanged
 4. ClawHub bundle-plugin `@modellix/modellix-plugin` only when `package.json` version changed (or `workflow_dispatch` + `force_publish`)
+5. Public npm package `@modellix/modellix-plugin` only when `package.json` version changed. GitHub Actions uses npm Trusted Publishing/OIDC (`id-token: write`, npm CLI pinned at the workflow's reviewed version); an already-published identical version is treated as idempotent success. Keep npm's trusted publisher bound exactly to `Modellix/modellix-plugin` + `skill_update.yml` with `npm publish` allowed.
 
 Merging to `main` publishes; do not trigger publish by hand. Claude/Codex marketplaces read the repo directly.
 
@@ -266,6 +271,8 @@ Bump versions when behavior or packaged content changes.
 - Filename ≠ model slug (`seedance-2-0-…md` vs `bytedance/seedance-2.0-…`).
 - Do not auto-retry ambiguous paid `model run` outcomes.
 - Skill-only path is `skills/modellix`, not the repo root.
+- The ClawHub bundle-plugin and npm package share `@modellix/modellix-plugin` as a name but are separate registries; always use an explicit `clawhub:` or `npm:` source with OpenClaw.
+- Plain `npm install` materializes files but does not register every host. Only document direct npm consumption where the host supports it (currently Pi and OpenClaw); use `npx ... install --host cursor` for Cursor local installation.
 - Version must match across root Agent Plugins manifest + host manifests + `skill.json` + `package.json` (+ Claude marketplace `metadata.version`).
 
 ## Quick file map
@@ -280,6 +287,6 @@ Bump versions when behavior or packaged content changes.
 | Marketplace | `.cursor-plugin/`, `.agents/plugins/marketplace.json`, `.claude-plugin/marketplace.json` |
 | Defaults | `SKILL.md`, examples, `evals/evals.json`, version bump |
 | CLI / REST | `SKILL.md`, `references/*`, scripts |
-| Install copy | `README.md`, manifests, `skill.json` |
+| Install copy / npm installer | `README.md`, `scripts/install.mjs`, `package.json`, manifests, `skill.json` |
 | Pi / Hermes | `package.json` + `.pi` symlink; SKILL.md Hermes frontmatter |
 | Cursor Marketplace | Validate `.cursor-plugin/plugin.json` and `marketplace.json` against the current `cursor/plugins` schemas before submission |

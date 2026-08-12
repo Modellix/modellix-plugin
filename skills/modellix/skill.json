@@ -1,6 +1,6 @@
 {
   "name": "modellix",
-  "version": "3.9.0",
+  "version": "3.9.1",
   "description": "Integrate Modellix unified API/CLI for async image, video, and audio workflows (model run --wait, task download).",
   "primaryCredential": "MODELLIX_API_KEY",
   "primaryEnv": "MODELLIX_API_KEY",

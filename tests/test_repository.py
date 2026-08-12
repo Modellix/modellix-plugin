@@ -174,13 +174,19 @@ class RepositoryTests(unittest.TestCase):
         self.assertNotIn("required", schema["properties"]["raw"])
 
     def test_package_excludes_python_build_artifacts(self):
-        files = read_json("package.json")["files"]
+        package = read_json("package.json")
+        files = package["files"]
         self.assertIn("plugin.json", files)
         self.assertIn("mcp.json", files)
         self.assertIn("!scripts/**/*.pyc", files)
         self.assertIn("!skills/**/*.pyc", files)
         self.assertIn("!scripts/**/__pycache__/**", files)
         self.assertIn("!skills/**/__pycache__/**", files)
+        self.assertEqual(package["bin"]["modellix-plugin"], "scripts/install.mjs")
+        self.assertEqual(package["publishConfig"]["access"], "public")
+        self.assertEqual(
+            package["publishConfig"]["registry"], "https://registry.npmjs.org/"
+        )
 
     def test_relative_markdown_links_exist(self):
         pattern = re.compile(r"\[[^\]]*\]\(([^)]+)\)")

@@ -1,11 +1,21 @@
 {
   "name": "@modellix/modellix-plugin",
-  "version": "3.9.0",
+  "version": "3.9.1",
   "description": "Unified API/CLI for AI image, video, and audio workflows via Modellix",
   "type": "module",
   "license": "MIT",
+  "bin": {
+    "modellix-plugin": "scripts/install.mjs"
+  },
   "scripts": {
-    "test": "node ./scripts/run_python_tests.mjs"
+    "test": "node ./scripts/run_python_tests.mjs && node --test ./tests/install_package.test.mjs"
+  },
+  "engines": {
+    "node": ">=18.17.0"
+  },
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org/"
   },
   "keywords": [
     "openclaw",

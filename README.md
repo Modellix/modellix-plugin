@@ -41,6 +41,25 @@ Prefer **Plugin** when the host supports Agent Plugins or marketplace plugins. U
 
 Installs the repository root as a plugin (manifests + `skills/modellix/`).
 
+#### npm / npx
+
+The public npm package contains the complete portable plugin bundle. For Cursor, the installer copies it into Cursor's local-plugin directory:
+
+```bash
+npx --yes @modellix/modellix-plugin@latest install --host cursor
+
+# update an existing npm-installed local plugin; the previous directory is kept as a backup
+npx --yes @modellix/modellix-plugin@latest install --host cursor --force
+```
+
+For another Agent Plugins-compatible host, materialize a versioned bundle and point the host's local-plugin flow at that directory:
+
+```bash
+npx --yes @modellix/modellix-plugin@latest install --host portable --target ./modellix-plugin
+```
+
+Plain `npm install @modellix/modellix-plugin` only downloads the package into `node_modules`; it does not register the plugin with every host. Prefer the host-specific marketplace commands below when available. Pi and OpenClaw can consume the npm package directly through their own package installers.
+
 #### Claude Code
 
 Install:
@@ -109,6 +128,9 @@ ClawHub package `@modellix/modellix-plugin` — plugin content/skill bundle (not
 Install:
 
 ```bash
+openclaw plugins install npm:@modellix/modellix-plugin
+
+# or from ClawHub
 openclaw plugins install clawhub:@modellix/modellix-plugin
 
 # local / git
@@ -116,7 +138,7 @@ openclaw plugins install .
 openclaw plugins install git:github.com/Modellix/modellix-plugin
 ```
 
-Update: reinstall from the same ClawHub/git/path source (or `git pull` if you linked a local checkout). `openclaw plugins update` only refreshes npm-tracked installs.
+Update npm installs with `openclaw plugins update npm:@modellix/modellix-plugin`. Reinstall from the same ClawHub/git/path source for other installs (or `git pull` if you linked a local checkout).
 
 #### Pi (package)
 
@@ -125,6 +147,8 @@ Update: reinstall from the same ClawHub/git/path source (or `git pull` if you li
 Install:
 
 ```bash
+pi install npm:@modellix/modellix-plugin
+# or
 pi install git:github.com/Modellix/modellix-plugin
 # or
 pi install https://github.com/Modellix/modellix-plugin
@@ -136,6 +160,8 @@ Update:
 
 ```bash
 pi update --extensions
+# or update only the npm package:
+pi update npm:@modellix/modellix-plugin
 # or pin/move ref:
 pi install git:github.com/Modellix/modellix-plugin
 ```
@@ -392,7 +418,7 @@ The three paid commands (`image`, `video`, `audio`) set `disable-model-invocatio
 ├── SECURITY.md                     # Credential, network, local-state, and disclosure policy
 ├── AGENTS.md                       # Maintainer / coding-agent instructions
 ├── CHANGELOG.md
-├── package.json                    # ClawHub OpenClaw + Pi package (@modellix/modellix-plugin)
+├── package.json                    # npm + ClawHub OpenClaw + Pi package (@modellix/modellix-plugin)
 ├── openclaw.plugin.json            # OpenClaw package manifest (skills bundle)
 ├── plugin.json                     # Agent Plugins 1.0.0 portable manifest
 ├── mcp.json                        # Agent Plugins 1.0.0 Docs MCP (streamable-http)
@@ -437,6 +463,7 @@ Current version: see [`plugin.json`](plugin.json) (kept in sync with host manife
 - Docs MCP: [ways-to-use/mcp](https://docs.modellix.ai/ways-to-use/mcp) ([endpoint](https://docs.modellix.ai/mcp))
 - REST API: [ways-to-use/api](https://docs.modellix.ai/ways-to-use/api.md)
 - CLI package: [npmjs.com/package/modellix-cli](https://www.npmjs.com/package/modellix-cli)
+- Plugin package: [npmjs.com/package/@modellix/modellix-plugin](https://www.npmjs.com/package/@modellix/modellix-plugin)
 - Pricing: [get-started/pricing](https://docs.modellix.ai/get-started/pricing)
 - Support: [support@modellix.ai](mailto:support@modellix.ai)
 - Community: [Discord](https://discord.gg/N2FbcB2cZT)

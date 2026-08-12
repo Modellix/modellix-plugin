@@ -3,6 +3,18 @@
 All notable changes to this project are documented here. The format loosely follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and versions use [Semantic Versioning](https://semver.org/).
 
+## [3.9.1] - 2026-08-12
+
+### Added
+
+- Public npm distribution for the complete Agent Plugins bundle, including a cross-platform `npx @modellix/modellix-plugin install` command for Cursor local installs and portable directory materialization.
+- Direct npm install instructions for Pi and OpenClaw, plus npm publication in the main release workflow.
+- Installer regression coverage for explicit host selection, dry runs, portable bundle contents, and repository-file exclusions.
+
+### Changed
+
+- Plugin and skill metadata version is now `3.9.1`.
+
 ## [3.9.0] - 2026-08-12
 
 ### Added
