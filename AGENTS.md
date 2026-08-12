@@ -248,9 +248,8 @@ On `main` push, [`.github/workflows/skill_update.yml`](.github/workflows/skill_u
 2. `npx skills add https://github.com/Modellix/modellix-plugin --skill modellix`
 3. ClawHub skill `modellix/modellix` via inline `clawhub` CLI (`CLAWHUB_TOKEN`); accepts `published` / `pending-publication` / `submitted` / `unchanged`; retries on version collision; skips when `skills/` unchanged
 4. ClawHub bundle-plugin `@modellix/modellix-plugin` only when `package.json` version changed (or `workflow_dispatch` + `force_publish`)
-5. Public npm package `@modellix/modellix-plugin` only when `package.json` version changed. GitHub Actions authenticates with the `NPM_TOKEN` repository secret; replace that secret when the npm token expires or is rotated. An already-published identical version is treated as idempotent success. Never commit the token or copy it into workflow files or logs.
 
-Merging to `main` publishes; do not trigger publish by hand. Claude/Codex marketplaces read the repo directly.
+Merging to `main` publishes the automated targets above; Claude/Codex marketplaces read the repo directly. npm is deliberately manual-only: publish `@modellix/modellix-plugin` from a trusted local environment using the single token stored outside the repository, after tests and `npm pack --dry-run`. Never add an npm token to GitHub Actions, workflow files, commits, or logs. Replace the local token when it expires or is rotated, and skip publishing when the exact version already exists.
 
 ```bash
 npx clawhub@latest package validate .
