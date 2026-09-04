@@ -1,11 +1,11 @@
 ---
 name: modellix
-description: Integrate Modellix's unified API for AI image, video, and audio workflows. Use this skill whenever the user wants to generate or edit images, create or transform videos, synthesize speech, transcribe audio, clone a voice, do virtual try-on, or call any Modellix model API. Also trigger when the user mentions Modellix, model-as-a-service for media generation, or providers such as Qwen, Wan, Seedream, Seedance, Kling, Hailuo, MiniMax, Whisper, or CosyVoice through a unified API. Prefer modellix-cli (model run --wait, task download, doctor, model list) over hand-rolled REST polling whenever the CLI is available.
+description: Integrate Modellix's unified API for AI image, video, and audio workflows. Use this skill whenever the user wants to generate or edit images, create or transform videos, synthesize speech, transcribe audio, clone a voice, do virtual try-on, or call any Modellix model API. Also trigger when the user mentions Modellix, model-as-a-service for media generation, or providers such as Qwen, Wan, Seedream, Seedance, Kling, Hailuo, MiniMax, Whisper, or CosyVoice through a unified API, or when they ask for a Modellix model's request schema, OpenAPI contract, or required input fields. Prefer modellix-cli (model get-schema, model run --wait, task download, doctor, model list) over hand-rolled REST polling whenever the CLI is available.
 license: MIT
 compatibility: Requires network access and Node.js 18.17+; Python 3.10+ enables automatic CLI updates and bundled helpers.
 metadata:
   author: Modellix
-  version: "3.9.1"
+  version: "3.10.0"
   modellix-primary-credential: MODELLIX_API_KEY
   modellix-hermes-tags: creative,image-generation,video-generation,audio-generation,speech-to-text,modellix,cli,api
 ---
@@ -26,10 +26,10 @@ Modellix is a Model-as-a-Service (MaaS) platform for asynchronous image, video, 
 
 This plugin may expose the **Modellix Docs MCP** (`.mcp.json` → `https://docs.modellix.ai/mcp`). It is a **read-only documentation** server (`search_modellix`, docs filesystem query, optional feedback). It does **not** submit generation tasks, poll, download, or handle API keys.
 
-When looking up product/API/install docs or request-body schema:
+When looking up product/API/install docs vs request-body schema:
 
-1. Prefer Docs MCP when the host has it connected (search, then read the matching page / OpenAPI chunk).
-2. Else use `modellix-cli model describe <slug> --json` → `docs_url`, or browse https://docs.modellix.ai/llms.txt and fetch the model `.md`.
+1. For **request/response schema**, use `modellix-cli model get-schema <slug>` (JSON is the default; the endpoint is public and needs no API key). If CLI is unavailable, use Docs MCP, then `docs_url` from `model describe` or https://docs.modellix.ai/llms.txt.
+2. For **product/install narrative**, prefer Docs MCP when the host has it connected (search, then read the matching page). Else use `model describe <slug> --json` → `docs_url`, or browse `llms.txt` and fetch the model `.md`.
 3. For **CLI command syntax and flags**, prefer this skill, `references/cli-playbook.md`, the npm README, or `modellix-cli --help` — do **not** trust website CLI pages over the CLI package (docs can lag).
 
 If the Docs MCP exposes a skill resource, treat **this** `SKILL.md` as the execution policy source of truth (CLI-first, defaults, paid-submit safety).
@@ -49,12 +49,15 @@ Canonical single-task flow:
 ```bash
 python3 scripts/preflight.py --json
 modellix-cli doctor --json
+modellix-cli model get-schema <provider/model>
 modellix-cli model run \
   --model-slug <provider/model> \
   --body '<json>' \
   --wait --timeout 5m --json
 modellix-cli task download <task_id> --output-dir ./outputs --json
 ```
+
+Skip `get-schema` when the skill default plus the example below already lists the required fields, or the user supplied a complete body.
 
 `model invoke` is a compatibility alias of `model run`. New commands should use `model run`.
 
@@ -142,9 +145,9 @@ When CLI is unavailable:
 ### 2) Select model
 
 1. If the user did not specify a model: use the **Default Models** table (do not scan the catalog first).
-2. If they named a model or need discovery: `modellix-cli model list` / `modellix-cli model describe <slug>` (describe returns `docs_url`).
-3. For request body schema: prefer Docs MCP when available; else fetch the model doc (`docs_url` or the matching link from https://docs.modellix.ai/llms.txt) and read the OpenAPI path / `model_id`. Do **not** invent slugs from filenames (decimals often matter, e.g. `bytedance/seedance-2.0-mini-t2v`).
-4. If CLI is unavailable for discovery: use Docs MCP or browse `llms.txt`, then fetch the target model `.md`.
+2. If they named a model or need discovery: `modellix-cli model list` / `modellix-cli model describe <slug>` (catalog metadata; describe returns `docs_url`).
+3. For request body schema: `modellix-cli model get-schema <slug>` (JSON default; public, no API key). Call this when the user named a non-default slug, when the body needs fields beyond the documented examples, after HTTP `400`, or when reporting required fields. Skip when the skill default plus the example already lists required fields, or the user supplied a complete body.
+4. If CLI is unavailable for schema or discovery: use Docs MCP or browse `llms.txt`, then fetch the target model `.md`. Do **not** invent slugs from filenames (decimals often matter, e.g. `bytedance/seedance-2.0-mini-t2v`).
 
 ### 3) Run and wait
 
@@ -236,7 +239,7 @@ modellix-cli model run \
   --wait --timeout 10m --json
 ```
 
-**TTS** (default model) — `text` + `voice` required (verify voice against the model doc; Flash voices only):
+**TTS** (default model) — `text` + `voice` required (verify voice with `model get-schema` or the model doc; Flash voices only):
 
 ```bash
 modellix-cli model run \
@@ -291,7 +294,7 @@ Read only what the task needs:
 
 | Situation | Action |
 |------|--------|
-| HTTP/API `400` | Do not retry. Fix parameters or body. |
+| HTTP/API `400` | Do not retry. Fix parameters or body (`model get-schema` when the contract is unclear). |
 | `401` | Do not retry. Fix key (`doctor`, `auth login`). |
 | `402` | Do not retry. Insufficient balance. |
 | `404` | Do not retry. Verify `task_id` or model slug. |
@@ -304,7 +307,7 @@ Read only what the task needs:
 
 - [ ] Doctor/preflight passed or REST key ready
 - [ ] Model chosen (default table or user/catalog)
-- [ ] Body schema checked against model doc when non-trivial
+- [ ] Body schema checked via `model get-schema` when non-trivial (or model doc when CLI is unavailable)
 - [ ] Used `model run --wait` (or `task wait`) instead of hand-rolled poll loops
 - [ ] Results downloaded (`task download` or manual persist before 7-day expiry)
 - [ ] No blind retry after unknown paid submission

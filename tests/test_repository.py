@@ -168,6 +168,16 @@ class RepositoryTests(unittest.TestCase):
         self.assertNotIn("community", active_hooks)
         self.assertNotIn("git\\s+push", active_hooks)
 
+    def test_skill_documents_model_get_schema(self):
+        skill = (ROOT / "skills/modellix/SKILL.md").read_text(encoding="utf-8")
+        playbook = (ROOT / "skills/modellix/references/cli-playbook.md").read_text(
+            encoding="utf-8"
+        )
+        models_command = (ROOT / "commands/models.md").read_text(encoding="utf-8")
+        self.assertIn("model get-schema", skill)
+        self.assertIn("model get-schema", playbook)
+        self.assertIn("model get-schema", models_command)
+
     def test_task_result_schema_supports_cli_and_download(self):
         schema = read_json("skills/modellix/assets/output/task-result.schema.json")
         self.assertIn("download", schema["properties"])

@@ -5,8 +5,9 @@ Use this matrix to switch between CLI and REST without changing task semantics.
 | Capability | CLI | REST | Notes |
 | --- | --- | --- | --- |
 | Resolve/update CLI and diagnose env/auth | `scripts/preflight.py --json` → `modellix-cli doctor --json` | N/A (manual key + probe) | Update check runs before paid work; failure keeps a working installed CLI |
-| List / describe models | `model list`, `model describe <slug>` | Browse `llms.txt`, then fetch model `.md` | Prefer CLI when installed; `describe` includes `docs_url` for schema fetch |
-| Look up product / API / schema docs | Docs MCP (`search_modellix` / docs filesystem) when connected via portable `mcp.json` or host adapter `.mcp.json` | Fetch `docs_url` or `llms.txt` → model `.md` | Docs MCP is read-only documentation — not generation. CLI flags still prefer npm / `--help` over website CLI pages |
+| List / describe models | `model list`, `model describe <slug>` | Browse `llms.txt`, then fetch model `.md` | Prefer CLI when installed; `describe` is catalog metadata (`docs_url`, pricing, featured) |
+| Get request / response schema | `model get-schema <slug>` (JSON default; public, no API key) | Fetch model `.md` OpenAPI via Docs MCP / `docs_url` / `llms.txt` | Use CLI schema before building `--body` when the slug is non-default or the body is non-trivial |
+| Look up product / API / install docs | Docs MCP (`search_modellix` / docs filesystem) when connected via portable `mcp.json` or host adapter `.mcp.json` | Fetch `docs_url` or `llms.txt` → model `.md` | Docs MCP is read-only documentation — not generation. CLI flags still prefer npm / `--help` over website CLI pages |
 | Submit async task | `modellix-cli model run --model-slug <provider/model> --body/--body-file ...` | `POST /api/v1/{provider}/{model_id}/async` | `model invoke` is an alias of `model run` |
 | Wait for terminal status | `model run --wait` or `task wait <task_id>` | Poll `GET /api/v1/tasks/{task_id}` | Prefer CLI wait; do not hand-roll poll loops when CLI exists |
 | Read task once | `task get <task_id>` | `GET /api/v1/tasks/{task_id}` | Same status lifecycle: `pending` / `processing` / `success` / `failed` |

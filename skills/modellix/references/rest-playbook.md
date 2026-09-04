@@ -101,7 +101,7 @@ Non-retryable reads:
 ## Notes
 
 - Task outputs expire after 7 days — download promptly.
-- Parameter shapes vary per model; verify against the model `.md` from https://docs.modellix.ai/llms.txt (or `docs_url` from CLI `model describe` when available).
+- Parameter shapes vary per model. If CLI is installed, verify with `modellix-cli model get-schema <slug>` even when submitting over REST. If CLI is unavailable, fetch the model `.md` from https://docs.modellix.ai/llms.txt (or `docs_url` from `model describe`).
 - Default T2I slug when the user omits a model: `google/nano-banana-2-lite`.
 - Default T2V slug when the user omits a model: `bytedance/seedance-2.0-mini-t2v`.
 - Default TTS slug when the user omits a model: `alibaba/qwen-audio-3.0-tts-flash`.

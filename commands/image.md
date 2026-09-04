@@ -10,7 +10,7 @@ Follow the Modellix skill (`skills/modellix/SKILL.md`) for execution policy, cre
 
 1. If `$ARGUMENTS` is empty, ask for a prompt instead of inventing one.
 2. Pick the model:
-   - A slug named by the user wins; confirm it with `modellix-cli model describe <slug> --json` if unsure.
+   - A slug named by the user wins; confirm its request contract with `modellix-cli model get-schema <slug>` before building `--body`.
    - Text only → `google/nano-banana-2-lite` (`{"prompt": "..."}`).
    - With input images → `google/nano-banana-2-lite-edit` (`{"prompt": "...", "image": ["<url>"]}`).
 3. Submit, wait, and persist:

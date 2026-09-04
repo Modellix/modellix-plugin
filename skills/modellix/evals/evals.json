@@ -78,6 +78,19 @@
         "Saved at least one audio file locally under the run outputs directory",
         "Did not print or log the raw API key value"
       ]
+    },
+    {
+      "id": 7,
+      "prompt": "Generate an image of a cute cat with bytedance/seedream-5.0-pro. Look up that model's request schema first so the body is valid, then wait for the result and save the file locally.",
+      "expected_output": "Calls modellix-cli model get-schema bytedance/seedream-5.0-pro before model run, uses the user-named slug (not the skill T2I default), builds --body from the schema's required fields, then model run --wait and task download.",
+      "files": [],
+      "assertions": [
+        "Called modellix-cli model get-schema for bytedance/seedream-5.0-pro before submitting model run",
+        "Used model slug bytedance/seedream-5.0-pro (user-named, not google/nano-banana-2-lite)",
+        "Request body included required fields from the get-schema contract",
+        "Submitted via modellix-cli model run with wait (or model run + task wait)",
+        "Did not print or log the raw API key value"
+      ]
     }
   ]
 }

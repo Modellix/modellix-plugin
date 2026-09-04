@@ -10,8 +10,8 @@ Follow the Modellix skill (`skills/modellix/SKILL.md`) for execution policy, cre
 
 1. If `$ARGUMENTS` is empty or the intended audio workflow is ambiguous, ask whether the user wants text-to-speech, speech-to-text, or speech-to-speech. Never invent text, a voice, or an input URL.
 2. Pick the model:
-   - A slug named by the user wins; confirm its schema with `modellix-cli model describe <slug> --json`.
-   - Text-to-speech → `alibaba/qwen-audio-3.0-tts-flash`; requires `text` and a Flash-compatible `voice` verified against the live model doc.
+   - A slug named by the user wins; confirm its request contract with `modellix-cli model get-schema <slug>` before building `--body`.
+   - Text-to-speech → `alibaba/qwen-audio-3.0-tts-flash`; requires `text` and a Flash-compatible `voice` verified with `model get-schema` (or the live model doc if CLI is unavailable).
    - Speech-to-text → `openai/whisper-1`; requires one public audio `url`.
    - Speech-to-speech / voice clone → `alibaba/cosyvoice-clone`; requires the target CosyVoice `model`, reference audio `url`, and synthesis `text`.
 3. Submit, wait, and persist:

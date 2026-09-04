@@ -10,7 +10,7 @@ Follow the Modellix skill (`skills/modellix/SKILL.md`) for execution policy, cre
 
 1. If `$ARGUMENTS` is empty, ask for a prompt instead of inventing one.
 2. Pick the model:
-   - A slug named by the user wins; confirm it with `modellix-cli model describe <slug> --json` if unsure.
+   - A slug named by the user wins; confirm its request contract with `modellix-cli model get-schema <slug>` before building `--body`.
    - Text only → `bytedance/seedance-2.0-mini-t2v` (`{"prompt": "..."}`).
    - With an input image → `bytedance/seedance-2.0-fast-i2v` (needs one of `first_frame_image`, `last_frame_image`, `reference_images`).
    - With a source video → `bytedance/seedance-2.0-fast-v2v` (`{"video_urls": ["<url>"]}`).

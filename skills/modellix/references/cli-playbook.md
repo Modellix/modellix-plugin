@@ -82,7 +82,15 @@ When the user did not specify a model, use skill defaults instead of listing fir
 
 `--model-slug` must be exact `provider/model` as returned by the catalog.
 
-For request body schema, use `model describe <slug> --json` to get `docs_url`, then fetch that model doc (OpenAPI). Do not keep or rely on a bundled model index file — live CLI catalog + docs are the source of truth.
+`model describe` is catalog metadata (pricing, `docs_url`, featured). For the request/response contract, use the public schema command (no API key):
+
+```bash
+modellix-cli model get-schema alibaba/qwen-image-3.0-pro
+modellix-cli model get-schema alibaba/qwen-image-3.0-pro --output human
+modellix-cli model get-schema alibaba/qwen-image-3.0-pro --quiet
+```
+
+JSON is the default and preserves `servers` plus the `post` OpenAPI-style contract — use it to build `--body`. Human output summarizes the inference endpoint, request body, and responses. Quiet prints only `servers[0].url`. Call `get-schema` when the user named a non-default slug, when the body needs fields beyond the skill examples, after HTTP `400`, or when reporting required fields. Skip it when the skill default plus the documented example already lists required fields, or the user supplied a complete body. If CLI is unavailable, fall back to Docs MCP or the model `.md` (`docs_url` / `llms.txt`). Do not keep a bundled model index — live CLI catalog + schema are the source of truth.
 
 ## Run a model (canonical)
 
@@ -202,7 +210,7 @@ Exit codes: `0` success, `1` operation/API failure, `2` args/safety guard, `124`
 
 | Code / case | Action |
 |---|---|
-| 400 | Fix body/params; do not retry as-is |
+| 400 | Fix body/params (`model get-schema` when the contract is unclear); do not retry as-is |
 | 401 | Fix key (`doctor`, `auth login`) |
 | 402 | Recharge balance |
 | 404 | Verify slug / task id |

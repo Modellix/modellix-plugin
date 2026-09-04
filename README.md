@@ -11,7 +11,7 @@ Official install guide: [docs.modellix.ai/ways-to-use/plugin](https://docs.model
 - CLI-first workflow: automatic latest-version preflight → `modellix-cli doctor` → `model run --wait` → `task download`
 - REST fallback when the CLI is unavailable
 - Default models when the user does not specify one
-- Model discovery via `modellix-cli model list` / `model describe`, plus live docs at [llms.txt](https://docs.modellix.ai/llms.txt)
+- Model discovery via `modellix-cli model list` / `model describe` / `model get-schema`, plus live docs at [llms.txt](https://docs.modellix.ai/llms.txt)
 - Optional **Docs MCP** (`mcp.json`, plus host adapter `.mcp.json` → [docs.modellix.ai/mcp](https://docs.modellix.ai/mcp)) for searching and reading official documentation — not for running generation tasks
 - Slash **commands** under `commands/`: `/modellix:image`, `/modellix:video`, `/modellix:audio`, `/modellix:doctor`, `/modellix:models`, `/modellix:tasks`, `/modellix:download`
 - Persistent host **rules** under `rules/` (`.mdc`): CLI-first defaults, paid-submit safety, credential/docs guardrails
@@ -351,9 +351,10 @@ To discover or inspect other models:
 ```bash
 modellix-cli model list --type text-to-image --output slugs
 modellix-cli model describe <provider/model> --json
+modellix-cli model get-schema <provider/model>
 ```
 
-Request-body schemas come from each model’s docs (prefer the plugin Docs MCP when connected; otherwise `docs_url` from `model describe`, or links in [llms.txt](https://docs.modellix.ai/llms.txt)).
+Request-body schemas come from `modellix-cli model get-schema <slug>` (JSON default; public, no API key). If CLI is unavailable, prefer the plugin Docs MCP when connected; otherwise `docs_url` from `model describe`, or links in [llms.txt](https://docs.modellix.ai/llms.txt).
 
 ## Execution guidance
 

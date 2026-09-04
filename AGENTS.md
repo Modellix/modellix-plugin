@@ -55,7 +55,7 @@ Do not invent CLI flags, model slugs, or install paths from memory:
 
 1. **CLI:** [npm `modellix-cli`](https://www.npmjs.com/package/modellix-cli) + local `modellix-cli --help`
 2. **REST:** https://docs.modellix.ai/ways-to-use/api.md
-3. **Models:** https://docs.modellix.ai/llms.txt → model `.md` / `modellix-cli model describe <slug> --json`
+3. **Models:** `modellix-cli model get-schema <slug>` for request/response schema; `modellix-cli model describe <slug> --json` / https://docs.modellix.ai/llms.txt for catalog metadata and narrative docs
 4. **Docs search (optional host MCP):** https://docs.modellix.ai/mcp via portable [`mcp.json`](mcp.json) and host adapter [`.mcp.json`](.mcp.json) — documentation only; not generation
 5. **Plugin format:** https://agent-plugins.org/specification and the official `schemas/1.0.0/*.schema.json`
 6. **Published install guide:** https://docs.modellix.ai/ways-to-use/plugin.md (flag drift vs README when install/defaults change)
@@ -66,7 +66,7 @@ Do not invent CLI flags, model slugs, or install paths from memory:
 Skill workflow to teach:
 
 ```text
-doctor → (defaults or model list/describe) → model run --wait → task download
+doctor → (defaults or model list/describe) → model get-schema → model run --wait → task download
 ```
 
 `model invoke` is only a compatibility alias of `model run`.
@@ -111,7 +111,7 @@ Seven markdown prompts in `commands/`; the filename is the command name, hosts n
 | `video.md` | yes | T2V / I2V / V2V routed by input type |
 | `audio.md` | yes | TTS / STT / STS routed by the requested speech workflow |
 | `doctor.md` | no | `--version` + `doctor --json`, credential lifecycle pointer |
-| `models.md` | no | `model list` filters, `model describe`, schema lookup |
+| `models.md` | no | `model list` filters, `model describe`, `model get-schema` |
 | `tasks.md` | no | `task history` / `get` / `wait`, unknown-submit recovery |
 | `download.md` | no | `task download`, private-network fallback, expiry warning |
 
@@ -179,7 +179,7 @@ When the user does not name a model (keep `SKILL.md` + examples + evals in sync)
 | STT | `openai/whisper-1` |
 | STS | `alibaba/cosyvoice-clone` |
 
-Verify via OpenAPI / `model describe`. Changing defaults → bump version everywhere + update evals.
+Verify via `model get-schema` / OpenAPI / `model describe`. Changing defaults → bump version everywhere + update evals.
 
 ## Update checklist
 
@@ -187,7 +187,7 @@ Verify via OpenAPI / `model describe`. Changing defaults → bump version everyw
 
 **Defaults/routing changed:** `SKILL.md` → examples/README/evals → bump all versions (patch docs, minor workflow, major breaking).
 
-**REST/schema:** Prefer Docs MCP when connected, else live `llms.txt` / `docs_url`; touch `rest-playbook.md` only for shared REST semantics.
+**REST/schema:** Prefer `model get-schema` when CLI is available; else Docs MCP / live `llms.txt` / `docs_url`. Touch `rest-playbook.md` only for shared REST semantics.
 
 **Before finish:**
 
@@ -218,8 +218,9 @@ claude --plugin-dir .
 ln -s "$PWD" ~/.cursor/plugins/local/modellix   # then Reload Window
 codex plugin marketplace add "$PWD"
 
-# CLI (needs key + balance)
+# CLI (needs key + balance for paid commands; get-schema is public)
 modellix-cli doctor --json
+modellix-cli model get-schema google/nano-banana-2-lite
 modellix-cli model run --model-slug google/nano-banana-2-lite --body '{"prompt":"smoke test"}' --wait --timeout 5m --json
 # modellix-cli task download <task_id> --output-dir ./tmp-out --json --allow-private-network
 

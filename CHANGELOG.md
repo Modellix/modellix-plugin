@@ -3,6 +3,18 @@
 All notable changes to this project are documented here. The format loosely follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and versions use [Semantic Versioning](https://semver.org/).
 
+## [3.10.0] - 2026-09-04
+
+### Added
+
+- Skill and CLI playbook coverage for `modellix-cli model get-schema`, the public request/response contract used to build `--body` before a paid submit.
+
+### Changed
+
+- Schema lookup prefers `model get-schema` over Docs MCP / `describe` → `docs_url` when the CLI is available. `model describe` remains catalog metadata.
+- `/modellix:models`, paid commands, credentials rule, README, and AGENTS.md now route schema questions to `get-schema`.
+- Plugin and skill metadata version is now `3.10.0`.
+
 ## [3.9.1] - 2026-08-12
 
 ### Added
