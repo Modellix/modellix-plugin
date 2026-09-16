@@ -10,12 +10,12 @@ Read-only: never submit a paid task from this command.
 1. Run the packaged preflight so a missing/older CLI is refreshed from public npm before doctor:
 
 ```bash
-python3 skills/modellix/scripts/preflight.py --json
+python3 skills/modellix-design/scripts/preflight.py --json
 ```
 
 Add `--profile $ARGUMENTS` when a profile was given. `MODELLIX_CLI_AUTO_UPDATE=0` pins the installed version; otherwise update failure safely retains an existing CLI or reports the REST fallback.
 
 2. Read the report: Node.js version, key source, API connectivity, key validity, balance. `doctor` never prints the key itself.
-3. If no credential resolves, follow the API key lifecycle in `skills/modellix/SKILL.md`: discover the session env `MODELLIX_API_KEY` and saved profiles first, ask the user only when nothing is available, and keep it session-only unless they ask to persist (`modellix-cli auth login`).
-4. If the CLI cannot be installed, say so and note that the REST fallback in `skills/modellix/references/rest-playbook.md` needs `MODELLIX_API_KEY`.
+3. If no credential resolves, follow the API key lifecycle in `skills/modellix-design/SKILL.md`: discover the session env `MODELLIX_API_KEY` and saved profiles first, ask the user only when nothing is available, and keep it session-only unless they ask to persist (`modellix-cli auth login`).
+4. If the CLI cannot be installed, say so and note that the REST fallback in `skills/modellix-design/references/rest-playbook.md` needs `MODELLIX_API_KEY`.
 5. Summarize what passed, what failed, and the single next action. Never echo the key.

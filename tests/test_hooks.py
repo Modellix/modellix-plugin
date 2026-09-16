@@ -33,7 +33,7 @@ def load_module(name: str, path: Path):
 HOOK_LIB = load_module("modellix_hook_lib_test", ROOT / "scripts" / "_hook_lib.py")
 INVOKE = load_module(
     "modellix_invoke_and_poll_test",
-    ROOT / "skills" / "modellix" / "scripts" / "invoke_and_poll.py",
+    ROOT / "skills" / "modellix-design" / "scripts" / "invoke_and_poll.py",
 )
 
 

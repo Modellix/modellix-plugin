@@ -6,7 +6,7 @@ disable-model-invocation: true
 
 Run an audio workflow with Modellix. Request: $ARGUMENTS
 
-Follow the Modellix skill (`skills/modellix/SKILL.md`) for execution policy, credentials, schema lookup, and error handling. This command only fixes the routing.
+Follow the Modellix skill (`skills/modellix-design/SKILL.md`) for execution policy, credentials, schema lookup, and error handling. This command only fixes the routing.
 
 1. If `$ARGUMENTS` is empty or the intended audio workflow is ambiguous, ask whether the user wants text-to-speech, speech-to-text, or speech-to-speech. Never invent text, a voice, or an input URL.
 2. Pick the model:

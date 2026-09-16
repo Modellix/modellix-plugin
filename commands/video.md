@@ -6,7 +6,7 @@ disable-model-invocation: true
 
 Generate a video with Modellix. Request: $ARGUMENTS
 
-Follow the Modellix skill (`skills/modellix/SKILL.md`) for execution policy, credentials, and error handling. This command only fixes the routing.
+Follow the Modellix skill (`skills/modellix-design/SKILL.md`) for execution policy, credentials, and error handling. This command only fixes the routing.
 
 1. If `$ARGUMENTS` is empty, ask for a prompt instead of inventing one.
 2. Pick the model:

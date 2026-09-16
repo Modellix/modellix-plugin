@@ -29,9 +29,9 @@ class RepositoryTests(unittest.TestCase):
             read_json(".claude-plugin/plugin.json")["version"],
             read_json(".codex-plugin/plugin.json")["version"],
             read_json(".claude-plugin/marketplace.json")["metadata"]["version"],
-            read_json("skills/modellix/skill.json")["version"],
+            read_json("skills/modellix-design/skill.json")["version"],
         }
-        skill_text = (ROOT / "skills/modellix/SKILL.md").read_text(encoding="utf-8")
+        skill_text = (ROOT / "skills/modellix-design/SKILL.md").read_text(encoding="utf-8")
         versions.add(
             re.search(
                 r'(?m)^  version:\s*["\']?([^"\'\s]+)["\']?$', skill_text
@@ -70,10 +70,13 @@ class RepositoryTests(unittest.TestCase):
         docs_server = mcp["mcpServers"]["modellix-docs"]
         self.assertEqual(docs_server["type"], "streamable-http")
         self.assertTrue(docs_server["url"].startswith("https://"))
-        self.assertTrue((ROOT / "skills/modellix/SKILL.md").is_file())
+        self.assertTrue((ROOT / "skills/modellix-design/SKILL.md").is_file())
+        self.assertEqual(
+            read_json("skills/modellix-design/skill.json")["name"], "modellix-design"
+        )
 
     def test_agent_skill_frontmatter_uses_standard_fields(self):
-        text = (ROOT / "skills/modellix/SKILL.md").read_text(encoding="utf-8")
+        text = (ROOT / "skills/modellix-design/SKILL.md").read_text(encoding="utf-8")
         frontmatter = text.split("---", 2)[1]
         top_level = {
             line.split(":", 1)[0]
@@ -84,6 +87,7 @@ class RepositoryTests(unittest.TestCase):
             top_level,
             {"name", "description", "license", "compatibility", "metadata"},
         )
+        self.assertRegex(frontmatter, r"(?m)^name:\s*modellix-design\s*$")
         metadata_lines = [
             line.strip()
             for line in frontmatter.splitlines()
@@ -169,8 +173,8 @@ class RepositoryTests(unittest.TestCase):
         self.assertNotIn("git\\s+push", active_hooks)
 
     def test_skill_documents_model_get_schema(self):
-        skill = (ROOT / "skills/modellix/SKILL.md").read_text(encoding="utf-8")
-        playbook = (ROOT / "skills/modellix/references/cli-playbook.md").read_text(
+        skill = (ROOT / "skills/modellix-design/SKILL.md").read_text(encoding="utf-8")
+        playbook = (ROOT / "skills/modellix-design/references/cli-playbook.md").read_text(
             encoding="utf-8"
         )
         models_command = (ROOT / "commands/models.md").read_text(encoding="utf-8")
@@ -179,7 +183,7 @@ class RepositoryTests(unittest.TestCase):
         self.assertIn("model get-schema", models_command)
 
     def test_task_result_schema_supports_cli_and_download(self):
-        schema = read_json("skills/modellix/assets/output/task-result.schema.json")
+        schema = read_json("skills/modellix-design/assets/output/task-result.schema.json")
         self.assertIn("download", schema["properties"])
         self.assertNotIn("required", schema["properties"]["raw"])
 

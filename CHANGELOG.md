@@ -3,6 +3,13 @@
 All notable changes to this project are documented here. The format loosely follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and versions use [Semantic Versioning](https://semver.org/).
 
+## [4.0.0] - 2026-09-16
+
+### Changed
+
+- **Breaking (skill identity):** renamed the Agent Skill from `modellix` to `modellix-design`. The skill tree is now [`skills/modellix-design/`](skills/modellix-design/). Skill-only installs must use `--skill modellix-design`. The ClawHub skill slug is `modellix/modellix-design`. Plugin name, slash commands (`/modellix:*`), and the Smithery registry slug (`modellix/modellix-skill`) are unchanged.
+- Plugin and skill metadata version is now `4.0.0`.
+
 ## [3.10.0] - 2026-09-04
 
 ### Added

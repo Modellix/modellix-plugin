@@ -34,10 +34,10 @@ jobs:
         run: npm test
 
       - name: Compile Python helpers
-        run: python3 -m py_compile scripts/*.py skills/modellix/scripts/*.py
+        run: python3 -m py_compile scripts/*.py skills/modellix-design/scripts/*.py
 
       - name: Clean Python build artifacts
-        run: python3 skills/modellix/scripts/clean_build_artifacts.py
+        run: python3 skills/modellix-design/scripts/clean_build_artifacts.py
 
       - name: Check package contents
         run: npm pack --dry-run
@@ -50,7 +50,7 @@ jobs:
       - name: Update Smithery skill
         env:
           SMITHERY_TOKEN: ${{ secrets[format('{0}', 'SMITHERY_TOKEN')] || '' }}
-          SKILL_GIT_URL: https://github.com/Modellix/modellix-plugin/tree/main/skills/modellix
+          SKILL_GIT_URL: https://github.com/Modellix/modellix-plugin/tree/main/skills/modellix-design
         run: |
           if [ -z "$SMITHERY_TOKEN" ]; then
             echo "SMITHERY_TOKEN is not set. Please configure it in repository secrets."
@@ -72,7 +72,7 @@ jobs:
 
       - name: Add skill via npx
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-        run: npx --yes skills add https://github.com/Modellix/modellix-plugin --skill modellix
+        run: npx --yes skills add https://github.com/Modellix/modellix-plugin --skill modellix-design
 
   # ClawHub rejects republishing an existing package version, and every skill
   # publish burns a new version number, so only publish what actually changed.
@@ -91,7 +91,7 @@ jobs:
       - id: check
         env:
           FORCE: ${{ github.event.inputs.force_publish || 'false' }}
-          SKILL_PATH: skills/modellix
+          SKILL_PATH: skills/modellix-design
         run: |
           python3 - <<'PY'
           import json, os, subprocess
@@ -126,7 +126,7 @@ jobs:
               fh.write(f"skill={str(skill_changed).lower()}\n")
           PY
 
-  # Publish skills/modellix to ClawHub (owner modellix, slug modellix).
+  # Publish skills/modellix-design to ClawHub (owner modellix, slug modellix-design).
   # Requires repository secret CLAWHUB_TOKEN. Unchanged content is skipped.
   #
   # This runs the ClawHub CLI directly instead of openclaw/clawhub's reusable
@@ -143,7 +143,7 @@ jobs:
     env:
       CLAWHUB_CLI_VERSION: 0.23.1
       CLAWHUB_REGISTRY: https://clawhub.ai
-      SKILL_PATH: skills/modellix
+      SKILL_PATH: skills/modellix-design
       SKILL_OWNER: modellix
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7

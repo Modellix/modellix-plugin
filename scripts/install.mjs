@@ -183,7 +183,7 @@ async function packageMetadata() {
   if (manifest.name !== PACKAGE_NAME || !manifest.version) {
     throw new Error("package metadata is invalid");
   }
-  for (const required of ["plugin.json", "mcp.json", "skills/modellix/SKILL.md"]) {
+  for (const required of ["plugin.json", "mcp.json", "skills/modellix-design/SKILL.md"]) {
     if (!(await exists(path.join(PLUGIN_ROOT, ...required.split("/"))))) {
       throw new Error(`package is missing required plugin content: ${required}`);
     }

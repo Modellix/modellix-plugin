@@ -4,7 +4,7 @@ alwaysApply: true
 ---
 
 - Prefer `modellix-cli` over hand-rolled REST polling when the CLI is available.
-- Before the first CLI command in a workflow, run `skills/modellix/scripts/preflight.py --json`; it resolves public npm `latest` before paid work and keeps an existing CLI on update failure. Never change CLI versions after submission starts.
+- Before the first CLI command in a workflow, run `skills/modellix-design/scripts/preflight.py --json`; it resolves public npm `latest` before paid work and keeps an existing CLI on update failure. Never change CLI versions after submission starts.
 - Canonical flow: automatic preflight/`doctor` → `model run --wait` → `task download`. Prefer `--json`.
 - Do not reinvent poll loops when CLI `--wait` / `task wait` exists. Use REST only if CLI is missing or unsuitable.
 - If the user did not name a model, use these defaults immediately (do not scan the catalog first):
@@ -16,4 +16,4 @@ alwaysApply: true
   - TTS: `alibaba/qwen-audio-3.0-tts-flash`
   - STT: `openai/whisper-1`
   - STS: `alibaba/cosyvoice-clone`
-- Full policy and examples: plugin skill `skills/modellix/SKILL.md` and `references/cli-playbook.md`.
+- Full policy and examples: plugin skill `skills/modellix-design/SKILL.md` and `references/cli-playbook.md`.

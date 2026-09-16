@@ -9,7 +9,7 @@ import unittest
 
 
 ROOT = Path(__file__).resolve().parents[1]
-MODULE_PATH = ROOT / "skills" / "modellix" / "scripts" / "cli_runtime.py"
+MODULE_PATH = ROOT / "skills" / "modellix-design" / "scripts" / "cli_runtime.py"
 SPEC = importlib.util.spec_from_file_location("modellix_cli_runtime_test", MODULE_PATH)
 CLI_RUNTIME = importlib.util.module_from_spec(SPEC)
 assert SPEC and SPEC.loader

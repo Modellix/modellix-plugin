@@ -26,7 +26,7 @@ Official install guide: [docs.modellix.ai/ways-to-use/plugin](https://docs.model
 - Python 3.10+ for automatic CLI preflight and optional hooks; direct CLI/REST use remains available when Python is unavailable
 
 ```bash
-python3 skills/modellix/scripts/preflight.py --json
+python3 skills/modellix-design/scripts/preflight.py --json
 ```
 
 Preflight checks the installed version, upgrades only to a newer exact public npm version, then runs `doctor`. Registry/install failure keeps a working installed CLI; if no CLI is usable it recommends REST when `MODELLIX_API_KEY` is available. Set `MODELLIX_CLI_AUTO_UPDATE=0` only when an environment must pin its installed CLI.
@@ -35,11 +35,11 @@ Preflight checks the installed version, upgrades only to a newer exact public np
 
 After install, use an existing authenticated CLI profile or set `MODELLIX_API_KEY` (see [Setup](#setup)).
 
-Prefer **Plugin** when the host supports Agent Plugins or marketplace plugins. Use **Skill** when you only need the Agent Skill (`skills/modellix`), or when the host has no plugin marketplace.
+Prefer **Plugin** when the host supports Agent Plugins or marketplace plugins. Use **Skill** when you only need the Agent Skill (`skills/modellix-design`), or when the host has no plugin marketplace.
 
 ### 1) Plugin
 
-Installs the repository root as a plugin (manifests + `skills/modellix/`).
+Installs the repository root as a plugin (manifests + `skills/modellix-design/`).
 
 #### npm / npx
 
@@ -142,7 +142,7 @@ Update npm installs with `openclaw plugins update npm:@modellix/modellix-plugin`
 
 #### Pi (package)
 
-[Pi](https://github.com/badlogic/pi-mono) loads this repo as a [Pi package](https://docs.pi.dev/packages) (skills only — not an Agent Plugins marketplace client). `package.json` declares `pi-package` and `pi.skills`; the repo also exposes `.pi/skills/modellix` → `skills/modellix` for local discovery.
+[Pi](https://github.com/badlogic/pi-mono) loads this repo as a [Pi package](https://docs.pi.dev/packages) (skills only — not an Agent Plugins marketplace client). `package.json` declares `pi-package` and `pi.skills`; the repo also exposes `.pi/skills/modellix-design` → `skills/modellix-design` for local discovery.
 
 Install:
 
@@ -170,15 +170,15 @@ pi install git:github.com/Modellix/modellix-plugin
 
 ### 2) Skill
 
-Installs only `skills/modellix` (Agent Skill). Useful for skills.sh, ClawHub skills, OpenCode, Pi, Hermes, Smithery, or Cursor skill-only installs.
+Installs only `skills/modellix-design` (Agent Skill). Useful for skills.sh, ClawHub skills, OpenCode, Pi, Hermes, Smithery, or Cursor skill-only installs.
 
 #### Agent Skills (skills.sh) — any host
 
 Install:
 
 ```bash
-npx skills add https://github.com/Modellix/modellix-plugin --skill modellix
-npx skills add https://github.com/Modellix/modellix-plugin --skill modellix --agent cursor   # one agent
+npx skills add https://github.com/Modellix/modellix-plugin --skill modellix-design
+npx skills add https://github.com/Modellix/modellix-plugin --skill modellix-design --agent cursor   # one agent
 ```
 
 Update:
@@ -189,40 +189,40 @@ npx skills update
 
 #### ClawHub / OpenClaw (skill)
 
-Slug `modellix` (skill registry; separate from the `@modellix/modellix-plugin` package above).
+Slug `modellix-design` (skill registry; separate from the `@modellix/modellix-plugin` package above).
 
 Install:
 
 ```bash
-clawhub install modellix
+clawhub install modellix-design
 # or
-openclaw skills install modellix
+openclaw skills install modellix-design
 ```
 
 Update:
 
 ```bash
-clawhub update modellix
+clawhub update modellix-design
 # or
 clawhub update --all
 ```
 
 #### OpenCode
 
-OpenCode’s [plugins](https://opencode.ai/docs/zh-cn/plugins/) are JS/TS event hooks — Modellix does **not** use that path. Use [Agent Skills](https://opencode.ai/docs/skills/) instead. This repo exposes `.opencode/skills/modellix` → `skills/modellix`.
+OpenCode’s [plugins](https://opencode.ai/docs/zh-cn/plugins/) are JS/TS event hooks — Modellix does **not** use that path. Use [Agent Skills](https://opencode.ai/docs/skills/) instead. This repo exposes `.opencode/skills/modellix-design` → `skills/modellix-design`.
 
 Install:
 
 ```bash
-npx skills add https://github.com/Modellix/modellix-plugin --skill modellix
+npx skills add https://github.com/Modellix/modellix-plugin --skill modellix-design
 
 # Global
 mkdir -p ~/.config/opencode/skills
-ln -sfn /path/to/modellix-plugin/skills/modellix ~/.config/opencode/skills/modellix
+ln -sfn /path/to/modellix-plugin/skills/modellix-design ~/.config/opencode/skills/modellix-design
 
 # Project-local
 mkdir -p .opencode/skills
-ln -sfn /path/to/modellix-plugin/skills/modellix .opencode/skills/modellix
+ln -sfn /path/to/modellix-plugin/skills/modellix-design .opencode/skills/modellix-design
 ```
 
 Update:
@@ -233,14 +233,14 @@ npx skills update
 git -C /path/to/modellix-plugin pull
 ```
 
-In OpenCode, load with `skill({ name: "modellix" })`.
+In OpenCode, load with `skill({ name: "modellix-design" })`.
 
 #### Cursor (skill-only)
 
 When you want the skill without installing the full Cursor plugin:
 
 ```bash
-npx skills add https://github.com/Modellix/modellix-plugin --skill modellix --agent cursor
+npx skills add https://github.com/Modellix/modellix-plugin --skill modellix-design --agent cursor
 npx skills update
 ```
 
@@ -260,12 +260,12 @@ Update: re-run the same `skill add` command (or your Smithery client’s update 
 Prefer the [Pi package](#pi-package) install above. Skill-only alternatives:
 
 ```bash
-npx skills add https://github.com/Modellix/modellix-plugin --skill modellix
+npx skills add https://github.com/Modellix/modellix-plugin --skill modellix-design
 # Pi also scans ~/.agents/skills/
 
 # or symlink the skill tree
 mkdir -p ~/.pi/agent/skills
-ln -sfn /path/to/modellix-plugin/skills/modellix ~/.pi/agent/skills/modellix
+ln -sfn /path/to/modellix-plugin/skills/modellix-design ~/.pi/agent/skills/modellix-design
 ```
 
 #### Hermes Agent
@@ -275,13 +275,13 @@ ln -sfn /path/to/modellix-plugin/skills/modellix ~/.pi/agent/skills/modellix
 Install:
 
 ```bash
-hermes skills install Modellix/modellix-plugin/skills/modellix
+hermes skills install Modellix/modellix-plugin/skills/modellix-design
 # or from skills.sh (when listed):
-# hermes skills install skills-sh/Modellix/modellix-plugin/modellix
+# hermes skills install skills-sh/Modellix/modellix-plugin/modellix-design
 
 # copy / symlink into the Hermes skills tree
 mkdir -p ~/.hermes/skills
-ln -sfn /path/to/modellix-plugin/skills/modellix ~/.hermes/skills/modellix
+ln -sfn /path/to/modellix-plugin/skills/modellix-design ~/.hermes/skills/modellix-design
 ```
 
 To reuse a shared Agent Skills directory, add under `skills` in `~/.hermes/config.yaml`:
@@ -358,7 +358,7 @@ Request-body schemas come from `modellix-cli model get-schema <slug>` (JSON defa
 
 ## Execution guidance
 
-1. Run `skills/modellix/scripts/preflight.py --json` before the first CLI command in a workflow; it refreshes to a newer npm `latest` release before any paid submit. Prefer the resolved CLI, otherwise use REST ([API guide](https://docs.modellix.ai/ways-to-use/api.md)).
+1. Run `skills/modellix-design/scripts/preflight.py --json` before the first CLI command in a workflow; it refreshes to a newer npm `latest` release before any paid submit. Prefer the resolved CLI, otherwise use REST ([API guide](https://docs.modellix.ai/ways-to-use/api.md)).
 2. Do not hand-roll `task get` polling loops when `model run --wait` or `task wait` is available.
 3. Do not blindly retry a paid `model run` after an unknown submission outcome — check `modellix-cli task history` first.
 4. `preflight.py` owns the automatic update check; `invoke_and_poll.py` pins the resolved executable for the complete submit/wait/download workflow. Update failure retains an existing CLI and never triggers a paid retry.
@@ -380,7 +380,7 @@ Hosts that support the packaged hook adapters load three lightweight guards. Hoo
 
 Config lives in [`hooks/hooks.json`](hooks/hooks.json) (legacy Open Plugins / Claude Code event names) and [`hooks/cursor-hooks.json`](hooks/cursor-hooks.json) (Cursor event names); each host manifest points at exactly one of them, so a host never runs both. Hook logic is Python 3 stdlib only, while `scripts/run_python_hook.mjs` selects the available Python 3 command across platforms. Per-session state stores command fingerprints, model slugs, and task ids—never prompts or keys—and every hook fails open. Hosts without hook support (Pi, Hermes, OpenCode, Codex) ignore this directory.
 
-Plugin-level `scripts/` holds these hook scripts; the CLI/REST helpers used by the skill live in `skills/modellix/scripts/`.
+Plugin-level `scripts/` holds these hook scripts; the CLI/REST helpers used by the skill live in `skills/modellix-design/scripts/`.
 
 ## Slash commands
 
@@ -428,8 +428,8 @@ The three paid commands (`image`, `video`, `audio`) set `disable-model-invocatio
 ├── rules/                          # Host-extension always-on guardrails (.mdc)
 ├── hooks/                          # Host adapters: hooks.json (legacy/Claude), cursor-hooks.json (Cursor)
 ├── scripts/                        # Hook logic (Python stdlib) + cross-platform Node launcher
-├── .opencode/skills/modellix       # Symlink → skills/modellix (OpenCode skill discovery)
-├── .pi/skills/modellix             # Symlink → skills/modellix (Pi local skill discovery)
+├── .opencode/skills/modellix-design       # Symlink → skills/modellix-design (OpenCode skill discovery)
+├── .pi/skills/modellix-design             # Symlink → skills/modellix-design (Pi local skill discovery)
 ├── .plugin/plugin.json             # Legacy Open Plugins host adapter
 ├── .cursor-plugin/
 │   ├── plugin.json                 # Cursor manifest (+ optional MODELLIX_API_KEY variable)
@@ -442,17 +442,17 @@ The three paid commands (`image`, `video`, `audio`) set `disable-model-invocatio
 ├── assets/logo.svg
 ├── tests/                           # Repository and paid-safety regression tests (not packaged)
 ├── skills/
-│   └── modellix/                   # Skill package (SKILL.md, scripts, references, assets, evals)
+│   └── modellix-design/            # Skill package (SKILL.md, scripts, references, assets, evals)
 └── .github/workflows/              # Publish sync (Smithery / skills add / ClawHub)
 ```
 
-`skills/modellix/` is discovered from the fixed Agent Plugins `skills/` location without a manifest path field. Pi uses `package.json#pi.skills`; Hermes installs the skill tree only (no Hermes-specific plugin manifest).
+`skills/modellix-design/` is discovered from the fixed Agent Plugins `skills/` location without a manifest path field. Pi uses `package.json#pi.skills`; Hermes installs the skill tree only (no Hermes-specific plugin manifest).
 
 ## Maintaining this plugin
 
 See [AGENTS.md](AGENTS.md) for sources of truth, update checklists, smoke tests, versioning, and PR conventions.
 
-Current version: see [`plugin.json`](plugin.json) (kept in sync with host manifests and [`skills/modellix/skill.json`](skills/modellix/skill.json)).
+Current version: see [`plugin.json`](plugin.json) (kept in sync with host manifests and [`skills/modellix-design/skill.json`](skills/modellix-design/skill.json)).
 
 ## Links
 
