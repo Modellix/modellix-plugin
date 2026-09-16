@@ -3,6 +3,23 @@
 All notable changes to this project are documented here. The format loosely follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and versions use [Semantic Versioning](https://semver.org/).
 
+## [4.1.0] - 2026-09-16
+
+### Added
+
+- Added the English `modellix-image-prompt-engineering` Agent Skill for image art
+  direction, high-density prompt writing, grid briefs, and prompt-side failure
+  diagnosis before generation.
+- Added `/modellix:prompt` for preparing a T2I or I2I brief without submitting a
+  paid task.
+
+### Changed
+
+- Vague image requests now flow through the prompt-engineering skill before
+  `modellix-design`; complete prompts can still go directly to execution.
+- Plugin and execution-skill metadata version is now `4.1.0`. The prompt-only
+  skill starts its independent version at `1.0.0`.
+
 ## [4.0.0] - 2026-09-16
 
 ### Changed

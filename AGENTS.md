@@ -4,7 +4,7 @@ Instructions for coding agents that maintain this **Modellix plugin** package. H
 
 ## Project overview
 
-This repository conforms to [Agent Plugins](https://agent-plugins.org/specification) **1.0.0**: **the git repository root is the plugin root**, root `plugin.json` is the portable manifest, `skills/modellix-design/` is the fixed Agent Skill location, and root `mcp.json` declares the read-only **Docs MCP**. Cursor, Claude Code, Codex, legacy Open Plugins, OpenClaw/ClawHub, OpenCode, Pi, and Hermes adapters add host capabilities such as rules, hooks, and seven slash commands without changing the portable core.
+This repository conforms to [Agent Plugins](https://agent-plugins.org/specification) **1.0.0**: **the git repository root is the plugin root**, root `plugin.json` is the portable manifest, immediate children under `skills/` are portable Agent Skills, and root `mcp.json` declares the read-only **Docs MCP**. Cursor, Claude Code, Codex, legacy Open Plugins, OpenClaw/ClawHub, OpenCode, Pi, and Hermes adapters add host capabilities such as rules, hooks, and eight slash commands without changing the portable core.
 
 There is no application runtime. The product is manifests + skill markdown + thin stdlib Python helpers, covered by repository regression tests.
 
@@ -18,12 +18,17 @@ modellix-plugin/                 ← plugin root (= repo root)
 ├── .codex-plugin/plugin.json
 ├── .agents/plugins/marketplace.json
 ├── assets/logo.svg
-├── skills/modellix-design/             ← Agent Plugins fixed skills/ discovery
+├── skills/modellix-design/             ← execution skill (CLI / REST / credentials)
 │   ├── SKILL.md
 │   ├── skill.json
 │   ├── references/              ← cli / rest / capability playbooks
 │   ├── scripts/                 ← CLI update/preflight + execution helpers (stdlib Python)
 │   ├── assets/
+│   └── evals/
+├── skills/modellix-image-prompt-engineering/ ← prompt-only image planning skill
+│   ├── SKILL.md
+│   ├── skill.json
+│   ├── references/              ← prompt / concepts / failure / grid playbooks
 │   └── evals/
 ├── openclaw.plugin.json         ← ClawHub bundle-plugin (skills only; no extensions)
 ├── .mcp.json                    ← Cursor/legacy Docs MCP adapter (`type: http`)
@@ -33,7 +38,9 @@ modellix-plugin/                 ← plugin root (= repo root)
 ├── scripts/                     ← plugin-level hook scripts + cross-platform Node launcher
 ├── package.json                 ← npm + ClawHub + Pi (`bin`, `pi-package`, pi.skills)
 ├── .opencode/skills/modellix-design → ../../skills/modellix-design
+├── .opencode/skills/modellix-image-prompt-engineering → ../../skills/modellix-image-prompt-engineering
 ├── .pi/skills/modellix-design → ../../skills/modellix-design
+├── .pi/skills/modellix-image-prompt-engineering → ../../skills/modellix-image-prompt-engineering
 └── .github/workflows/skill_update.yml
 ```
 
@@ -47,7 +54,7 @@ Follow https://agent-plugins.org/specification for the portable core. Rules that
 4. **Host extensions stay layered.** Agent Plugins 1.0.0 core defines skills and MCP only. This repository additionally ships `.mcp.json`, `rules/*.mdc`, `hooks/` + `scripts/`, and `commands/*.md` for hosts that support them. Never move those fields into root `plugin.json`. Do not ship repository-level `.cursor/hooks.json` or unrelated stop follow-ups: the repo root is the install artifact, so maintainer automation would affect every installer and fail marketplace security review.
 5. **Names:** `name` is lowercase alphanumerics, hyphens, periods; no `--` or `..`. Current name: `modellix`.
 6. **`${PLUGIN_ROOT}`** (Claude also accepts `${CLAUDE_PLUGIN_ROOT}`) for paths that must resolve against the plugin root. Skill-internal refs stay relative to the skill root (`scripts/…`, `references/…`).
-7. **Pi / Hermes** reuse the same `skills/modellix-design` tree (Pi via `package.json#pi` / symlink; Hermes via skill install + SKILL.md frontmatter). Do not invent Pi-/Hermes-only plugin manifest directories.
+7. **Pi / Hermes** reuse the two trees under `skills/` (Pi via `package.json#pi` / symlinks; Hermes via skill install + SKILL.md frontmatter). Do not invent Pi-/Hermes-only plugin manifest directories.
 
 ## Sources of truth
 
@@ -89,7 +96,7 @@ Python helpers: stdlib only (no pip deps for `cli_runtime.py`, `preflight.py`, o
 
 ## Layout and skill rules
 
-Progressive disclosure:
+Progressive disclosure for the execution skill:
 
 | Path | Role |
 |------|------|
@@ -99,14 +106,20 @@ Progressive disclosure:
 | `references/capability-matrix.md` | CLI ↔ REST mapping |
 | `scripts/` | CLI update/preflight + optional execution wrapper; must retain direct CLI/REST fallback |
 
-Keep a **single** skill tree under `skills/modellix-design/`. `.opencode/skills/modellix-design` and `.pi/skills/modellix-design` are symlinks only — do not duplicate. OpenCode’s JS/TS `.opencode/plugins/` system is unused here.
+Keep exactly two immediate skill trees with separate responsibilities:
+
+- `skills/modellix-image-prompt-engineering/` prepares T2I/I2I prompts and never executes, authenticates, submits, polls, or downloads.
+- `skills/modellix-design/` owns all Modellix execution policy, model schemas, credentials, paid-submit safety, waiting, and downloads.
+
+The matching `.opencode/skills/*` and `.pi/skills/*` entries are symlinks only — do not duplicate either tree. OpenCode’s JS/TS `.opencode/plugins/` system is unused here.
 
 ## Commands
 
-Seven markdown prompts in `commands/`; the filename is the command name, hosts namespace it as `/modellix:<file>`.
+Eight markdown prompts in `commands/`; the filename is the command name, hosts namespace it as `/modellix:<file>`.
 
 | File | Paid | Role |
 |------|------|------|
+| `prompt.md` | no | prepare an image prompt/brief without submitting |
 | `image.md` | yes | T2I, or I2I when the request carries input images |
 | `video.md` | yes | T2V / I2V / V2V routed by input type |
 | `audio.md` | yes | TTS / STT / STS routed by the requested speech workflow |
@@ -117,7 +130,7 @@ Seven markdown prompts in `commands/`; the filename is the command name, hosts n
 
 Invariants when editing commands:
 
-- **Thin prompts, not policy.** A command routes arguments to an existing CLI flow and points at `skills/modellix-design/SKILL.md`. Do not restate the credential lifecycle, retry table, or REST fallback — that duplication goes stale.
+- **Thin prompts, not policy.** A command routes arguments to one skill: `prompt.md` points at `skills/modellix-image-prompt-engineering/SKILL.md`; execution commands point at `skills/modellix-design/SKILL.md`. Upstream planning skills hand completed briefs to the execution skill, but the execution skill does not enumerate or depend on its callers. Do not restate the credential lifecycle, retry table, or REST fallback — that duplication goes stale.
 - **Paid commands stay user-only.** `image.md`, `video.md`, and `audio.md` set `disable-model-invocation: true` so an agent cannot spend by calling a command; agent-initiated generation goes through the skill, where the rules and hooks apply.
 - **Frontmatter is the union of hosts.** `description` (all hosts), `argument-hint` (Claude), `disable-model-invocation` (spec + Claude). Unknown keys are ignored elsewhere. Only `$ARGUMENTS` is a guaranteed placeholder — never `$1` / `$2`.
 - **Handle empty arguments.** Ask the user instead of inventing a prompt or a task id.
@@ -155,7 +168,7 @@ Invariants when editing hooks:
 
 ## Manifest rules
 
-- Keep shared metadata in sync across root `plugin.json`, the four host `plugin.json` adapters, `skills/modellix-design/skill.json`, and root `package.json` (`name`/`version`/`description`/`homepage`/…). Cursor also adds `displayName`, `publisher`, discovery metadata, explicit component paths, and an optional `MODELLIX_API_KEY` variable; `.cursor-plugin/marketplace.json` must resolve back to the repository root.
+- Keep plugin release metadata in sync across root `plugin.json`, the four host `plugin.json` adapters, `skills/modellix-design/skill.json`, and root `package.json` (`name`/`version`/`description`/`homepage`/…). `modellix-image-prompt-engineering` has an independent skill version. Cursor also adds `displayName`, `publisher`, discovery metadata, explicit component paths, and an optional `MODELLIX_API_KEY` variable; `.cursor-plugin/marketplace.json` must resolve back to the repository root.
 - Edit root `plugin.json` first, then mirror. `homepage` = https://docs.modellix.ai/ways-to-use/plugin
 - `openclaw.plugin.json`: `skills: ["./skills"]`, empty `configSchema`. Do **not** add `openclaw.extensions` or hooks there — ClawHub treats this as a content bundle.
 - Hook wiring: `.cursor-plugin` → `./hooks/cursor-hooks.json`; `.plugin` and `.claude-plugin` → `./hooks/hooks.json`; `.codex-plugin` stays without hooks.
@@ -202,7 +215,7 @@ Verify via `model get-schema` / OpenAPI / `model describe`. Changing defaults �
 
 ```bash
 # Manifests
-python3 -c "import json,glob; [json.load(open(f)) for f in glob.glob('.*-plugin/*.json') + glob.glob('hooks/*.json') + ['plugin.json', 'mcp.json', '.plugin/plugin.json', '.agents/plugins/marketplace.json', 'openclaw.plugin.json', 'package.json', 'skills/modellix-design/skill.json', '.mcp.json']]"
+python3 -c "import json,glob; [json.load(open(f)) for f in glob.glob('.*-plugin/*.json') + glob.glob('hooks/*.json') + ['plugin.json', 'mcp.json', '.plugin/plugin.json', '.agents/plugins/marketplace.json', 'openclaw.plugin.json', 'package.json', 'skills/modellix-design/skill.json', 'skills/modellix-image-prompt-engineering/skill.json', '.mcp.json']]"
 
 # Commands (frontmatter present + default slugs consistent)
 python3 -c "import pathlib,sys; [sys.exit(f'bad frontmatter: {p}') for p in sorted(pathlib.Path('commands').glob('*.md')) if not (p.read_text().startswith('---') and 'description:' in p.read_text().split('---')[1])]"
@@ -230,7 +243,7 @@ python3 skills/modellix-design/scripts/preflight.py --json
 node scripts/install.mjs install --host cursor --dry-run
 ```
 
-`skills/modellix-design/evals/evals.json` is the regression reference; keep run artifacts out of the repo.
+Each skill keeps its regression reference under `skills/<name>/evals/evals.json`; keep run artifacts out of the repo.
 
 ## Code style and security
 
@@ -247,7 +260,7 @@ On `main` push, [`.github/workflows/skill_update.yml`](.github/workflows/skill_u
 
 1. Smithery skill `modellix/modellix-skill` → git URL `skills/modellix-design/` (`SMITHERY_TOKEN`; slug kept for existing installs)
 2. `npx skills add https://github.com/Modellix/modellix-plugin --skill modellix-design`
-3. ClawHub skill `modellix/modellix-design` via inline `clawhub` CLI (`CLAWHUB_TOKEN`); accepts `published` / `pending-publication` / `submitted` / `unchanged`; retries on version collision; skips when `skills/` unchanged
+3. ClawHub skill `modellix/modellix-design` via inline `clawhub` CLI (`CLAWHUB_TOKEN`); accepts `published` / `pending-publication` / `submitted` / `unchanged`; retries on version collision; skips when `skills/modellix-design/` is unchanged
 4. ClawHub bundle-plugin `@modellix/modellix-plugin` only when `package.json` version changed (or `workflow_dispatch` + `force_publish`)
 
 Merging to `main` publishes the automated targets above; Claude/Codex marketplaces read the repo directly. npm is deliberately manual-only: publish `@modellix/modellix-plugin` from a trusted local environment using the single token stored outside the repository, after tests and `npm pack --dry-run`. Never add an npm token to GitHub Actions, workflow files, commits, or logs. Replace the local token when it expires or is rotated, and skip publishing when the exact version already exists.
@@ -270,7 +283,7 @@ Bump versions when behavior or packaged content changes.
 - Trust npm CLI / `--help` over website CLI docs.
 - Filename ≠ model slug (`seedance-2-0-…md` vs `bytedance/seedance-2.0-…`).
 - Do not auto-retry ambiguous paid `model run` outcomes.
-- Skill-only path is `skills/modellix-design`, not the repo root.
+- Skill-only execution path is `skills/modellix-design`; prompt-only image planning is `skills/modellix-image-prompt-engineering`; neither uses the repo root as a skill path.
 - The ClawHub bundle-plugin and npm package share `@modellix/modellix-plugin` as a name but are separate registries; always use an explicit `clawhub:` or `npm:` source with OpenClaw.
 - Plain `npm install` materializes files but does not register every host. Only document direct npm consumption where the host supports it (currently Pi and OpenClaw); use `npx ... install --host cursor` for Cursor local installation.
 - Version must match across root Agent Plugins manifest + host manifests + `skill.json` + `package.json` (+ Claude marketplace `metadata.version`).
@@ -282,6 +295,7 @@ Bump versions when behavior or packaged content changes.
 | Plugin metadata / logo | root `plugin.json` → host manifests; Cursor-only listing fields in `.cursor-plugin/` |
 | Docs MCP endpoint | root `mcp.json` (`streamable-http`) + `.mcp.json` host adapter (`http`); keep URL in sync |
 | Slash commands | `commands/*.md` (thin prompts; keep default slugs in sync with `SKILL.md`) |
+| Image prompt engineering | `skills/modellix-image-prompt-engineering/SKILL.md` + its `references/*`; keep execution out |
 | Always-on guardrails | `rules/*.mdc` (keep in sync with skill defaults / paid-submit / credential policy) |
 | Hook behavior | `scripts/*.py`, `scripts/run_python_hook.mjs`, and both `hooks/*.json` (keep the two configs equivalent) |
 | Marketplace | `.cursor-plugin/`, `.agents/plugins/marketplace.json`, `.claude-plugin/marketplace.json` |

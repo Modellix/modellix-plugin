@@ -1,0 +1,5 @@
+{
+  "name": "modellix-image-prompt-engineering",
+  "version": "1.0.0",
+  "description": "Engineer execution-ready prompts and visual briefs for AI image generation and editing before handing work to modellix-design."
+}

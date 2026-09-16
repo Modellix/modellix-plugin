@@ -9,11 +9,12 @@ Official install guide: [docs.modellix.ai/ways-to-use/plugin](https://docs.model
 ## What this plugin provides
 
 - CLI-first workflow: automatic latest-version preflight → `modellix-cli doctor` → `model run --wait` → `task download`
+- Image prompt engineering for covers, posters, infographics, mockups, edits, and coherent asset sets before execution
 - REST fallback when the CLI is unavailable
 - Default models when the user does not specify one
 - Model discovery via `modellix-cli model list` / `model describe` / `model get-schema`, plus live docs at [llms.txt](https://docs.modellix.ai/llms.txt)
 - Optional **Docs MCP** (`mcp.json`, plus host adapter `.mcp.json` → [docs.modellix.ai/mcp](https://docs.modellix.ai/mcp)) for searching and reading official documentation — not for running generation tasks
-- Slash **commands** under `commands/`: `/modellix:image`, `/modellix:video`, `/modellix:audio`, `/modellix:doctor`, `/modellix:models`, `/modellix:tasks`, `/modellix:download`
+- Slash **commands** under `commands/`: `/modellix:prompt`, `/modellix:image`, `/modellix:video`, `/modellix:audio`, `/modellix:doctor`, `/modellix:models`, `/modellix:tasks`, `/modellix:download`
 - Persistent host **rules** under `rules/` (`.mdc`): CLI-first defaults, paid-submit safety, credential/docs guardrails
 - Optional **hooks** under `hooks/`: confirm before a repeated paid submit or an unbounded `model batch`, and remind the agent to download results before they expire
 - Retry and error guidance aligned with CLI exit codes and paid-submit safety
@@ -21,7 +22,9 @@ Official install guide: [docs.modellix.ai/ways-to-use/plugin](https://docs.model
 
 ## Requirements
 
-- A Modellix API key from the [Console](https://modellix.ai/console/api-key)
+- Prompt preparation needs no credential. Generation and authenticated API/CLI
+  operations need a Modellix API key from the
+  [Console](https://modellix.ai/console/api-key) or a saved CLI profile.
 - [modellix-cli](https://www.npmjs.com/package/modellix-cli) requires Node.js 18.17+; the plugin preflight installs or refreshes it automatically from the public npm `latest` tag
 - Python 3.10+ for automatic CLI preflight and optional hooks; direct CLI/REST use remains available when Python is unavailable
 
@@ -35,11 +38,14 @@ Preflight checks the installed version, upgrades only to a newer exact public np
 
 After install, use an existing authenticated CLI profile or set `MODELLIX_API_KEY` (see [Setup](#setup)).
 
-Prefer **Plugin** when the host supports Agent Plugins or marketplace plugins. Use **Skill** when you only need the Agent Skill (`skills/modellix-design`), or when the host has no plugin marketplace.
+Prefer **Plugin** when the host supports Agent Plugins or marketplace plugins. Use
+**Skill** when you only need execution (`skills/modellix-design`) or image prompt
+engineering (`skills/modellix-image-prompt-engineering`), or when the host has no
+plugin marketplace.
 
 ### 1) Plugin
 
-Installs the repository root as a plugin (manifests + `skills/modellix-design/`).
+Installs the repository root as a plugin, including both skills under `skills/`.
 
 #### npm / npx
 
@@ -142,7 +148,7 @@ Update npm installs with `openclaw plugins update npm:@modellix/modellix-plugin`
 
 #### Pi (package)
 
-[Pi](https://github.com/badlogic/pi-mono) loads this repo as a [Pi package](https://docs.pi.dev/packages) (skills only — not an Agent Plugins marketplace client). `package.json` declares `pi-package` and `pi.skills`; the repo also exposes `.pi/skills/modellix-design` → `skills/modellix-design` for local discovery.
+[Pi](https://github.com/badlogic/pi-mono) loads this repo as a [Pi package](https://docs.pi.dev/packages) (skills only — not an Agent Plugins marketplace client). `package.json` declares `pi-package` and `pi.skills`; the repo also exposes matching `.pi/skills/*` symlinks for both skills.
 
 Install:
 
@@ -170,7 +176,10 @@ pi install git:github.com/Modellix/modellix-plugin
 
 ### 2) Skill
 
-Installs only `skills/modellix-design` (Agent Skill). Useful for skills.sh, ClawHub skills, OpenCode, Pi, Hermes, Smithery, or Cursor skill-only installs.
+Install either Agent Skill independently. `modellix-design` executes image, video,
+and audio workflows. `modellix-image-prompt-engineering` prepares image prompts
+and hands generation back to `modellix-design`. Useful for skills.sh, ClawHub
+skills, OpenCode, Pi, Hermes, Smithery, or Cursor skill-only installs.
 
 #### Agent Skills (skills.sh) — any host
 
@@ -178,6 +187,7 @@ Install:
 
 ```bash
 npx skills add https://github.com/Modellix/modellix-plugin --skill modellix-design
+npx skills add https://github.com/Modellix/modellix-plugin --skill modellix-image-prompt-engineering
 npx skills add https://github.com/Modellix/modellix-plugin --skill modellix-design --agent cursor   # one agent
 ```
 
@@ -189,7 +199,9 @@ npx skills update
 
 #### ClawHub / OpenClaw (skill)
 
-Slug `modellix-design` (skill registry; separate from the `@modellix/modellix-plugin` package above).
+Only `modellix-design` is currently published as a standalone ClawHub skill (skill
+registry; separate from the `@modellix/modellix-plugin` package above). Install
+the prompt skill from the GitHub repository or as part of the complete plugin.
 
 Install:
 
@@ -209,20 +221,23 @@ clawhub update --all
 
 #### OpenCode
 
-OpenCode’s [plugins](https://opencode.ai/docs/zh-cn/plugins/) are JS/TS event hooks — Modellix does **not** use that path. Use [Agent Skills](https://opencode.ai/docs/skills/) instead. This repo exposes `.opencode/skills/modellix-design` → `skills/modellix-design`.
+OpenCode’s [plugins](https://opencode.ai/docs/zh-cn/plugins/) are JS/TS event hooks — Modellix does **not** use that path. Use [Agent Skills](https://opencode.ai/docs/skills/) instead. This repo exposes `.opencode/skills/modellix-design` and `.opencode/skills/modellix-image-prompt-engineering` as symlinks to the canonical skill trees.
 
 Install:
 
 ```bash
 npx skills add https://github.com/Modellix/modellix-plugin --skill modellix-design
+npx skills add https://github.com/Modellix/modellix-plugin --skill modellix-image-prompt-engineering
 
 # Global
 mkdir -p ~/.config/opencode/skills
 ln -sfn /path/to/modellix-plugin/skills/modellix-design ~/.config/opencode/skills/modellix-design
+ln -sfn /path/to/modellix-plugin/skills/modellix-image-prompt-engineering ~/.config/opencode/skills/modellix-image-prompt-engineering
 
 # Project-local
 mkdir -p .opencode/skills
 ln -sfn /path/to/modellix-plugin/skills/modellix-design .opencode/skills/modellix-design
+ln -sfn /path/to/modellix-plugin/skills/modellix-image-prompt-engineering .opencode/skills/modellix-image-prompt-engineering
 ```
 
 Update:
@@ -233,7 +248,8 @@ npx skills update
 git -C /path/to/modellix-plugin pull
 ```
 
-In OpenCode, load with `skill({ name: "modellix-design" })`.
+In OpenCode, load with `skill({ name: "modellix-design" })` or
+`skill({ name: "modellix-image-prompt-engineering" })`.
 
 #### Cursor (skill-only)
 
@@ -241,6 +257,7 @@ When you want the skill without installing the full Cursor plugin:
 
 ```bash
 npx skills add https://github.com/Modellix/modellix-plugin --skill modellix-design --agent cursor
+npx skills add https://github.com/Modellix/modellix-plugin --skill modellix-image-prompt-engineering --agent cursor
 npx skills update
 ```
 
@@ -261,11 +278,13 @@ Prefer the [Pi package](#pi-package) install above. Skill-only alternatives:
 
 ```bash
 npx skills add https://github.com/Modellix/modellix-plugin --skill modellix-design
+npx skills add https://github.com/Modellix/modellix-plugin --skill modellix-image-prompt-engineering
 # Pi also scans ~/.agents/skills/
 
 # or symlink the skill tree
 mkdir -p ~/.pi/agent/skills
 ln -sfn /path/to/modellix-plugin/skills/modellix-design ~/.pi/agent/skills/modellix-design
+ln -sfn /path/to/modellix-plugin/skills/modellix-image-prompt-engineering ~/.pi/agent/skills/modellix-image-prompt-engineering
 ```
 
 #### Hermes Agent
@@ -276,12 +295,14 @@ Install:
 
 ```bash
 hermes skills install Modellix/modellix-plugin/skills/modellix-design
+hermes skills install Modellix/modellix-plugin/skills/modellix-image-prompt-engineering
 # or from skills.sh (when listed):
 # hermes skills install skills-sh/Modellix/modellix-plugin/modellix-design
 
 # copy / symlink into the Hermes skills tree
 mkdir -p ~/.hermes/skills
 ln -sfn /path/to/modellix-plugin/skills/modellix-design ~/.hermes/skills/modellix-design
+ln -sfn /path/to/modellix-plugin/skills/modellix-image-prompt-engineering ~/.hermes/skills/modellix-image-prompt-engineering
 ```
 
 To reuse a shared Agent Skills directory, add under `skills` in `~/.hermes/config.yaml`:
@@ -313,6 +334,18 @@ export MODELLIX_API_KEY="your_api_key"
 - Never commit API keys or print them in logs.
 
 Key resolution order in the CLI: `--api-key` → `MODELLIX_API_KEY` → selected saved profile.
+
+## Image prompt workflow
+
+For a vague image request, first use
+`skills/modellix-image-prompt-engineering/`. It turns the idea into a T2I or I2I
+brief with a final prompt, on-image text language, aspect/size, and reference-image
+roles. It does not authenticate or submit work.
+
+If the user asked only for a prompt, stop there. If they asked for a generated or
+edited image, pass the brief to `skills/modellix-design/`, which owns model schema
+checks, credentials, paid-submit safety, waiting, and download. A complete prompt
+that the user explicitly marked final can go directly to `modellix-design`.
 
 ## Quick start (CLI)
 
@@ -384,10 +417,11 @@ Plugin-level `scripts/` holds these hook scripts; the CLI/REST helpers used by t
 
 ## Slash commands
 
-Hosts that support the packaged command adapters expose seven shortcuts. Commands are outside the Agent Plugins 1.0.0 core; each routes to the same `modellix-cli` workflow the skill teaches and adds no separate runtime:
+Hosts that support the packaged command adapters expose eight shortcuts. Commands are outside the Agent Plugins 1.0.0 core; each routes to one of the packaged skills and adds no separate runtime:
 
 | Command | Use it for |
 | --- | --- |
+| `/modellix:prompt [image idea or existing prompt]` | Prepare an image prompt and brief without submitting |
 | `/modellix:image [prompt] [image url]` | Text-to-image, or image editing when input images are given |
 | `/modellix:video [prompt] [image or video url]` | Text-to-video, image-to-video, or video-to-video |
 | `/modellix:audio [tts\|stt\|sts] [text or audio url]` | Text-to-speech, speech-to-text, or speech-to-speech |
@@ -396,7 +430,10 @@ Hosts that support the packaged command adapters expose seven shortcuts. Command
 | `/modellix:tasks [task id]` | Task status, plus recovery after a timeout or unknown submission |
 | `/modellix:download [task id] [dir]` | Fetch results into `./outputs` before the ~7-day expiry |
 
-The three paid commands (`image`, `video`, `audio`) set `disable-model-invocation: true`, so only a human can trigger them; the read-only four can also be called by the agent. Hosts without command support (Pi, Hermes, OpenCode, the ClawHub skill bundle) ignore [`commands/`](commands/) and keep using the skill.
+The three paid commands (`image`, `video`, `audio`) and the user-facing prompt
+command set `disable-model-invocation: true`. Hosts without command support (Pi,
+Hermes, OpenCode, the ClawHub skill bundle) ignore [`commands/`](commands/) and
+keep using the skills.
 
 ## Supported task types
 
@@ -424,12 +461,14 @@ The three paid commands (`image`, `video`, `audio`) set `disable-model-invocatio
 ├── plugin.json                     # Agent Plugins 1.0.0 portable manifest
 ├── mcp.json                        # Agent Plugins 1.0.0 Docs MCP (streamable-http)
 ├── .mcp.json                       # Cursor/legacy host Docs MCP adapter
-├── commands/                       # Slash commands (:image, :video, :audio, :doctor, :models, :tasks, :download)
+├── commands/                       # Slash commands (:prompt, :image, :video, :audio, :doctor, :models, :tasks, :download)
 ├── rules/                          # Host-extension always-on guardrails (.mdc)
 ├── hooks/                          # Host adapters: hooks.json (legacy/Claude), cursor-hooks.json (Cursor)
 ├── scripts/                        # Hook logic (Python stdlib) + cross-platform Node launcher
 ├── .opencode/skills/modellix-design       # Symlink → skills/modellix-design (OpenCode skill discovery)
+├── .opencode/skills/modellix-image-prompt-engineering # Symlink → matching skill tree
 ├── .pi/skills/modellix-design             # Symlink → skills/modellix-design (Pi local skill discovery)
+├── .pi/skills/modellix-image-prompt-engineering       # Symlink → matching skill tree
 ├── .plugin/plugin.json             # Legacy Open Plugins host adapter
 ├── .cursor-plugin/
 │   ├── plugin.json                 # Cursor manifest (+ optional MODELLIX_API_KEY variable)
@@ -442,17 +481,24 @@ The three paid commands (`image`, `video`, `audio`) set `disable-model-invocatio
 ├── assets/logo.svg
 ├── tests/                           # Repository and paid-safety regression tests (not packaged)
 ├── skills/
-│   └── modellix-design/            # Skill package (SKILL.md, scripts, references, assets, evals)
+│   ├── modellix-design/            # Execution skill (CLI/REST, scripts, references, evals)
+│   └── modellix-image-prompt-engineering/ # Prompt-only image planning skill
 └── .github/workflows/              # Publish sync (Smithery / skills add / ClawHub)
 ```
 
-`skills/modellix-design/` is discovered from the fixed Agent Plugins `skills/` location without a manifest path field. Pi uses `package.json#pi.skills`; Hermes installs the skill tree only (no Hermes-specific plugin manifest).
+Both immediate skill directories are discovered from the fixed Agent Plugins
+`skills/` location without manifest path fields. Pi uses
+`package.json#pi.skills`; Hermes installs skill trees directly (no
+Hermes-specific plugin manifest).
 
 ## Maintaining this plugin
 
 See [AGENTS.md](AGENTS.md) for sources of truth, update checklists, smoke tests, versioning, and PR conventions.
 
-Current version: see [`plugin.json`](plugin.json) (kept in sync with host manifests and [`skills/modellix-design/skill.json`](skills/modellix-design/skill.json)).
+Current plugin version: see [`plugin.json`](plugin.json) (kept in sync with host
+manifests and [`skills/modellix-design/skill.json`](skills/modellix-design/skill.json)).
+The prompt-only skill has its own version in
+[`skills/modellix-image-prompt-engineering/skill.json`](skills/modellix-image-prompt-engineering/skill.json).
 
 ## Links
 

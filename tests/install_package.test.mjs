@@ -46,6 +46,10 @@ test("portable install materializes the complete plugin without repository files
     assert.equal(portableManifest.name, "modellix");
     assert.equal(packageManifest.name, "@modellix/modellix-plugin");
     await readFile(path.join(target, "skills", "modellix-design", "SKILL.md"), "utf8");
+    await readFile(
+      path.join(target, "skills", "modellix-image-prompt-engineering", "SKILL.md"),
+      "utf8",
+    );
     await assert.rejects(readFile(path.join(target, "tests", "test_repository.py")));
     await assert.rejects(readFile(path.join(target, ".github", "workflows", "skill_update.yml")));
     await assert.rejects(readFile(path.join(target, "AGENTS.md")));

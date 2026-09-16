@@ -74,27 +74,67 @@ class RepositoryTests(unittest.TestCase):
         self.assertEqual(
             read_json("skills/modellix-design/skill.json")["name"], "modellix-design"
         )
+        self.assertTrue(
+            (ROOT / "skills/modellix-image-prompt-engineering/SKILL.md").is_file()
+        )
+        self.assertEqual(
+            read_json("skills/modellix-image-prompt-engineering/skill.json")["name"],
+            "modellix-image-prompt-engineering",
+        )
 
     def test_agent_skill_frontmatter_uses_standard_fields(self):
-        text = (ROOT / "skills/modellix-design/SKILL.md").read_text(encoding="utf-8")
-        frontmatter = text.split("---", 2)[1]
-        top_level = {
-            line.split(":", 1)[0]
-            for line in frontmatter.splitlines()
-            if line and not line[0].isspace()
-        }
+        skill_dirs = sorted(path.parent for path in (ROOT / "skills").glob("*/SKILL.md"))
         self.assertEqual(
-            top_level,
-            {"name", "description", "license", "compatibility", "metadata"},
+            {path.name for path in skill_dirs},
+            {"modellix-design", "modellix-image-prompt-engineering"},
         )
-        self.assertRegex(frontmatter, r"(?m)^name:\s*modellix-design\s*$")
-        metadata_lines = [
-            line.strip()
-            for line in frontmatter.splitlines()
-            if line.startswith("  ") and not line.startswith("    ")
-        ]
-        self.assertTrue(metadata_lines)
-        self.assertTrue(all(": " in line for line in metadata_lines))
+        for skill_dir in skill_dirs:
+            text = (skill_dir / "SKILL.md").read_text(encoding="utf-8")
+            frontmatter = text.split("---", 2)[1]
+            top_level = {
+                line.split(":", 1)[0]
+                for line in frontmatter.splitlines()
+                if line and not line[0].isspace()
+            }
+            with self.subTest(skill=skill_dir.name):
+                self.assertEqual(
+                    top_level,
+                    {"name", "description", "license", "compatibility", "metadata"},
+                )
+                self.assertRegex(
+                    frontmatter, rf"(?m)^name:\s*{re.escape(skill_dir.name)}\s*$"
+                )
+                metadata_lines = [
+                    line.strip()
+                    for line in frontmatter.splitlines()
+                    if line.startswith("  ") and not line.startswith("    ")
+                ]
+                self.assertTrue(metadata_lines)
+                self.assertTrue(all(": " in line for line in metadata_lines))
+
+    def test_prompt_skill_is_prompt_only_and_credential_free(self):
+        skill_dir = ROOT / "skills/modellix-image-prompt-engineering"
+        text = (skill_dir / "SKILL.md").read_text(encoding="utf-8")
+        metadata = read_json("skills/modellix-image-prompt-engineering/skill.json")
+        self.assertNotIn("modellix-cli", text)
+        self.assertNotIn("MODELLIX_API_KEY", text)
+        self.assertTrue(
+            {"primaryCredential", "primaryEnv", "requiredEnv", "env"}.isdisjoint(metadata)
+        )
+        self.assertIn("modellix-design", text)
+        self.assertIn("google/nano-banana-2-lite", text)
+        self.assertIn("google/nano-banana-2-lite-edit", text)
+
+    def test_host_skill_symlinks_target_canonical_trees(self):
+        for host in (".opencode", ".pi"):
+            for skill_name in (
+                "modellix-design",
+                "modellix-image-prompt-engineering",
+            ):
+                path = ROOT / host / "skills" / skill_name
+                with self.subTest(host=host, skill=skill_name):
+                    self.assertTrue(path.is_symlink())
+                    self.assertEqual(path.resolve(), (ROOT / "skills" / skill_name).resolve())
 
     def test_cursor_manifest_matches_official_surface(self):
         manifest = read_json(".cursor-plugin/plugin.json")
@@ -149,14 +189,14 @@ class RepositoryTests(unittest.TestCase):
     def test_commands_have_frontmatter_and_paid_guards(self):
         command_paths = sorted((ROOT / "commands").glob("*.md"))
         self.assertEqual({p.stem for p in command_paths}, {
-            "audio", "doctor", "download", "image", "models", "tasks", "video"
+            "audio", "doctor", "download", "image", "models", "prompt", "tasks", "video"
         })
         for path in command_paths:
             text = path.read_text(encoding="utf-8")
             self.assertTrue(text.startswith("---\n"), path)
             frontmatter = text.split("---", 2)[1]
             self.assertIn("description:", frontmatter)
-            if path.stem in {"audio", "image", "video"}:
+            if path.stem in {"audio", "image", "prompt", "video"}:
                 self.assertIn("disable-model-invocation: true", frontmatter)
 
     def test_repository_does_not_ship_maintainer_agent_hooks(self):

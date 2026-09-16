@@ -1,0 +1,46 @@
+{
+  "skill_name": "modellix-image-prompt-engineering",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "帮我做一张公众号封面，主题是新模型发布，要高级感。先帮我把提示词想清楚，不要真的生成图片。",
+      "expected_output": "Turns the vague adjective into a specific Chinese T2I brief with a fitting named visual system or explicit visual grammar, medium, hierarchy, on-image text language, aspect/size status, default Modellix image slug, and a stop-after-prompt next step. It does not execute image generation.",
+      "files": [],
+      "assertions": [
+        "Classified the task as T2I",
+        "Returned the final image prompt in Chinese",
+        "Replaced the vague request for a premium look with a specific named visual system or concrete visual grammar",
+        "Included on-image text language and aspect/size status in the handoff",
+        "Suggested google/nano-banana-2-lite without browsing the model catalog",
+        "Stopped after prompt preparation and did not invoke an image-generation command"
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "Make a 4x4 set of AI-tool icons. I only need the prompt and production brief for now, not the generated image.",
+      "expected_output": "Routes to the batch-grid method and returns an English T2I prompt for sixteen specified or sensibly enumerated icons, a square 4x4 semantic grid, consistent visual grammar, no visible grid helpers, and explicit post-processing caveats. It does not claim to crop or generate files.",
+      "files": [],
+      "assertions": [
+        "Classified the task as T2I and a 4x4 grid",
+        "Specified sixteen icon subjects or requested the missing exact list",
+        "Requested consistent scale, viewpoint, visual system, and background",
+        "Prohibited visible grid lines, borders, labels, and cell numbers",
+        "Stated that cropping or transparency post-processing is a separate step",
+        "Did not invoke image generation or claim that output files were created"
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "Run this on the default image model: Dieter Rams style DJI Pocket 3 manual. The prompt is final; do not rewrite it.",
+      "expected_output": "Recognizes that the prompt is already specific and final, avoids a heavy prompt-engineering pass, preserves it verbatim or performs only a one-line readiness check, then routes execution to modellix-design.",
+      "files": [],
+      "assertions": [
+        "Did not expand or substantially rewrite the supplied final prompt",
+        "Recognized the named subject, visual system, and medium as sufficient",
+        "Classified the task as T2I",
+        "Passed execution responsibility to modellix-design",
+        "Did not duplicate credential, polling, schema, or download policy"
+      ]
+    }
+  ]
+}

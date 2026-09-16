@@ -5,7 +5,7 @@ license: MIT
 compatibility: Requires network access and Node.js 18.17+; Python 3.10+ enables automatic CLI updates and bundled helpers.
 metadata:
   author: Modellix
-  version: "4.0.0"
+  version: "4.1.0"
   modellix-primary-credential: MODELLIX_API_KEY
   modellix-hermes-tags: creative,image-generation,video-generation,audio-generation,speech-to-text,modellix,cli,api
 ---
