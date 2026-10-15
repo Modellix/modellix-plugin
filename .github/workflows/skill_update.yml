@@ -72,7 +72,7 @@ jobs:
 
       - name: Add skill via npx
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-        run: npx --yes skills add https://github.com/Modellix/modellix-plugin --skill modellix-design
+        run: npx --yes skills add https://github.com/Modellix/modellix-plugin --skill modellix-design --agent codex --yes
 
   # ClawHub rejects republishing an existing package version, and every skill
   # publish burns a new version number, so only publish what actually changed.
