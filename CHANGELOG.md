@@ -3,6 +3,14 @@
 All notable changes to this project are documented here. The format loosely follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and versions use [Semantic Versioning](https://semver.org/).
 
+## [4.2.1] - 2026-10-15
+
+### Fixed
+
+- Reject authenticated REST redirects so credentials never reach a different origin.
+- Preserve HTTP failure codes without reading or echoing untrusted error bodies.
+- Treat invalid paid-submit responses and missing task IDs as unknown outcomes, without replaying the request.
+
 ## [4.2.0] - 2026-10-15
 
 ### Changed

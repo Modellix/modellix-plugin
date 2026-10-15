@@ -79,6 +79,7 @@ Create-task `POST`:
 
 - Submit once. Do not automatically repeat a paid POST, including after `429`, `500`, `503`, a timeout, or a network error.
 - When the response is ambiguous, inspect `modellix-cli task history`, the Modellix console, or any returned task id before another paid submission.
+- The helper rejects redirects on authenticated requests. Invalid JSON, an invalid success envelope, or a missing usable task ID after submission is an unknown outcome. HTTP error bodies are not consumed or echoed.
 
 Safe task-status `GET` reads may retry:
 

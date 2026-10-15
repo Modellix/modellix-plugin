@@ -16,6 +16,7 @@ from __future__ import annotations
 import argparse
 import json
 import os
+import re
 import subprocess
 import sys
 import time
@@ -28,6 +29,16 @@ from cli_runtime import CliRuntime, resolve_cli_runtime
 BASE_URL = "https://api.modellix.ai/api/v1"
 RETRYABLE_READ_STATUS = {408, 429, 500, 502, 503, 504}
 MAX_READ_RETRIES = 3
+
+
+class NoRedirectHandler(urllib.request.HTTPRedirectHandler):
+    """Authenticated REST calls must never forward a Key to a redirect target."""
+
+    def redirect_request(self, req, fp, code, msg, headers, newurl):
+        return None
+
+
+REST_OPENER = urllib.request.build_opener(NoRedirectHandler())
 
 
 def parse_args() -> argparse.Namespace:
@@ -189,39 +200,42 @@ def http_request(
 
     req = urllib.request.Request(url=url, method=method, headers=headers, data=data)
     try:
-        with urllib.request.urlopen(req, timeout=timeout_seconds) as resp:
+        with REST_OPENER.open(req, timeout=timeout_seconds) as resp:
             raw = resp.read(16 * 1024 * 1024 + 1)
             if len(raw) > 16 * 1024 * 1024:
                 raise ValueError("REST response exceeds the 16 MiB limit.")
             text = raw.decode("utf-8")
             return json.loads(text) if text else {}
     except urllib.error.HTTPError as exc:
-        payload = exc.read().decode("utf-8")
-        try:
-            parsed = json.loads(payload)
-        except json.JSONDecodeError:
-            parsed = {"code": exc.code, "message": payload}
-        parsed.setdefault("code", exc.code)
-        return parsed
+        # Error bodies are untrusted, may be unbounded, and can echo credentials
+        # or request data. Preserve the HTTP failure without consuming that body.
+        exc.close()
+        return {"code": exc.code}
 
 
 def run_rest_submit(args: argparse.Namespace, body: Dict[str, Any], api_key: str) -> Dict[str, Any]:
     provider, model_id = parse_model_slug(args.model_slug)
     url = f"{BASE_URL}/{provider}/{model_id}/async"
+    unknown = (
+        "REST paid submission outcome is unknown; it was not retried. "
+        "Inspect task history or the console before another submit."
+    )
     try:
         result = http_request(url=url, method="POST", api_key=api_key, body=body)
-    except (urllib.error.URLError, TimeoutError, OSError) as exc:
-        raise RuntimeError(
-            "REST paid submit hit a transport error and was not retried. Its outcome may be "
-            "unknown; inspect task history or the console before another submit."
-        ) from exc
-    code = int(result.get("code", 500))
+    except (urllib.error.URLError, TimeoutError, OSError, ValueError) as exc:
+        raise RuntimeError(unknown) from exc
+    if not isinstance(result, dict) or type(result.get("code")) is not int:
+        raise RuntimeError(unknown)
+    code = result["code"]
     if code == 0:
+        data = result.get("data")
+        task_id = data.get("task_id") if isinstance(data, dict) else None
+        if not isinstance(task_id, str) or re.fullmatch(r"[A-Za-z0-9._~:+@=-]{1,512}", task_id) is None:
+            raise RuntimeError(unknown)
         return result
-    raise RuntimeError(
-        "REST submit did not succeed and was not retried because this is a paid POST. "
-        f"Inspect task history or the console before another submit: {json.dumps(result, ensure_ascii=False)}"
-    )
+    if code in {400, 401, 402, 403, 404, 405, 413, 415, 422, 429}:
+        raise RuntimeError(f"REST submit was rejected (code {code}) and was not retried. Check the model schema and account status before another submit.")
+    raise RuntimeError(unknown)
 
 
 def run_rest_poll(task_id: str, api_key: str, remaining_seconds: float = 50) -> Dict[str, Any]:
