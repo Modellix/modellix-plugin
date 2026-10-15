@@ -25,6 +25,7 @@ import urllib.request
 from typing import Any, Dict, Optional, Tuple
 
 from cli_runtime import CliRuntime, resolve_cli_runtime
+from http_deadline import DeadlineHTTPHandler, DeadlineHTTPSHandler, HttpDeadline
 
 BASE_URL = "https://api.modellix.ai/api/v1"
 RETRYABLE_READ_STATUS = {408, 429, 500, 502, 503, 504}
@@ -36,9 +37,6 @@ class NoRedirectHandler(urllib.request.HTTPRedirectHandler):
 
     def redirect_request(self, req, fp, code, msg, headers, newurl):
         return None
-
-
-REST_OPENER = urllib.request.build_opener(NoRedirectHandler())
 
 
 def parse_args() -> argparse.Namespace:
@@ -199,18 +197,20 @@ def http_request(
         data = json.dumps(body).encode("utf-8")
 
     req = urllib.request.Request(url=url, method=method, headers=headers, data=data)
-    try:
-        with REST_OPENER.open(req, timeout=timeout_seconds) as resp:
-            raw = resp.read(16 * 1024 * 1024 + 1)
-            if len(raw) > 16 * 1024 * 1024:
-                raise ValueError("REST response exceeds the 16 MiB limit.")
-            text = raw.decode("utf-8")
-            return json.loads(text) if text else {}
-    except urllib.error.HTTPError as exc:
-        # Error bodies are untrusted, may be unbounded, and can echo credentials
-        # or request data. Preserve the HTTP failure without consuming that body.
-        exc.close()
-        return {"code": exc.code}
+    with HttpDeadline(timeout_seconds) as deadline:
+        opener = urllib.request.build_opener(DeadlineHTTPHandler(deadline), DeadlineHTTPSHandler(deadline), NoRedirectHandler())
+        try:
+            with opener.open(req, timeout=deadline.remaining()) as resp:
+                raw = resp.read(16 * 1024 * 1024 + 1)
+                deadline.remaining()
+                if len(raw) > 16 * 1024 * 1024:
+                    raise ValueError("REST response exceeds the 16 MiB limit.")
+                text = raw.decode("utf-8")
+                return json.loads(text) if text else {}
+        except urllib.error.HTTPError as exc:
+            # Do not consume unbounded error bodies or echo credentials/request data.
+            exc.close()
+            return {"code": exc.code}
 
 
 def run_rest_submit(args: argparse.Namespace, body: Dict[str, Any], api_key: str) -> Dict[str, Any]:

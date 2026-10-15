@@ -48,7 +48,7 @@ class RestSubmitBoundaryTests(unittest.TestCase):
 
         body = ErrorBody(b'{"code":0,"message":"untrusted"}')
         failure = urllib.error.HTTPError("https://api.modellix.ai/api/v1/test", 503, "Unavailable", {}, body)
-        with patch.object(helper.REST_OPENER, "open", side_effect=failure):
+        with patch.object(helper.urllib.request.OpenerDirector, "open", side_effect=failure):
             result = helper.http_request("https://api.modellix.ai/api/v1/test", "POST", "test-key", {})
         self.assertEqual(result, {"code": 503})
         self.assertTrue(body.closed)

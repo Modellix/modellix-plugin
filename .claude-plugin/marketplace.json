@@ -6,7 +6,7 @@
   },
   "metadata": {
     "description": "Official Modellix plugins for AI image, video, and audio workflows",
-    "version": "4.2.1"
+    "version": "4.2.2"
   },
   "plugins": [
     {

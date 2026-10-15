@@ -3,6 +3,13 @@
 All notable changes to this project are documented here. The format loosely follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and versions use [Semantic Versioning](https://semver.org/).
 
+## [4.2.2] - 2026-10-15
+
+### Fixed
+
+- Enforce the overall REST wait budget during slow response headers and bodies, proxy CONNECT, and TLS handshakes.
+- Stop timed-out socket I/O and retain the task ID for recovery without another paid submission.
+
 ## [4.2.1] - 2026-10-15
 
 ### Fixed
