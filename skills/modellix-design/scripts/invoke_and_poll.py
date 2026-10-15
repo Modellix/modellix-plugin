@@ -3,7 +3,7 @@
 Submit a Modellix async task using CLI-first with REST fallback.
 
 CLI path uses `modellix-cli model run --wait` (no hand-rolled poll loop).
-REST path keeps submit + exponential-backoff poll.
+REST submits once and uses bounded server-side wait; only transient read failures back off.
 
 Examples:
   python scripts/invoke_and_poll.py \\
@@ -46,8 +46,8 @@ def parse_args() -> argparse.Namespace:
         default="5m",
         help="CLI wait timeout (e.g. 5m, 300s). Also used to derive REST timeout seconds.",
     )
-    parser.add_argument("--initial-wait", type=float, default=1.0)
-    parser.add_argument("--max-wait", type=float, default=10.0)
+    parser.add_argument("--initial-wait", type=float, default=1.0, help="Deprecated compatibility option; server-side wait does not use local polling intervals.")
+    parser.add_argument("--max-wait", type=float, default=10.0, help="Deprecated compatibility option; server-side wait does not use local polling intervals.")
     parser.add_argument(
         "--output-dir",
         help="If set and CLI mode succeeds, run task download into this directory",
@@ -176,7 +176,8 @@ def run_cli_download(
 
 
 def http_request(
-    url: str, method: str, api_key: str, body: Optional[Dict[str, Any]] = None
+    url: str, method: str, api_key: str, body: Optional[Dict[str, Any]] = None,
+    timeout_seconds: float = 30,
 ) -> Dict[str, Any]:
     headers = {
         "Authorization": f"Bearer {api_key}",
@@ -188,8 +189,11 @@ def http_request(
 
     req = urllib.request.Request(url=url, method=method, headers=headers, data=data)
     try:
-        with urllib.request.urlopen(req, timeout=30) as resp:
-            text = resp.read().decode("utf-8")
+        with urllib.request.urlopen(req, timeout=timeout_seconds) as resp:
+            raw = resp.read(16 * 1024 * 1024 + 1)
+            if len(raw) > 16 * 1024 * 1024:
+                raise ValueError("REST response exceeds the 16 MiB limit.")
+            text = raw.decode("utf-8")
             return json.loads(text) if text else {}
     except urllib.error.HTTPError as exc:
         payload = exc.read().decode("utf-8")
@@ -220,9 +224,48 @@ def run_rest_submit(args: argparse.Namespace, body: Dict[str, Any], api_key: str
     )
 
 
-def run_rest_poll(task_id: str, api_key: str) -> Dict[str, Any]:
-    url = f"{BASE_URL}/tasks/{task_id}"
-    return http_request(url=url, method="GET", api_key=api_key)
+def run_rest_poll(task_id: str, api_key: str, remaining_seconds: float = 50) -> Dict[str, Any]:
+    from urllib.parse import quote
+    if not task_id or any(ord(char) < 32 for char in task_id):
+        raise ValueError("A valid task ID is required.")
+    seconds = min(45, max(1, int(remaining_seconds - 1)))
+    url = f"{BASE_URL}/tasks/{quote(task_id, safe='')}?wait=true&timeout={seconds}"
+    return http_request(url=url, method="GET", api_key=api_key,
+                        timeout_seconds=min(remaining_seconds, seconds + 5))
+
+
+def wait_rest_task(task_id: str, api_key: str, timeout_seconds: float) -> Dict[str, Any]:
+    deadline = time.monotonic() + timeout_seconds
+    read_failures = 0
+    while True:
+        remaining = deadline - time.monotonic()
+        if remaining <= 0:
+            raise TimeoutError(f"Wait timed out for {task_id}. The remote task may still be running; resume using this ID, never resubmit.")
+        try:
+            payload = run_rest_poll(task_id, api_key, remaining_seconds=remaining)
+        except (urllib.error.URLError, TimeoutError, OSError) as exc:
+            if read_failures < MAX_READ_RETRIES and time.monotonic() < deadline:
+                read_failures += 1
+                time.sleep(min(2 ** (read_failures - 1), max(0, deadline - time.monotonic())))
+                continue
+            raise RuntimeError(f"REST task read failed for {task_id}; keep the ID and retry waiting.") from exc
+        code = int(payload.get("code", 500))
+        if code != 0:
+            if code in RETRYABLE_READ_STATUS and read_failures < MAX_READ_RETRIES:
+                read_failures += 1
+                time.sleep(min(2 ** (read_failures - 1), max(0, deadline - time.monotonic())))
+                continue
+            raise RuntimeError(f"REST task read rejected for {task_id} (code {code}); no new submission was made.")
+        read_failures = 0
+        data = payload.get("data") or {}
+        if data.get("task_id") != task_id:
+            raise RuntimeError("REST task response has no matching task_id.")
+        status = str(data.get("status", "")).lower()
+        if status in {"success", "failed", "canceled", "cancelled", "error", "completed", "succeeded"}:
+            return payload
+        wait = data.get("wait")
+        if not isinstance(wait, dict) or not isinstance(wait.get("timed_out"), bool):
+            raise RuntimeError(f"The API does not support server-side wait for {task_id}. Keep the task ID and use an immediate task query; do not resubmit.")
 
 
 def pick_mode(args: argparse.Namespace, runtime: CliRuntime | None) -> str:
@@ -313,40 +356,7 @@ def main() -> int:
         )
 
     timeout_seconds = timeout_to_seconds(args.timeout)
-    started = time.time()
-    wait = args.initial_wait
-    read_failures = 0
-    poll_payload: Dict[str, Any] = {}
-    while True:
-        if time.time() - started > timeout_seconds:
-            raise TimeoutError(
-                f"Polling timed out for {task_id}. Remote task may still be running."
-            )
-        time.sleep(wait)
-        try:
-            poll_payload = run_rest_poll(task_id, api_key or "")
-        except (urllib.error.URLError, TimeoutError, OSError) as exc:
-            if read_failures < MAX_READ_RETRIES:
-                read_failures += 1
-                wait = min(wait * 2, args.max_wait)
-                continue
-            raise RuntimeError(
-                f"REST task read failed after {MAX_READ_RETRIES} retries: {exc}"
-            ) from exc
-        code = int(poll_payload.get("code", 500))
-        if code != 0:
-            if code in RETRYABLE_READ_STATUS and read_failures < MAX_READ_RETRIES:
-                read_failures += 1
-                wait = min(wait * 2, args.max_wait)
-                continue
-            raise RuntimeError(
-                f"REST task read failed: {json.dumps(poll_payload, ensure_ascii=False)}"
-            )
-        read_failures = 0
-        status = str(poll_payload.get("data", {}).get("status", "")).lower()
-        if status in {"success", "failed"}:
-            break
-        wait = min(wait * 2, args.max_wait)
+    poll_payload = wait_rest_task(task_id, api_key or "", timeout_seconds)
 
     print(
         json.dumps(

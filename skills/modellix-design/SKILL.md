@@ -5,7 +5,7 @@ license: MIT
 compatibility: Requires network access and Node.js 18.17+; Python 3.10+ enables automatic CLI updates and bundled helpers.
 metadata:
   author: Modellix
-  version: "4.1.0"
+  version: "4.2.0"
   modellix-primary-credential: MODELLIX_API_KEY
   modellix-hermes-tags: creative,image-generation,video-generation,audio-generation,speech-to-text,modellix,cli,api
 ---
@@ -123,7 +123,7 @@ python3 scripts/preflight.py --json
 Bundled helpers:
 
 1. `scripts/preflight.py` — checks public npm `latest`, safely updates a missing/older global CLI before paid work, pins newer local installs instead of downgrading, wraps `doctor`, and recommends `cli`, `rest`, or `none`.
-2. `scripts/invoke_and_poll.py` — performs the same resolution before submission, pins the resolved executable for the workflow, uses `model run --wait` on CLI, and otherwise keeps the REST submit+poll fallback.
+2. `scripts/invoke_and_poll.py` — performs the same resolution before submission, pins the resolved executable for the workflow, uses `model run --wait` on CLI, and otherwise keeps the REST submit plus server-side wait fallback.
 
 Set `MODELLIX_CLI_AUTO_UPDATE=0` (also accepts `false` or `off`) only when the environment must keep its installed CLI version. A registry/install failure is non-destructive: use the existing CLI if it still passes doctor, or REST when no CLI is usable and a session API key exists. Never update or swap the CLI after a paid submission has started.
 
@@ -168,6 +168,10 @@ modellix-cli task wait "$TASK_ID" --timeout 10m --json
 ```
 
 Batch (paid guard required): `modellix-cli model batch tasks.jsonl --max-tasks N [--wait]`.
+
+Use CLI 0.0.11 or later with a deployed server-wait API. `task get` is immediate; wait commands use bounded server waits. The legacy `--interval` flag is unused. On exit 124, keep unfinished IDs and resume; never resubmit.
+
+For media inputs, use `file list --json` to reuse URLs, then `file upload <path> --json` only when needed (images/video/audio, maximum 16 MiB / 16777216 bytes). On quota errors, explicitly approve deletion of an unneeded file ID; never auto-delete or replay uploads.
 
 Manual REST: `references/rest-playbook.md`. Optional helper: `scripts/invoke_and_poll.py`.
 
@@ -275,7 +279,7 @@ If this session used REST because CLI was missing, suggest installing the CLI af
 Read only what the task needs:
 
 - `references/cli-playbook.md` — install, auth, run/wait/download, batch, recovery
-- `references/rest-playbook.md` — REST submit/poll when CLI is unavailable
+- `references/rest-playbook.md` — REST submit/wait when CLI is unavailable
 - `references/capability-matrix.md` — CLI ↔ REST mapping and fallback rules
 
 ## Bundled Assets

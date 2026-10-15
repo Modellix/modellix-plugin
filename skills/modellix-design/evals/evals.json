@@ -91,6 +91,18 @@
         "Submitted via modellix-cli model run with wait (or model run + task wait)",
         "Did not print or log the raw API key value"
       ]
+    },
+    {
+      "id": 8,
+      "prompt": "The video task task-existing is processing and upload quota is full. Continue waiting and reuse existing files. Do not generate again or delete without approval.",
+      "expected_output": "Uses task wait with task-existing and file list to reuse URLs. A normal deadline keeps the ID. Deletion requires explicit selection and approval.",
+      "files": [],
+      "assertions": [
+        "Uses server-side wait rather than task get plus sleep",
+        "Keeps task-existing after exit 124",
+        "Lists reusable uploaded files",
+        "Does not automatically delete or replay uploads or paid submissions"
+      ]
     }
   ]
 }

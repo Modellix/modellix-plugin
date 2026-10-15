@@ -3,6 +3,14 @@
 All notable changes to this project are documented here. The format loosely follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and versions use [Semantic Versioning](https://semver.org/).
 
+## [4.2.0] - 2026-10-15
+
+### Changed
+
+- Use bounded server-side waits in the REST helper with one monotonic deadline.
+- Document CLI 0.0.11 file listing, media formats, quota recovery, and unfinished task snapshots.
+- Preserve CLI-first execution, paid-submit guards, and the separate prompt-only skill.
+
 ## [4.1.0] - 2026-09-16
 
 ### Added

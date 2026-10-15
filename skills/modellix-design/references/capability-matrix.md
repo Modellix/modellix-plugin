@@ -9,7 +9,7 @@ Use this matrix to switch between CLI and REST without changing task semantics.
 | Get request / response schema | `model get-schema <slug>` (JSON default; public, no API key) | Fetch model `.md` OpenAPI via Docs MCP / `docs_url` / `llms.txt` | Use CLI schema before building `--body` when the slug is non-default or the body is non-trivial |
 | Look up product / API / install docs | Docs MCP (`search_modellix` / docs filesystem) when connected via portable `mcp.json` or host adapter `.mcp.json` | Fetch `docs_url` or `llms.txt` → model `.md` | Docs MCP is read-only documentation — not generation. CLI flags still prefer npm / `--help` over website CLI pages |
 | Submit async task | `modellix-cli model run --model-slug <provider/model> --body/--body-file ...` | `POST /api/v1/{provider}/{model_id}/async` | `model invoke` is an alias of `model run` |
-| Wait for terminal status | `model run --wait` or `task wait <task_id>` | Poll `GET /api/v1/tasks/{task_id}` | Prefer CLI wait; do not hand-roll poll loops when CLI exists |
+| Wait for terminal status | `model run --wait` or `task wait <task_id>` | Wait with `GET /api/v1/tasks/{task_id}?wait=true&timeout=45` | Prefer CLI wait; do not hand-roll poll loops when CLI exists |
 | Read task once | `task get <task_id>` | `GET /api/v1/tasks/{task_id}` | Same status lifecycle: `pending` / `processing` / `success` / `failed` |
 | Download resources | `task download <task_id> --output-dir ...` | Download URLs from `result.resources` | CLI path preferred (safe filenames, limits) |
 | Batch submit | `model batch <file.jsonl> --max-tasks N` | Multiple REST POSTs | CLI validates all lines before first paid POST |

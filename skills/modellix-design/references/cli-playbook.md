@@ -121,7 +121,7 @@ modellix-cli model run --model-slug google/nano-banana-2-lite --body '{"prompt":
 Notes:
 
 - Use either `--body` or `--body-file`, not both.
-- Default submit is async; `--wait` polls to a terminal status; `--no-wait` makes async explicit.
+- Default submit is async; `--wait` uses bounded server-side waits to a terminal status; `--no-wait` makes async explicit.
 - Paid POST is **not** auto-retried. An unknown submission outcome must not be blindly repeated — check `task history` and any printed task ID first.
 - If wait times out after a task ID was received, recover with `task wait` using that ID (exit `124`).
 
@@ -154,7 +154,7 @@ modellix-cli model run --model-slug google/nano-banana-2-lite --body-file ".\pos
 ```bash
 modellix-cli task get <task_id>
 modellix-cli task wait <task_id>
-modellix-cli task wait task-a task-b --interval 5s --timeout 10m --concurrency 8 --json
+modellix-cli task wait task-a task-b --timeout 10m --concurrency 8 --json
 ```
 
 Durations accept values like `500ms`, `30s`, `5m`, `2h` (bare integers remain seconds). Overall wait timeout exit code: `124`. Multiple IDs return a stable `{ "tasks": [...] }` wrapper in input order.
@@ -228,3 +228,15 @@ modellix-cli config clear --profile work --yes
 ```
 
 These never print the API key.
+
+## Media Files and Server Wait
+
+Use modellix-cli 0.0.11 or later for server wait and file listing, after the compatible task API is deployed. `task get` stays immediate; `task wait`, `model run --wait`, and `model batch --wait` use server wait. `--interval` is parsed for compatibility but unused. Exit 124 preserves completed results, unfinished IDs, and available unfinished snapshots; resume waiting on the same IDs.
+
+```bash
+modellix-cli file list --limit 20 --offset 0 --json
+modellix-cli file upload ./reference.mp4 --json
+modellix-cli file delete <explicit-file-id> --json
+```
+
+Supported image, video, and audio inputs have a 16 MiB (16777216-byte) CLI limit and must be regular files, not symlinks. Match the selected model schema before uploading. Reuse returned URLs; quota errors require explicit selection and deletion, never automatic cleanup. A 404 delete succeeds as `alreadyAbsent` and does not claim a new deletion.

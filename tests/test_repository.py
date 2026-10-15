@@ -1,7 +1,9 @@
 from __future__ import annotations
 
 import json
+import os
 import re
+import subprocess
 import unittest
 from pathlib import Path
 
@@ -133,6 +135,14 @@ class RepositoryTests(unittest.TestCase):
             ):
                 path = ROOT / host / "skills" / skill_name
                 with self.subTest(host=host, skill=skill_name):
+                    if os.name == "nt" and not path.is_symlink():
+                        # Git for Windows can materialize mode-120000 entries as
+                        # link text when the account cannot create symlinks.
+                        relative = path.relative_to(ROOT).as_posix()
+                        indexed = subprocess.check_output(["git", "ls-files", "--stage", "--", relative], cwd=ROOT, text=True)
+                        self.assertTrue(indexed.startswith("120000 "))
+                        self.assertEqual(path.read_text(encoding="utf-8").strip(), f"../../skills/{skill_name}")
+                        continue
                     self.assertTrue(path.is_symlink())
                     self.assertEqual(path.resolve(), (ROOT / "skills" / skill_name).resolve())
 

@@ -24,10 +24,10 @@ Authorization: Bearer <MODELLIX_API_KEY>
 POST /{provider}/{model_id}/async
 ```
 
-2) Poll task:
+2) Wait for the existing task:
 
 ```http
-GET /tasks/{task_id}
+GET /tasks/{task_id}?wait=true&timeout=45
 ```
 
 ## cURL Example
@@ -59,10 +59,10 @@ The submit response includes `get_result` with the polling endpoint:
 }
 ```
 
-Poll:
+Wait:
 
 ```bash
-curl -X GET "https://api.modellix.ai/api/v1/tasks/<task_id>" \
+curl -X GET "https://api.modellix.ai/api/v1/tasks/<task_id>?wait=true&timeout=45" \
   -H "Authorization: Bearer $MODELLIX_API_KEY"
 ```
 
@@ -108,3 +108,11 @@ Non-retryable reads:
 - Default STT slug when the user omits a model: `openai/whisper-1`.
 - Default STS slug when the user omits a model: `alibaba/cosyvoice-clone`.
 - See `capability-matrix.md` for the full default-model table and CLI ↔ REST mapping.
+
+## Server Wait and File Recovery
+
+`wait` accepts only `true`, `false`, `1`, or `0`; it defaults to false. When true, `timeout` defaults to 30 seconds and accepts integers 1–55. A normal deadline returns HTTP 200/code 0 with the task snapshot and `data.wait = {timed_out, elapsed_ms}`. Keep the task ID and wait again. A snapshot GET without wait remains immediate; its timeout query is ignored. Terminal states include `success`, `failed`, and `canceled`.
+
+The helper uses wait hops of at most 45 seconds, a finite transport margin, and one monotonic total deadline. `--initial-wait` and `--max-wait` are deprecated compatibility flags and do not add sleeps between valid wait responses. Only transient read errors back off; paid POSTs and uploads are never replayed automatically.
+
+Use `GET /api/v1/media/files?limit=20&offset=0` to reuse uploaded URLs. CLI/MCP uploads accept at most 16 MiB (16777216 bytes); REST has a separate configurable limit. Defaults are 10 files per team, 2 concurrent uploads, and 7-day retention. On 429, list files and explicitly approve deleting an unneeded ID with `DELETE /api/v1/media/files/{file_id}`. Never auto-delete files or retry uploads to clear quota.

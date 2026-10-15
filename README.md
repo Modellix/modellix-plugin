@@ -10,6 +10,7 @@ Official install guide: [docs.modellix.ai/ways-to-use/plugin](https://docs.model
 
 - CLI-first workflow: automatic latest-version preflight → `modellix-cli doctor` → `model run --wait` → `task download`
 - Image prompt engineering for covers, posters, infographics, mockups, edits, and coherent asset sets before execution
+- Bounded server-side waits with resumable task IDs and no repeated paid submissions
 - REST fallback when the CLI is unavailable
 - Default models when the user does not specify one
 - Model discovery via `modellix-cli model list` / `model describe` / `model get-schema`, plus live docs at [llms.txt](https://docs.modellix.ai/llms.txt)
@@ -25,7 +26,7 @@ Official install guide: [docs.modellix.ai/ways-to-use/plugin](https://docs.model
 - Prompt preparation needs no credential. Generation and authenticated API/CLI
   operations need a Modellix API key from the
   [Console](https://modellix.ai/console/api-key) or a saved CLI profile.
-- [modellix-cli](https://www.npmjs.com/package/modellix-cli) requires Node.js 18.17+; the plugin preflight installs or refreshes it automatically from the public npm `latest` tag
+- [modellix-cli](https://www.npmjs.com/package/modellix-cli) 0.0.11+ requires Node.js 18.17+; the plugin preflight installs or refreshes it automatically from the public npm `latest` tag
 - Python 3.10+ for automatic CLI preflight and optional hooks; direct CLI/REST use remains available when Python is unavailable
 
 ```bash
