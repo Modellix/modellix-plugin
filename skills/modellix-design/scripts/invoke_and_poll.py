@@ -7,7 +7,7 @@ REST submits once and uses bounded server-side wait; only transient read failure
 
 Examples:
   python scripts/invoke_and_poll.py \\
-    --model-slug google/nano-banana-2-lite \\
+    --model-slug <provider/model> \\
     --body '{"prompt":"A cinematic portrait of a fox in a misty forest at sunrise"}'
 """
 
@@ -44,7 +44,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--model-slug",
         required=True,
-        help="Model slug in provider/model format, e.g. google/nano-banana-2-lite",
+        help="Model slug in provider/model format, supplied by the user",
     )
     parser.add_argument("--body", help="Inline JSON request body")
     parser.add_argument("--body-file", help="Path to JSON request body file")

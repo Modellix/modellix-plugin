@@ -1,19 +1,12 @@
 ---
-description: Prefer modellix-cli and use image, video, or audio defaults when no model is named.
+description: Prefer Modellix Media Generation when it is connected. Ask for a model slug when the user did not name one.
 alwaysApply: true
 ---
 
-- Prefer `modellix-cli` over hand-rolled REST polling when the CLI is available.
-- Before the first CLI command in a workflow, run `skills/modellix-design/scripts/preflight.py --json`; it resolves public npm `latest` before paid work and keeps an existing CLI on update failure. Never change CLI versions after submission starts.
-- Canonical flow: automatic preflight/`doctor` → `model run --wait` → `task download`. Prefer `--json`.
-- Do not reinvent poll loops when CLI `--wait` / `task wait` exists. Use REST only if CLI is missing or unsuitable.
-- If the user did not name a model, use these defaults immediately (do not scan the catalog first):
-  - T2I: `google/nano-banana-2-lite`
-  - T2V: `bytedance/seedance-2.0-mini-t2v`
-  - I2I: `google/nano-banana-2-lite-edit`
-  - I2V: `bytedance/seedance-2.0-fast-i2v`
-  - V2V: `bytedance/seedance-2.0-fast-v2v`
-  - TTS: `alibaba/qwen-audio-3.0-tts-flash`
-  - STT: `openai/whisper-1`
-  - STS: `alibaba/cosyvoice-clone`
-- Full policy and examples: plugin skill `skills/modellix-design/SKILL.md` and `references/cli-playbook.md`.
+- When `modellix_submit_task` is available and the input is not a local file, use the Modellix Media Generation MCP.
+- Otherwise prefer `modellix-cli` over hand-rolled REST polling.
+- Run `skills/modellix-design/scripts/preflight.py --json` only before the CLI path. It resolves public npm `latest` before paid work and keeps an existing CLI on update failure. Never change CLI versions after submission starts.
+- CLI flow: preflight/`doctor` → `model run --wait` → `task download`. Prefer `--json`.
+- Do not reinvent poll loops when `modellix_wait_task` or CLI `--wait` / `task wait` exists. Use REST only if both the Media Generation tools and the CLI are missing or unsuitable.
+- If the user did not name a `provider/model` slug, ask which model to run. Do not invent one or pick from a built-in list. A catalog listing is for them to choose from.
+- Full policy and examples: plugin skill `skills/modellix-design/SKILL.md`, `references/media-mcp-playbook.md`, and `references/cli-playbook.md`.

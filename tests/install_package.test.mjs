@@ -50,6 +50,7 @@ test("portable install materializes the complete plugin without repository files
       path.join(target, "skills", "modellix-image-prompt-engineering", "SKILL.md"),
       "utf8",
     );
+    await readFile(path.join(target, "skills", "modellix-ffmpeg", "SKILL.md"), "utf8");
     await assert.rejects(readFile(path.join(target, "tests", "test_repository.py")));
     await assert.rejects(readFile(path.join(target, ".github", "workflows", "skill_update.yml")));
     await assert.rejects(readFile(path.join(target, "AGENTS.md")));

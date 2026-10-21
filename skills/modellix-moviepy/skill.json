@@ -1,0 +1,5 @@
+{
+  "name": "modellix-moviepy",
+  "version": "1.0.0",
+  "description": "Composite local media into a finished spot with moviepy: titles, lower thirds, and a timed stack of clips and voiceover."
+}

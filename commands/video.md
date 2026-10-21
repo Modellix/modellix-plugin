@@ -6,14 +6,13 @@ disable-model-invocation: true
 
 Generate a video with Modellix. Request: $ARGUMENTS
 
-Follow the Modellix skill (`skills/modellix-design/SKILL.md`) for execution policy, credentials, and error handling. This command only fixes the routing.
+Follow the Modellix skill (`skills/modellix-design/SKILL.md`) for execution policy, credentials, and error handling. This command only fixes the routing. Use Media Generation when `modellix_submit_task` is available and the input is not a local file. The CLI steps below apply when the skill selects the CLI path.
 
 1. If `$ARGUMENTS` is empty, ask for a prompt instead of inventing one.
 2. Pick the model:
-   - A slug named by the user wins; confirm its request contract with `modellix-cli model get-schema <slug>` before building `--body`.
-   - Text only → `bytedance/seedance-2.0-mini-t2v` (`{"prompt": "..."}`).
-   - With an input image → `bytedance/seedance-2.0-fast-i2v` (needs one of `first_frame_image`, `last_frame_image`, `reference_images`).
-   - With a source video → `bytedance/seedance-2.0-fast-v2v` (`{"video_urls": ["<url>"]}`).
+   - Use a slug the user named, and confirm its request contract with `modellix-cli model get-schema <slug>` before building `--body`.
+   - If they did not name a slug, ask for one.
+   - Text-only bodies need `prompt`. An input image needs one of `first_frame_image`, `last_frame_image`, or `reference_images`. A source video needs `video_urls`.
 3. Submit, wait, and persist:
 
 ```bash

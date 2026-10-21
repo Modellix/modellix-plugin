@@ -1,8 +1,12 @@
 {
   "mcpServers": {
-    "modellix-docs": {
+    "Modellix Docs Search": {
       "type": "http",
       "url": "https://docs.modellix.ai/mcp"
+    },
+    "Modellix Media Generation": {
+      "type": "http",
+      "url": "https://tool.modellix.ai/mcp/media"
     }
   }
 }

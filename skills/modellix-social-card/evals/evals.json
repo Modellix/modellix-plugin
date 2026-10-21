@@ -1,0 +1,44 @@
+{
+  "skill_name": "modellix-social-card",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "把这篇产品笔记做成小红书图文，先只写提示词，不要生成图片。笔记大意：新版本可以把一段会议录音直接变成可编辑的纪要，省掉手动整理。语气干脆，封面要让人停下来。",
+      "expected_output": "Returns a Xiaohongshu social-card brief at 3:4. Compresses the note into a cover hook plus later cards with one idea each. Quotes exact Chinese on-image text. Does not recommend a model or submit generation.",
+      "files": [],
+      "assertions": [
+        "Named Xiaohongshu and a 3:4 aspect",
+        "Quoted exact Chinese on-image text",
+        "Gave the carousel more than one card role",
+        "Did not recommend a model, provider, or slug",
+        "Stopped after the brief and did not submit a generation task"
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "I need a YouTube thumbnail prompt for a video titled 'Ship the API in one afternoon'. Bold English type, no extra slogans. Prompt only.",
+      "expected_output": "Returns a YouTube thumbnail brief at 16:9. Quotes the exact English title. Keeps the lower-right duration area clear. Does not invent a model slug or submit.",
+      "files": [],
+      "assertions": [
+        "Named a YouTube thumbnail and a 16:9 aspect",
+        "Quoted the exact English title Ship the API in one afternoon",
+        "Kept the lower-right duration badge area clear of type",
+        "Did not recommend a model, provider, or slug",
+        "Stopped after the brief and did not submit a generation task"
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "Generate a LinkedIn post image announcing that our design review now takes one hour instead of a full day. Use whatever model you think is best.",
+      "expected_output": "Writes a LinkedIn post-card prompt at about 1.91:1 with quoted English on-image text, then hands that prompt to modellix-design. Omits the model because the user did not name a slug.",
+      "files": [],
+      "assertions": [
+        "Named LinkedIn and an aspect near 1.91:1",
+        "Quoted exact on-image text and did not invent statistics",
+        "Passed the prompt to modellix-design",
+        "Did not name or recommend a model slug",
+        "Did not submit, authenticate, or download from this skill"
+      ]
+    }
+  ]
+}

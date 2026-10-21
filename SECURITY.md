@@ -17,9 +17,9 @@ The latest released version receives security fixes. Please update before report
 
 - Before the first CLI use in a workflow, `preflight.py` queries only the public npm registry for `modellix-cli@latest`. If a newer version is available, it globally installs that exact version with lifecycle scripts disabled, then verifies the CLI-reported version before use. Set `MODELLIX_CLI_AUTO_UPDATE=0` to opt out.
 - npm registry checks and installs use a clean public-registry configuration that removes npm auth/token/password environment variables and does not read the user's npm config. Update failures retain a working installed CLI; the updater never downgrades and never runs after a paid submit has started.
-- Generation, editing, transcription, and speech inputs are sent only when a user or agent invokes the documented Modellix CLI or REST workflow. Prompts and public media URLs are sent to `https://api.modellix.ai`.
+- Generation, editing, transcription, and speech inputs are sent only when a user or agent invokes the documented Modellix workflow. CLI and REST send prompts and public media URLs to `https://api.modellix.ai`. Modellix Media Generation sends them to `https://tool.modellix.ai/mcp/media` and receives the API key only from the host's `Authorization` header.
 - Result downloads may connect to the HTTPS resource hosts returned by the Modellix API, including `file.modellix.ai`. Generated results are retained for about seven days; save required outputs promptly.
-- The optional Docs MCP connects only to `https://docs.modellix.ai/mcp` for documentation search and reading. It does not receive the Modellix API key and cannot submit paid tasks.
+- Modellix Docs Search connects only to `https://docs.modellix.ai/mcp` for documentation search and reading. It does not receive the Modellix API key and cannot submit paid tasks.
 - This plugin adds no analytics or unrelated network requests. See the [Modellix Privacy Policy](https://www.modellix.ai/privacy) for the service-level policy.
 
 ## Local state
@@ -33,6 +33,6 @@ Repository-level maintainer hooks and marketing follow-ups are intentionally exc
 ## Paid-operation safety
 
 - Paid model submissions are never automatically retried by the bundled wrapper.
-- An ambiguous submission must be recovered through task history, the Modellix console, or a known task id before another paid POST.
+- An ambiguous submission must be recovered through the existing task, task history, or the Modellix console before another paid submit on any path.
 - Batch commands require an explicit task ceiling or user acknowledgement.
 - Hooks fail open on runtime errors; they advise or request confirmation but never run a paid command themselves.

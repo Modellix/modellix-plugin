@@ -6,14 +6,15 @@ disable-model-invocation: true
 
 Run an audio workflow with Modellix. Request: $ARGUMENTS
 
-Follow the Modellix skill (`skills/modellix-design/SKILL.md`) for execution policy, credentials, schema lookup, and error handling. This command only fixes the routing.
+Follow the Modellix skill (`skills/modellix-design/SKILL.md`) for execution policy, credentials, schema lookup, and error handling. This command only fixes the routing. Use Media Generation when `modellix_submit_task` is available and the input is not a local file. The CLI steps below apply when the skill selects the CLI path.
 
 1. If `$ARGUMENTS` is empty or the intended audio workflow is ambiguous, ask whether the user wants text-to-speech, speech-to-text, or speech-to-speech. Never invent text, a voice, or an input URL.
 2. Pick the model:
-   - A slug named by the user wins; confirm its request contract with `modellix-cli model get-schema <slug>` before building `--body`.
-   - Text-to-speech → `alibaba/qwen-audio-3.0-tts-flash`; requires `text` and a Flash-compatible `voice` verified with `model get-schema` (or the live model doc if CLI is unavailable).
-   - Speech-to-text → `openai/whisper-1`; requires one public audio `url`.
-   - Speech-to-speech / voice clone → `alibaba/cosyvoice-clone`; requires the target CosyVoice `model`, reference audio `url`, and synthesis `text`.
+   - Use a slug the user named, and confirm its request contract with `modellix-cli model get-schema <slug>` before building `--body`.
+   - If they did not name a slug, ask for one.
+   - Text-to-speech needs `text` and a `voice` from that model's schema.
+   - Speech-to-text needs one public audio `url`.
+   - Speech-to-speech needs the fields that slug's schema requires, including reference audio and synthesis text when those are required.
 3. Submit, wait, and persist:
 
 ```bash

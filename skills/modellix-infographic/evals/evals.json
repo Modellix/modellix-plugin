@@ -1,0 +1,44 @@
+{
+  "skill_name": "modellix-infographic",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Make an infographic prompt that compares these two plans. Do not generate the image. Plan A: 12 ms median latency, 4 regions. Plan B: 40 ms median latency, 1 region. Use a comparison structure, landscape, English labels.",
+      "expected_output": "Returns an infographic brief with a comparison structure and a landscape aspect. Quotes 12 ms, 40 ms, 4 regions, and 1 region. Does not invent extra statistics, recommend a model, or submit.",
+      "files": [],
+      "assertions": [
+        "Named a comparison structure and a landscape aspect",
+        "Quoted the source facts 12 ms, 40 ms, 4 regions, and 1 region",
+        "Did not invent numbers that were not in the source",
+        "Did not recommend a model, provider, or slug",
+        "Stopped after the brief and did not submit a generation task"
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "Write a prompt for a sequence infographic of this onboarding, portrait, Chinese labels. Steps only, no image yet: 1 注册账号 2 粘贴 API key 3 运行第一次请求.",
+      "expected_output": "Returns a sequence infographic brief in a portrait aspect. Quotes the three Chinese steps in order. Does not recommend a model or submit.",
+      "files": [],
+      "assertions": [
+        "Named a sequence structure and a portrait aspect",
+        "Quoted the exact Chinese steps in order",
+        "Did not add a step the user did not supply",
+        "Did not recommend a model, provider, or slug",
+        "Stopped after the brief and did not submit a generation task"
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "Generate an infographic of this funnel. Visitors 1000, signups 240, paid 36. Use a funnel, square, English. Pick the best model and make the image.",
+      "expected_output": "Writes one square funnel prompt quoting 1000, 240, and 36, then hands that prompt to modellix-design. Omits the model because the user did not name a slug.",
+      "files": [],
+      "assertions": [
+        "Named a funnel structure and a square aspect",
+        "Quoted 1000, 240, and 36 and did not invent a conversion rate",
+        "Passed the prompt to modellix-design",
+        "Did not name or recommend a model slug",
+        "Did not submit, authenticate, or download from this skill"
+      ]
+    }
+  ]
+}

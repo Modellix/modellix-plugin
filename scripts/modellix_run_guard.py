@@ -72,6 +72,15 @@ def main() -> int:
         return lib.emit()
 
     reason = build_message(state, fp)
+    slug = lib.model_slug(command)
+    mcp_prior = lib.submit_for_slug(state, slug, source="mcp")
+    if not reason and mcp_prior:
+        task_ids = ", ".join(mcp_prior.get("task_ids") or []) or "unknown"
+        reason = (
+            "This model slug was already submitted in this session through Modellix Media Generation "
+            f"(task: {task_ids}). A CLI model run would charge again. "
+            f"Reuse the existing task. {HISTORY_HINT}"
+        )
     if not reason and lib.submit_kind(command) == "batch" and not lib.has_flag(command, "--max-tasks"):
         reason = (
             "`model batch` without `--max-tasks` has no cost ceiling. "

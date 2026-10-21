@@ -1,0 +1,5 @@
+{
+  "name": "modellix-social-card",
+  "version": "1.0.0",
+  "description": "Plan mainstream social-card prompts, with exact on-image text and aspect ratio, before handing generation to modellix-design."
+}

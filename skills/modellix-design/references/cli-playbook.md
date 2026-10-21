@@ -66,19 +66,10 @@ modellix-cli model list
 modellix-cli model list --type text-to-image --output slugs
 modellix-cli model list --provider google --limit 20
 modellix-cli model list --search banana
-modellix-cli model describe google/nano-banana-2-lite --json
+modellix-cli model describe <provider/model> --json
 ```
 
-When the user did not specify a model, use skill defaults instead of listing first:
-
-- T2I: `google/nano-banana-2-lite`
-- T2V: `bytedance/seedance-2.0-mini-t2v`
-- I2I: `google/nano-banana-2-lite-edit`
-- I2V: `bytedance/seedance-2.0-fast-i2v`
-- V2V: `bytedance/seedance-2.0-fast-v2v`
-- TTS: `alibaba/qwen-audio-3.0-tts-flash`
-- STT: `openai/whisper-1`
-- STS: `alibaba/cosyvoice-clone`
+When the user did not name a `provider/model` slug, ask for one. Do not choose a model from this list.
 
 `--model-slug` must be exact `provider/model` as returned by the catalog.
 
@@ -90,7 +81,7 @@ modellix-cli model get-schema alibaba/qwen-image-3.0-pro --output human
 modellix-cli model get-schema alibaba/qwen-image-3.0-pro --quiet
 ```
 
-JSON is the default and preserves `servers` plus the `post` OpenAPI-style contract — use it to build `--body`. Human output summarizes the inference endpoint, request body, and responses. Quiet prints only `servers[0].url`. Call `get-schema` when the user named a non-default slug, when the body needs fields beyond the skill examples, after HTTP `400`, or when reporting required fields. Skip it when the skill default plus the documented example already lists required fields, or the user supplied a complete body. If CLI is unavailable, fall back to Docs MCP or the model `.md` (`docs_url` / `llms.txt`). Do not keep a bundled model index — live CLI catalog + schema are the source of truth.
+JSON is the default and preserves `servers` plus the `post` OpenAPI-style contract — use it to build `--body`. Human output summarizes the inference endpoint, request body, and responses. Quiet prints only `servers[0].url`. Call `get-schema` when the body needs fields beyond a complete body the user already supplied, after HTTP `400`, or when reporting required fields. If CLI is unavailable, fall back to Docs Search or the model `.md` (`docs_url` / `llms.txt`). Do not keep a bundled model index — live CLI catalog + schema are the source of truth.
 
 ## Run a model (canonical)
 
@@ -100,7 +91,7 @@ Inline JSON:
 
 ```bash
 modellix-cli model run \
-  --model-slug google/nano-banana-2-lite \
+  --model-slug <provider/model> \
   --body '{"prompt":"A cute cat"}' \
   --wait --timeout 5m --json
 ```
@@ -108,14 +99,14 @@ modellix-cli model run \
 From file or stdin:
 
 ```bash
-modellix-cli model run --model-slug google/nano-banana-2-lite --body-file ./payload.json --wait --timeout 5m --json
-printf '%s' '{"prompt":"A cute cat"}' | modellix-cli model run --model-slug google/nano-banana-2-lite --body-file - --wait --timeout 5m --json
+modellix-cli model run --model-slug <provider/model> --body-file ./payload.json --wait --timeout 5m --json
+printf '%s' '{"prompt":"A cute cat"}' | modellix-cli model run --model-slug <provider/model> --body-file - --wait --timeout 5m --json
 ```
 
 Task ID only (for pipelines):
 
 ```bash
-modellix-cli model run --model-slug google/nano-banana-2-lite --body '{"prompt":"A cute cat"}' --output task-id
+modellix-cli model run --model-slug <provider/model> --body '{"prompt":"A cute cat"}' --output task-id
 ```
 
 Notes:
@@ -135,7 +126,7 @@ $payload = @{
   aspectRatio = "3:4"
 } | ConvertTo-Json -Compress
 
-modellix-cli model run --model-slug google/nano-banana-2-lite --body $payload --wait --timeout 5m --json
+modellix-cli model run --model-slug <provider/model> --body $payload --wait --timeout 5m --json
 ```
 
 `--body-file` for complex prompts:
@@ -146,7 +137,7 @@ $payload = @{
   aspectRatio = "3:4"
 }
 $payload | ConvertTo-Json -Depth 10 | Set-Content -Path ".\poster_body.json" -Encoding UTF8
-modellix-cli model run --model-slug google/nano-banana-2-lite --body-file ".\poster_body.json" --wait --timeout 5m --json
+modellix-cli model run --model-slug <provider/model> --body-file ".\poster_body.json" --wait --timeout 5m --json
 ```
 
 ## Wait and get

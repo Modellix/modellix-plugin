@@ -34,7 +34,7 @@ jobs:
         run: npm test
 
       - name: Compile Python helpers
-        run: python3 -m py_compile scripts/*.py skills/modellix-design/scripts/*.py
+        run: python3 -m py_compile scripts/*.py skills/modellix-design/scripts/*.py skills/modellix-ffmpeg/scripts/*.py
 
       - name: Clean Python build artifacts
         run: python3 skills/modellix-design/scripts/clean_build_artifacts.py

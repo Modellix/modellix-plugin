@@ -35,7 +35,7 @@ GET /tasks/{task_id}?wait=true&timeout=45
 Submit:
 
 ```bash
-curl -X POST "https://api.modellix.ai/api/v1/google/nano-banana-2-lite/async" \
+curl -X POST "https://api.modellix.ai/api/v1/<provider>/<model_id>/async" \
   -H "Authorization: Bearer $MODELLIX_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{"prompt":"A cute cat playing in a garden on a sunny day"}'
@@ -103,12 +103,8 @@ Non-retryable reads:
 
 - Task outputs expire after 7 days — download promptly.
 - Parameter shapes vary per model. If CLI is installed, verify with `modellix-cli model get-schema <slug>` even when submitting over REST. If CLI is unavailable, fetch the model `.md` from https://docs.modellix.ai/llms.txt (or `docs_url` from `model describe`).
-- Default T2I slug when the user omits a model: `google/nano-banana-2-lite`.
-- Default T2V slug when the user omits a model: `bytedance/seedance-2.0-mini-t2v`.
-- Default TTS slug when the user omits a model: `alibaba/qwen-audio-3.0-tts-flash`.
-- Default STT slug when the user omits a model: `openai/whisper-1`.
-- Default STS slug when the user omits a model: `alibaba/cosyvoice-clone`.
-- See `capability-matrix.md` for the full default-model table and CLI ↔ REST mapping.
+- The user names the slug. Do not fill one in when they omit it.
+- See `capability-matrix.md` for the CLI ↔ REST mapping.
 
 ## Server Wait and File Recovery
 

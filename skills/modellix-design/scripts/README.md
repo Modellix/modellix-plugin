@@ -39,14 +39,8 @@ Usage:
 
 ```bash
 python scripts/invoke_and_poll.py \
-  --model-slug google/nano-banana-2-lite \
+  --model-slug <provider/model> \
   --body '{"prompt":"A cinematic portrait of a fox in a misty forest at sunrise"}'
-
-python scripts/invoke_and_poll.py \
-  --model-slug bytedance/seedance-2.0-mini-t2v \
-  --body '{"prompt":"A cat in a garden"}' \
-  --timeout 10m \
-  --output-dir ./outputs
 ```
 
 Key behavior:
@@ -56,5 +50,4 @@ Key behavior:
 - Optional `--output-dir` triggers `task download` after a successful CLI wait
 - REST path: submit a paid POST exactly once, then retry only safe task-status reads on transient `408`/`429`/`5xx` responses or transport failures
 - An explicit `--api-key` is passed to child CLI processes through `MODELLIX_API_KEY`, never as a process argument
-- `--model-slug` is required in `provider/model` format
-- Skill defaults when user omits a model: T2I=`google/nano-banana-2-lite`, T2V=`bytedance/seedance-2.0-mini-t2v`, TTS=`alibaba/qwen-audio-3.0-tts-flash`, STT=`openai/whisper-1`, STS=`alibaba/cosyvoice-clone` (full table in `SKILL.md`)
+- `--model-slug` is required in `provider/model` format and comes from the user. This skill does not supply one when they omit it.

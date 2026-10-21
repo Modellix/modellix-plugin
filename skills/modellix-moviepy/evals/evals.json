@@ -1,0 +1,51 @@
+{
+  "skill_name": "modellix-moviepy",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Put a lower third on ./outputs/speaker.mp4 that reads Ada Lopez, harbor pilot. moviepy is not installed.",
+      "expected_output": "Runs scripts/check_moviepy.py --json, sees ok false, shows install_command, and waits. Does not run pip. Does not write a video.",
+      "files": [],
+      "assertions": [
+        "Ran python3 scripts/check_moviepy.py --json before importing moviepy",
+        "Showed install_command to the user and waited for confirmation",
+        "Did not run the install command before the user agreed",
+        "Did not call modellix-cli or a Modellix generation API"
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "moviepy 2 and Pillow are installed. Add a name plate reading Ada Lopez to ./outputs/speaker.mp4 and save it beside the source.",
+      "expected_output": "Draws the name with Pillow to a PNG and places an ImageClip. Does not use TextClip. Writes a new file and does not overwrite speaker.mp4.",
+      "files": [],
+      "assertions": [
+        "Rendered the name with Pillow instead of TextClip",
+        "Placed the text as an ImageClip on the existing clip",
+        "Wrote a new file and did not overwrite or delete ./outputs/speaker.mp4",
+        "Did not call modellix-cli or a Modellix generation API"
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "Generate a new five-second video of a fox walking through snow. I do not have any local clips.",
+      "expected_output": "Hands the request to modellix-design. Does not import moviepy for a prompt, and does not submit a Modellix task from this skill.",
+      "files": [],
+      "assertions": [
+        "Handed generation to modellix-design",
+        "Did not run moviepy for a prompt that has no local media",
+        "Did not submit, poll, or download a Modellix task from modellix-moviepy"
+      ]
+    },
+    {
+      "id": 4,
+      "prompt": "Join ./outputs/a.mp4 and ./outputs/b.mp4, then compress the result. Also burn ./outputs/captions.srt onto it.",
+      "expected_output": "Hands concatenation, compression, and the SRT burn to modellix-ffmpeg. Does not rebuild those operations in moviepy.",
+      "files": [],
+      "assertions": [
+        "Handed concatenate, compress, and SRT burn to modellix-ffmpeg",
+        "Did not composite the two clips in moviepy",
+        "Did not call modellix-cli or a Modellix generation API"
+      ]
+    }
+  ]
+}

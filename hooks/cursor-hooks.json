@@ -8,10 +8,24 @@
         "timeout": 10
       }
     ],
+    "beforeMCPExecution": [
+      {
+        "command": "node \"${CURSOR_PLUGIN_ROOT}/scripts/run_python_hook.mjs\" modellix_mcp_guard",
+        "matcher": "modellix_submit_task",
+        "timeout": 10
+      }
+    ],
     "afterShellExecution": [
       {
         "command": "node \"${CURSOR_PLUGIN_ROOT}/scripts/run_python_hook.mjs\" modellix_task_watch",
         "matcher": "modellix-cli",
+        "timeout": 10
+      }
+    ],
+    "afterMCPExecution": [
+      {
+        "command": "node \"${CURSOR_PLUGIN_ROOT}/scripts/run_python_hook.mjs\" modellix_mcp_guard",
+        "matcher": "modellix_submit_task",
         "timeout": 10
       }
     ],

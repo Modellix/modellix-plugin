@@ -4,14 +4,14 @@
     {
       "id": 1,
       "prompt": "帮我做一张公众号封面，主题是新模型发布，要高级感。先帮我把提示词想清楚，不要真的生成图片。",
-      "expected_output": "Turns the vague adjective into a specific Chinese T2I brief with a fitting named visual system or explicit visual grammar, medium, hierarchy, on-image text language, aspect/size status, default Modellix image slug, and a stop-after-prompt next step. It does not execute image generation.",
+      "expected_output": "Turns the vague adjective into a specific Chinese T2I brief with a fitting named visual system or explicit visual grammar, medium, hierarchy, on-image text language, aspect/size status, and a stop-after-prompt next step. It does not recommend a model or execute image generation.",
       "files": [],
       "assertions": [
         "Classified the task as T2I",
         "Returned the final image prompt in Chinese",
         "Replaced the vague request for a premium look with a specific named visual system or concrete visual grammar",
         "Included on-image text language and aspect/size status in the handoff",
-        "Suggested google/nano-banana-2-lite without browsing the model catalog",
+        "Did not recommend a model, provider, or slug",
         "Stopped after prompt preparation and did not invoke an image-generation command"
       ]
     },
@@ -38,7 +38,7 @@
         "Did not expand or substantially rewrite the supplied final prompt",
         "Recognized the named subject, visual system, and medium as sufficient",
         "Classified the task as T2I",
-        "Passed execution responsibility to modellix-design",
+        "Passed execution responsibility to modellix-design without naming a model",
         "Did not duplicate credential, polling, schema, or download policy"
       ]
     }

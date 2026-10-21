@@ -62,6 +62,7 @@ def main() -> int:
         )
         record["count"] = int(record.get("count") or 0) + 1
         record["slug"] = lib.model_slug(command)
+        record["source"] = "cli"
         record["kind"] = lib.submit_kind(command)
         record["status"] = "failed" if failed else ("succeeded" if task_ids else "unknown")
         record["last_watch_at"] = time.time()

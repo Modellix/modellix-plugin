@@ -1,9 +1,13 @@
 {
   "$schema": "https://agent-plugins.org/schemas/1.0.0/mcp.schema.json",
   "mcpServers": {
-    "modellix-docs": {
+    "Modellix Docs Search": {
       "type": "streamable-http",
       "url": "https://docs.modellix.ai/mcp"
+    },
+    "Modellix Media Generation": {
+      "type": "streamable-http",
+      "url": "https://tool.modellix.ai/mcp/media"
     }
   }
 }

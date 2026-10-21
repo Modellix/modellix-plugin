@@ -1,0 +1,5 @@
+{
+  "name": "modellix-ffmpeg",
+  "version": "1.0.0",
+  "description": "Edit, concatenate, trim, reframe, and transcode local media with FFmpeg after files are already on disk."
+}

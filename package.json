@@ -1,6 +1,6 @@
 {
   "name": "@modellix/modellix-plugin",
-  "version": "4.2.2",
+  "version": "4.7.0",
   "description": "Unified API/CLI for AI image, video, and audio workflows via Modellix",
   "type": "module",
   "license": "MIT",

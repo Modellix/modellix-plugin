@@ -73,7 +73,7 @@ grammar directly.
 ### Medium
 
 Name the actual deliverable: instruction manual, editorial illustration, campaign
-poster, product photograph, packaging family, comparison infographic, app
+poster, product photograph, packaging family, editorial spread, app
 dashboard, icon sheet, character turnaround, or another concrete format.
 
 ## 4. Build the composition
@@ -182,12 +182,8 @@ reference 2 for [role].
 
 ### Infographic structure
 
-Start with the relationship:
-
-```text
-A [comparison/sequence/hierarchy/flow/cause-and-effect] infographic showing
-[verified content], with [primary insight] as the strongest visual hierarchy.
-```
+A structured infographic belongs to `modellix-infographic`. Do not plan that
+image here.
 
 ### UI decision screen
 
@@ -223,4 +219,5 @@ The brief is ready when:
 - facts are verified, supplied, omitted, or marked as placeholders,
 - constraints address real risks,
 - the prompt contains no fake section headers,
+- the brief does not recommend a model unless the user already named one,
 - the next step says either stop or hand off to `modellix-design`.

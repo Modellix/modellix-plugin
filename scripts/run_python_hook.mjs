@@ -11,6 +11,7 @@ const HOOKS = new Set([
   "modellix_run_guard",
   "modellix_task_watch",
   "modellix_stop_reminder",
+  "modellix_mcp_guard",
 ]);
 
 function failOpen(message) {

@@ -106,13 +106,6 @@ def main() -> int:
     recommended_mode = "none"
     if cli_available and doctor_ok is True:
         recommended_mode = "cli"
-        notes.append(
-            "Defaults when user omits model: T2I=google/nano-banana-2-lite, "
-            "T2V=bytedance/seedance-2.0-mini-t2v, "
-            "TTS=alibaba/qwen-audio-3.0-tts-flash, "
-            "STT=openai/whisper-1, "
-            "STS=alibaba/cosyvoice-clone."
-        )
     elif not cli_available and env_key_available:
         recommended_mode = "rest"
         notes.append("REST fallback is available because an API key exists.")

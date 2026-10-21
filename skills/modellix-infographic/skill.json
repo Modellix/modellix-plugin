@@ -1,0 +1,5 @@
+{
+  "name": "modellix-infographic",
+  "version": "1.0.0",
+  "description": "Plan one infographic prompt from a source, with exact facts and a confirmed structure, before handing generation to modellix-design."
+}

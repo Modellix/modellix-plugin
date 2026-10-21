@@ -1,0 +1,54 @@
+{
+  "skill_name": "modellix-ffmpeg",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Join ./outputs/a.mp4 and ./outputs/b.mp4. FFmpeg is not installed on this machine.",
+      "expected_output": "Runs scripts/check_ffmpeg.py --json, sees ok false, shows install_command, and waits. Does not download a binary or pipe a script into a shell. Does not run ffmpeg.",
+      "files": [],
+      "assertions": [
+        "Ran python3 scripts/check_ffmpeg.py --json before any ffmpeg command",
+        "Showed install_command to the user and waited for confirmation",
+        "Did not run the install command before the user agreed",
+        "Did not download an FFmpeg binary or pipe a remote script into a shell",
+        "Did not call modellix-cli or a Modellix generation API"
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "Concatenate ./outputs/wide.mp4 (1920x1080, 30fps) and ./outputs/tall.mp4 (1080x1920, 24fps) into ./outputs/joined.mp4. FFmpeg is already installed.",
+      "expected_output": "Probes both files, refuses stream copy because resolution and frame rate differ, then re-encodes to a shared frame and concatenates. Does not overwrite either input.",
+      "files": [],
+      "assertions": [
+        "Probed both inputs with ffprobe before choosing copy or re-encode",
+        "Did not concatenate with -c copy",
+        "Re-encoded both clips to one shared width, height, and frame rate",
+        "Wrote ./outputs/joined.mp4 and did not overwrite wide.mp4 or tall.mp4",
+        "Did not call modellix-cli or a Modellix generation API"
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "Generate a new five-second video of a fox walking through snow. I do not have any local clips.",
+      "expected_output": "Hands the request to modellix-design. Does not invent an FFmpeg command for a prompt, and does not submit a Modellix task from this skill.",
+      "files": [],
+      "assertions": [
+        "Handed generation to modellix-design",
+        "Did not run ffmpeg for a prompt that has no local media",
+        "Did not submit, poll, or download a Modellix task from modellix-ffmpeg"
+      ]
+    },
+    {
+      "id": 4,
+      "prompt": "Trim the first three seconds of ./outputs/scene.mp4. FFmpeg is installed. Put the result next to the source.",
+      "expected_output": "Asks for an output path if none was given, or writes a new file. Uses re-encode rather than stream copy. Does not delete or overwrite scene.mp4.",
+      "files": [],
+      "assertions": [
+        "Did not overwrite or delete ./outputs/scene.mp4",
+        "Asked for an output path or wrote a different new file",
+        "Re-encoded the trim instead of using -c copy",
+        "Passed -n unless the user had already asked to replace that output file"
+      ]
+    }
+  ]
+}

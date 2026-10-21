@@ -108,6 +108,102 @@ class HookTests(unittest.TestCase):
             )
             self.assertEqual(permission, "ask")
 
+    def test_mcp_schema_lookup_is_not_blocked(self):
+        with tempfile.TemporaryDirectory() as temp_dir:
+            response = self.run_hook(
+                "modellix_mcp_guard.py",
+                {
+                    "session_id": "mcp-schema",
+                    "tool_name": "modellix_get_schema",
+                    "tool_input": {"model_slug": "google/nano-banana-2-lite"},
+                },
+                temp_dir,
+            )
+            self.assertEqual(response, {})
+
+    def test_mcp_submit_asks_only_after_the_slug_was_recorded(self):
+        with tempfile.TemporaryDirectory() as temp_dir:
+            payload = {
+                "session_id": "mcp-repeat",
+                "tool_name": "modellix_submit_task",
+                "tool_input": {
+                    "model_slug": "google/nano-banana-2-lite",
+                    "prompt": "private mcp prompt",
+                },
+            }
+            self.assertEqual(self.run_hook("modellix_mcp_guard.py", payload, temp_dir), {})
+            self.run_hook(
+                "modellix_mcp_guard.py",
+                {
+                    **payload,
+                    "result_json": '{"status":"success","task_id":"task-mcp-123"}',
+                },
+                temp_dir,
+            )
+            second = self.run_hook("modellix_mcp_guard.py", payload, temp_dir)
+            permission = second.get("permission") or second.get("hookSpecificOutput", {}).get(
+                "permissionDecision"
+            )
+            self.assertEqual(permission, "ask")
+            state_text = next((Path(temp_dir) / "modellix-hooks").glob("*.json")).read_text(
+                encoding="utf-8"
+            )
+            self.assertNotIn("private mcp prompt", state_text)
+            state = json.loads(state_text)
+            record = next(iter(state["submits"].values()))
+            self.assertEqual(record["slug"], "google/nano-banana-2-lite")
+            self.assertEqual(record["source"], "mcp")
+            self.assertIn("task-mcp-123", record["task_ids"])
+            self.assertNotIn("prompt", record)
+            self.assertEqual(
+                next((Path(temp_dir) / "modellix-hooks").glob("*.json")).stat().st_mode & 0o777,
+                0o600,
+            )
+
+    def test_cli_submit_after_mcp_requires_confirmation(self):
+        with tempfile.TemporaryDirectory() as temp_dir:
+            mcp_payload = {
+                "session_id": "cross-path",
+                "tool_name": "modellix_submit_task",
+                "tool_input": {"model_slug": "google/nano-banana-2-lite"},
+            }
+            self.run_hook("modellix_mcp_guard.py", mcp_payload, temp_dir)
+            self.run_hook(
+                "modellix_mcp_guard.py",
+                {**mcp_payload, "result_json": '{"status":"success","task_id":"task-cross-1"}'},
+                temp_dir,
+            )
+            cli = self.run_hook(
+                "modellix_run_guard.py",
+                {
+                    "session_id": "cross-path",
+                    "command": (
+                        "modellix-cli model run --model-slug google/nano-banana-2-lite "
+                        "--body '{\"prompt\":\"different\"}' --wait --json"
+                    ),
+                },
+                temp_dir,
+            )
+            permission = cli.get("permission") or cli.get("hookSpecificOutput", {}).get(
+                "permissionDecision"
+            )
+            self.assertEqual(permission, "ask")
+
+    def test_mcp_guard_fails_open_on_invalid_json(self):
+        with tempfile.TemporaryDirectory() as temp_dir:
+            env = os.environ.copy()
+            env.update({"TMP": temp_dir, "TEMP": temp_dir, "TMPDIR": temp_dir})
+            result = subprocess.run(
+                [PYTHON, str(ROOT / "scripts" / "modellix_mcp_guard.py")],
+                input="{not json",
+                capture_output=True,
+                text=True,
+                env=env,
+                check=False,
+            )
+            self.assertEqual(result.returncode, 0, result.stderr)
+            self.assertEqual(json.loads(result.stdout), {})
+
     def test_rejected_pre_submit_does_not_count_as_executed(self):
         with tempfile.TemporaryDirectory() as temp_dir:
             payload = {

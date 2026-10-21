@@ -214,6 +214,29 @@ def model_slug(command: str) -> str:
     return flag_value(command, "--model-slug", "--model", "-m") or ""
 
 
+def submit_for_slug(state: dict[str, Any], slug: str, source: str | None = None) -> dict[str, Any] | None:
+    """Return the recorded paid submit for this slug, optionally limited to one source.
+
+    Records without `source` are CLI submits from older state files.
+    """
+    if not slug:
+        return None
+    best: dict[str, Any] | None = None
+    for record in (state.get("submits") or {}).values():
+        if not isinstance(record, dict):
+            continue
+        if str(record.get("slug") or "") != slug:
+            continue
+        if int(record.get("count") or 0) < 1:
+            continue
+        record_source = str(record.get("source") or "cli")
+        if source and record_source != source:
+            continue
+        if best is None or int(record.get("count") or 0) > int(best.get("count") or 0):
+            best = record
+    return best
+
+
 def session_key(event: dict[str, Any]) -> str:
     raw = event.get("session_id") or f"cwd:{event.get('cwd') or ''}"
     return hashlib.sha256(str(raw).encode("utf-8")).hexdigest()[:16]

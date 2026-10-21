@@ -3,6 +3,52 @@
 All notable changes to this project are documented here. The format loosely follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and versions use [Semantic Versioning](https://semver.org/).
 
+## [4.7.0] - 2026-10-22
+
+### Added
+
+- Add `skills/modellix-infographic` to plan one infographic prompt from a source. It confirms the information structure, quotes the source facts, and hands generation to `modellix-design`. It does not recommend a model or submit a task.
+
+### Changed
+
+- Route a structured infographic from `modellix-social-card` and `modellix-image-prompt-engineering` to `modellix-infographic`.
+
+## [4.6.0] - 2026-10-21
+
+### Added
+
+- Add `skills/modellix-social-card` to plan prompts for mainstream social cards, covers, and carousels. It writes one prompt per placement and hands generation to `modellix-design`. It does not recommend a model or submit a task.
+
+## [4.5.0] - 2026-10-21
+
+### Added
+
+- Add `skills/modellix-ffmpeg` for local concatenation, trimming, reframing, and transcoding after files are on disk. `scripts/check_ffmpeg.py --json` reports whether FFmpeg is usable and prints a platform install command. It does not install FFmpeg, download a binary, or call Modellix.
+- Add `skills/modellix-moviepy` for titles, lower thirds, and timed composites after files are on disk. `scripts/check_moviepy.py --json` reports whether moviepy 2.x and Pillow import and prints a pip command. It does not install them or call Modellix.
+
+### Fixed
+
+- Document all four skills in the install instructions. `modellix-ffmpeg` and `modellix-moviepy` ship with the plugin package, not as separate Smithery or ClawHub skills.
+
+## [4.4.0] - 2026-10-21
+
+### Changed
+
+- Remove built-in default models from `modellix-design`. If the user does not name a `provider/model` slug, ask and wait. Do not invent one.
+- Stop recommending image models from `modellix-image-prompt-engineering`. That skill writes the prompt and leaves model choice to the user.
+
+## [4.3.0] - 2026-10-21
+
+### Added
+
+- Declare Modellix Docs Search and Modellix Media Generation in `mcp.json` and `.mcp.json` without auth headers.
+- Route `modellix-design` through Media Generation when its tools are available and the input is not a local file, then the CLI, then REST.
+- Ask on Cursor before a repeated `modellix_submit_task` for a model slug already submitted in the session.
+
+### Changed
+
+- Rename the docs MCP server key from `modellix-docs` to `Modellix Docs Search`.
+
 ## [4.2.2] - 2026-10-15
 
 ### Fixed

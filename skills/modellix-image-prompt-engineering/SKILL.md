@@ -1,11 +1,11 @@
 ---
 name: modellix-image-prompt-engineering
-description: Engineer clear, high-density prompts for AI image generation and editing before execution. Use this skill whenever a user asks for a cover, poster, banner, infographic, product shot, packaging concept, editorial illustration, UI mockup, slide visual, icon set, character sheet, card set, sprite sheet, image edit, or a better image prompt—even when they do not say "prompt engineering." Turn vague visual requests into an execution-ready T2I or I2I brief, then hand generation to modellix-design. Skip video/audio tasks, CLI/auth troubleshooting, and requests that already contain a complete prompt and only need execution.
+description: Engineer clear, high-density prompts for AI image generation and editing before execution. Use this skill whenever a user asks for a cover, poster, banner, product shot, packaging concept, editorial illustration, UI mockup, slide visual, icon set, character sheet, card set, sprite sheet, image edit, or a better image prompt—even when they do not say "prompt engineering." Turn vague visual requests into an execution-ready T2I or I2I brief, then hand generation to modellix-design. Skip video/audio tasks, structured infographics, CLI/auth troubleshooting, and requests that already contain a complete prompt and only need execution.
 license: MIT
 compatibility: No external tools required; pairs with the modellix-design skill for image execution.
 metadata:
   author: Modellix
-  version: "1.0.0"
+  version: "1.2.0"
   modellix-hermes-tags: image-generation,prompt-engineering,art-direction,visual-design,modellix
 ---
 
@@ -15,8 +15,9 @@ Convert an image idea into a deliberate, execution-ready prompt. This skill is t
 creative planning layer; `modellix-design` is the execution layer.
 
 Do not submit, poll, download, authenticate, or inspect model schemas here. Do not
-run the Modellix CLI. When the user wants an image generated, finish the brief
-first and then hand it to `modellix-design`.
+run the Modellix CLI. Do not recommend a model, a provider, or a slug. Catalogs
+change quickly, and choosing a model is outside this skill. When the user wants an
+image generated, finish the brief first and then hand it to `modellix-design`.
 
 ## Route the request
 
@@ -33,6 +34,8 @@ Skip or keep the pass minimal when:
 
 - The user supplied a complete prompt and explicitly asked only to run it. Pass it
   directly to `modellix-design`.
+- The request is a structured infographic, visual summary, or information diagram.
+  Use `modellix-infographic`.
 - The request is about video, audio, credentials, task status, downloads, model
   schemas, or command syntax. Use `modellix-design`.
 - The user only wants image compression, format conversion, cropping, or reuse of
@@ -52,7 +55,7 @@ Before writing, fill three slots:
 2. **Visual system** — an established design movement, studio, brand language,
    medium tradition, or precisely described visual grammar.
 3. **Medium** — poster, instruction manual, editorial illustration, packaging,
-   product photograph, infographic, UI screen, icon sheet, and so on.
+   product photograph, UI screen, icon sheet, and so on.
 
 Prefer precise, recognizable references over adjective piles:
 
@@ -195,9 +198,8 @@ For I2I, describe what must remain unchanged before describing the change. Assig
 each reference image a role: subject identity, style, composition, product, or
 background. Do not assume that every image controls every property.
 
-For infographics, name the relationship first: comparison, sequence, hierarchy,
-flow, cause/effect, or spatial map. Visual decoration comes after the information
-model.
+A structured infographic belongs to `modellix-infographic`. That skill confirms
+the information structure and writes the single image prompt.
 
 For UI mockups, identify the user's decision on that screen, the primary action,
 and the information hierarchy. Do not optimize only for visual polish.
@@ -225,7 +227,7 @@ Before presenting the result, check:
 6. **Text:** Is exact copy quoted, audience language explicit, and fabricated
    content avoided?
 7. **Reference risk:** Could a brand or publication become a masthead or watermark?
-8. **Execution boundary:** Has this skill avoided submission and model-schema work?
+8. **Execution boundary:** Has this skill avoided submission, model-schema work, and any model recommendation?
 
 If an item fails, repair the prompt before handoff.
 
@@ -240,13 +242,12 @@ Image brief
 - On-image text: <none | language and exact copy>
 - Aspect/size: <verified value | requested value | unresolved>
 - Reference images: <none | paths/URLs with roles>
-- Suggested default: google/nano-banana-2-lite | google/nano-banana-2-lite-edit
+- Model: <only a slug the user already named | omitted>
 - Next step: <stop after prompt | pass to modellix-design for execution>
 ```
 
-Use `google/nano-banana-2-lite` for T2I and
-`google/nano-banana-2-lite-edit` for I2I unless the user already named a model.
-Do not browse the catalog from this skill.
+Leave `Model` blank unless the user already named a slug. Do not fill one in, and
+do not browse the catalog from this skill.
 
 If the user asked only for prompt work, stop after the brief. If the original
 request asked for generation or editing, pass the finished brief to
