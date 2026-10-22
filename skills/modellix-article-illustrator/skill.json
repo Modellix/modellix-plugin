@@ -1,0 +1,5 @@
+{
+  "name": "modellix-article-illustrator",
+  "version": "1.0.0",
+  "description": "Plan one prompt per in-article illustration from a confirmed type, style, palette, and density, before handing generation to modellix-design."
+}

@@ -1,0 +1,5 @@
+{
+  "name": "modellix-cover-image",
+  "version": "1.0.0",
+  "description": "Plan one article-cover prompt from confirmed type, palette, rendering, text level, and mood, before handing generation to modellix-design."
+}

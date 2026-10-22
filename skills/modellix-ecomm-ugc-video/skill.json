@@ -1,0 +1,5 @@
+{
+  "name": "modellix-ecomm-ugc-video",
+  "version": "1.0.0",
+  "description": "Plan a vertical ecommerce UGC video as one prompt per shot, quoting only supplied product facts, before handing generation to modellix-design."
+}

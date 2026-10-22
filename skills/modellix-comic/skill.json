@@ -1,0 +1,5 @@
+{
+  "name": "modellix-comic",
+  "version": "1.0.0",
+  "description": "Plan a knowledge-comic storyboard and one prompt per page from a confirmed style, page count, and text level, before handing generation to modellix-design."
+}

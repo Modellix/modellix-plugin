@@ -20,6 +20,7 @@ The latest released version receives security fixes. Please update before report
 - Generation, editing, transcription, and speech inputs are sent only when a user or agent invokes the documented Modellix workflow. CLI and REST send prompts and public media URLs to `https://api.modellix.ai`. Modellix Media Generation sends them to `https://tool.modellix.ai/mcp/media` and receives the API key only from the host's `Authorization` header.
 - Result downloads may connect to the HTTPS resource hosts returned by the Modellix API, including `file.modellix.ai`. Generated results are retained for about seven days; save required outputs promptly.
 - Modellix Docs Search connects only to `https://docs.modellix.ai/mcp` for documentation search and reading. It does not receive the Modellix API key and cannot submit paid tasks.
+- Modellix Web Tools connects to `https://tool.modellix.ai/mcp` to search the public web and fetch public URLs (`modellix-ai/web-search`, `modellix-ai/web-fetch`). Calls are billed. It receives the API key only from the host's `Authorization` header. The manifests do not contain that header.
 - This plugin adds no analytics or unrelated network requests. See the [Modellix Privacy Policy](https://www.modellix.ai/privacy) for the service-level policy.
 
 ## Local state

@@ -1,6 +1,6 @@
 ---
 name: modellix-infographic
-description: Plan one prompt for a single infographic, visual summary, or information diagram. Use this skill whenever the user asks for an infographic, 信息图, 可视化总结, visual summary, or a diagram that packs a source into one comparison, sequence, funnel, cycle, dashboard, or module overview — even if they only say "turn this into a picture of the facts." Confirm the structure, aspect, and on-image language, quote the source facts, then hand generation to modellix-design. Skip social-network cards, ordinary posters, and requests that only need an already finished prompt executed.
+description: Plan one prompt for a single infographic, visual summary, or information diagram. Use this skill whenever the user asks for an infographic, 信息图, 可视化总结, visual summary, or a diagram that packs a source into one comparison, sequence, funnel, cycle, dashboard, or module overview — even if they only say "turn this into a picture of the facts." Confirm the structure, aspect, and on-image language, quote the source facts, then hand generation to modellix-design. Skip social-network cards, in-article illustration sets, knowledge comics, ordinary posters, and requests that only need an already finished prompt executed.
 license: MIT
 compatibility: No external tools required; pairs with the modellix-design skill for image execution.
 metadata:
@@ -38,8 +38,13 @@ Skip or keep the pass short when:
 - The user already supplied a finished prompt and asked only to run it. Pass that
   prompt to `modellix-design`.
 - The request is a social card for a specific network. Use `modellix-social-card`.
+- The request is an article, blog, or newsletter cover. Use `modellix-cover-image`.
+- The request is a set of illustrations placed through an article. Use `modellix-article-illustrator`.
+- The request is a knowledge comic, educational comic, biography comic, or four-panel strip. Use `modellix-comic`.
 - The request is a poster or product image with no structured facts. Use
   `modellix-image-prompt-engineering`.
+- The request is a commerce UGC video that still needs a shot plan. Use
+  `modellix-ecomm-ugc-video`.
 - The request is video editing, credentials, task status, or a download.
 
 ## Plan the image

@@ -5,7 +5,7 @@ license: MIT
 compatibility: Requires network access and Node.js 18.17+; Python 3.10+ enables automatic CLI updates and bundled helpers.
 metadata:
   author: Modellix
-  version: "4.7.0"
+  version: "4.12.0"
   modellix-primary-credential: MODELLIX_API_KEY
   modellix-hermes-tags: creative,image-generation,video-generation,audio-generation,speech-to-text,modellix,cli,api
 ---
@@ -23,6 +23,7 @@ After files are on disk, local trimming, concatenation, reframing, and transcodi
 - Full Models Index: https://docs.modellix.ai/llms.txt
 - Docs Search MCP (search / read docs): https://docs.modellix.ai/mcp
 - Media Generation MCP: https://tool.modellix.ai/mcp/media
+- Web Tools MCP (public web search / URL fetch): https://docs.modellix.ai/tools/mcp (endpoint https://tool.modellix.ai/mcp)
 - CLI package (source of truth for CLI behavior): https://www.npmjs.com/package/modellix-cli
 
 ### Documentation lookup policy
@@ -30,6 +31,8 @@ After files are on disk, local trimming, concatenation, reframing, and transcodi
 This plugin exposes **Modellix Docs Search** (`https://docs.modellix.ai/mcp`). It is a **read-only documentation** server (`search_modellix`, docs filesystem query, optional feedback). It does **not** submit generation tasks, poll, download, or handle API keys.
 
 **Modellix Media Generation** (`https://tool.modellix.ai/mcp/media`) is a separate server. It submits paid image, video, and audio tasks. The host attaches `Authorization: Bearer` from its own secret store. This repository does not put that header in `mcp.json`.
+
+**Modellix Web Tools** (`https://tool.modellix.ai/mcp`) is a separate server. It searches the public web (`modellix-ai/web-search`) and fetches public URLs (`modellix-ai/web-fetch`). Calls are billed. It does not submit image, video, or audio tasks, and it does not replace Docs Search or the CLI. The host attaches `Authorization: Bearer` from its own secret store. This repository does not put that header in `mcp.json`.
 
 When looking up product/API/install docs vs request-body schema:
 
@@ -233,7 +236,7 @@ Read only what the task needs:
 ## Credential and Data Egress
 
 - Primary credential: `MODELLIX_API_KEY` (also via CLI profiles).
-- Network egress: `https://api.modellix.ai` for CLI and REST (override only with trusted `--base-url` / `MODELLIX_BASE_URL`). Media Generation uses `https://tool.modellix.ai/mcp/media` and receives the API key only when the host attaches it. Docs Search uses `https://docs.modellix.ai/mcp` and does not receive the key.
+- Network egress: `https://api.modellix.ai` for CLI and REST (override only with trusted `--base-url` / `MODELLIX_BASE_URL`). Media Generation uses `https://tool.modellix.ai/mcp/media` and receives the API key only when the host attaches it. Docs Search uses `https://docs.modellix.ai/mcp` and does not receive the key. Web Tools uses `https://tool.modellix.ai/mcp` and receives the API key only when the host attaches it.
 - User prompts and media inputs may be sent to Modellix during invocation.
 - Never expose API keys in logs, screenshots, transcripts, or commits.
 - Default to session-only credentials; persistent writes need explicit user approval.

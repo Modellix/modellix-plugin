@@ -106,11 +106,32 @@ class RepositoryTests(unittest.TestCase):
             read_json("skills/modellix-infographic/skill.json")["name"],
             "modellix-infographic",
         )
+        self.assertTrue((ROOT / "skills/modellix-ecomm-ugc-video/SKILL.md").is_file())
+        self.assertEqual(
+            read_json("skills/modellix-ecomm-ugc-video/skill.json")["name"],
+            "modellix-ecomm-ugc-video",
+        )
+        self.assertTrue((ROOT / "skills/modellix-cover-image/SKILL.md").is_file())
+        self.assertEqual(
+            read_json("skills/modellix-cover-image/skill.json")["name"],
+            "modellix-cover-image",
+        )
+        self.assertTrue((ROOT / "skills/modellix-comic/SKILL.md").is_file())
+        self.assertEqual(
+            read_json("skills/modellix-comic/skill.json")["name"],
+            "modellix-comic",
+        )
+        self.assertTrue((ROOT / "skills/modellix-article-illustrator/SKILL.md").is_file())
+        self.assertEqual(
+            read_json("skills/modellix-article-illustrator/skill.json")["name"],
+            "modellix-article-illustrator",
+        )
 
     def test_mcp_servers_are_named_and_unauthenticated(self):
         expected = {
             "Modellix Docs Search": "https://docs.modellix.ai/mcp",
             "Modellix Media Generation": "https://tool.modellix.ai/mcp/media",
+            "Modellix Web Tools": "https://tool.modellix.ai/mcp",
         }
         for path, transport in (("mcp.json", "streamable-http"), (".mcp.json", "http")):
             mcp = read_json(path)
@@ -137,6 +158,10 @@ class RepositoryTests(unittest.TestCase):
                 "modellix-moviepy",
                 "modellix-social-card",
                 "modellix-infographic",
+                "modellix-ecomm-ugc-video",
+                "modellix-cover-image",
+                "modellix-comic",
+                "modellix-article-illustrator",
             },
         )
         for skill_dir in skill_dirs:
@@ -201,6 +226,55 @@ class RepositoryTests(unittest.TestCase):
         self.assertIn("Do not recommend a model", text)
         self.assertIn("modellix-design", text)
 
+    def test_ecomm_ugc_video_skill_is_prompt_only_and_credential_free(self):
+        text = (ROOT / "skills/modellix-ecomm-ugc-video/SKILL.md").read_text(encoding="utf-8")
+        metadata = read_json("skills/modellix-ecomm-ugc-video/skill.json")
+        self.assertEqual(metadata["version"], "1.0.0")
+        self.assertTrue(
+            {"primaryCredential", "primaryEnv", "requiredEnv", "env"}.isdisjoint(metadata)
+        )
+        self.assertNotIn("MODELLIX_API_KEY", text)
+        self.assertNotIn("modellix-cli", text)
+        self.assertIn("Do not recommend a model", text)
+        self.assertIn("modellix-design", text)
+        self.assertIn("modellix-ffmpeg", text)
+
+    def test_cover_image_skill_is_prompt_only_and_credential_free(self):
+        text = (ROOT / "skills/modellix-cover-image/SKILL.md").read_text(encoding="utf-8")
+        metadata = read_json("skills/modellix-cover-image/skill.json")
+        self.assertEqual(metadata["version"], "1.0.0")
+        self.assertTrue(
+            {"primaryCredential", "primaryEnv", "requiredEnv", "env"}.isdisjoint(metadata)
+        )
+        self.assertNotIn("MODELLIX_API_KEY", text)
+        self.assertNotIn("modellix-cli", text)
+        self.assertIn("Do not recommend a model", text)
+        self.assertIn("modellix-design", text)
+
+    def test_comic_skill_is_prompt_only_and_credential_free(self):
+        text = (ROOT / "skills/modellix-comic/SKILL.md").read_text(encoding="utf-8")
+        metadata = read_json("skills/modellix-comic/skill.json")
+        self.assertEqual(metadata["version"], "1.0.0")
+        self.assertTrue(
+            {"primaryCredential", "primaryEnv", "requiredEnv", "env"}.isdisjoint(metadata)
+        )
+        self.assertNotIn("MODELLIX_API_KEY", text)
+        self.assertNotIn("modellix-cli", text)
+        self.assertIn("Do not recommend a model", text)
+        self.assertIn("modellix-design", text)
+
+    def test_article_illustrator_skill_is_prompt_only_and_credential_free(self):
+        text = (ROOT / "skills/modellix-article-illustrator/SKILL.md").read_text(encoding="utf-8")
+        metadata = read_json("skills/modellix-article-illustrator/skill.json")
+        self.assertEqual(metadata["version"], "1.0.0")
+        self.assertTrue(
+            {"primaryCredential", "primaryEnv", "requiredEnv", "env"}.isdisjoint(metadata)
+        )
+        self.assertNotIn("MODELLIX_API_KEY", text)
+        self.assertNotIn("modellix-cli", text)
+        self.assertIn("Do not recommend a model", text)
+        self.assertIn("modellix-design", text)
+
     def test_ffmpeg_skill_is_local_and_credential_free(self):
         text = (ROOT / "skills/modellix-ffmpeg/SKILL.md").read_text(encoding="utf-8")
         metadata = read_json("skills/modellix-ffmpeg/skill.json")
@@ -239,6 +313,10 @@ class RepositoryTests(unittest.TestCase):
                 "modellix-moviepy",
                 "modellix-social-card",
                 "modellix-infographic",
+                "modellix-ecomm-ugc-video",
+                "modellix-cover-image",
+                "modellix-comic",
+                "modellix-article-illustrator",
             ):
                 path = ROOT / host / "skills" / skill_name
                 with self.subTest(host=host, skill=skill_name):
@@ -306,14 +384,14 @@ class RepositoryTests(unittest.TestCase):
     def test_commands_have_frontmatter_and_paid_guards(self):
         command_paths = sorted((ROOT / "commands").glob("*.md"))
         self.assertEqual({p.stem for p in command_paths}, {
-            "audio", "doctor", "download", "image", "infographic", "models", "prompt", "social-card", "tasks", "video"
+            "audio", "article-illustrator", "comic", "cover-image", "doctor", "download", "ecomm-ugc-video", "image", "infographic", "models", "prompt", "social-card", "tasks", "video"
         })
         for path in command_paths:
             text = path.read_text(encoding="utf-8")
             self.assertTrue(text.startswith("---\n"), path)
             frontmatter = text.split("---", 2)[1]
             self.assertIn("description:", frontmatter)
-            if path.stem in {"audio", "image", "infographic", "prompt", "social-card", "video"}:
+            if path.stem in {"audio", "article-illustrator", "comic", "cover-image", "ecomm-ugc-video", "image", "infographic", "prompt", "social-card", "video"}:
                 self.assertIn("disable-model-invocation: true", frontmatter)
 
     def test_repository_does_not_ship_maintainer_agent_hooks(self):

@@ -1,0 +1,45 @@
+{
+  "skill_name": "modellix-cover-image",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Plan an article cover prompt. Do not generate the image. Title: Shipping the queue. Confirmed dimensions: type conceptual, palette cool, rendering flat-vector, text title-only, mood balanced, font clean, aspect 16:9, English. The article is about a background job queue.",
+      "expected_output": "Returns a cover brief with those confirmed dimensions, 16:9, and the exact title Shipping the queue. The prompt describes a flat-vector conceptual cover and does not invent a subtitle. Does not recommend a model or submit.",
+      "files": [],
+      "assertions": [
+        "Named conceptual, cool, flat-vector, title-only, balanced, clean, and 16:9",
+        "Quoted the title Shipping the queue and did not add a subtitle",
+        "Described a flat illustrated cover rather than a photograph",
+        "Did not recommend a model, provider, or slug",
+        "Stopped after the brief and did not submit a generation task"
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "给这篇文章出封面提示词，先不要生成。标题就用「队列为什么会堵住」。类型 typography，配色 mono，画法 hand-drawn，文字 title-only，情绪 subtle，字体 serif，画幅 2.35:1，画面中文。",
+      "expected_output": "Returns a typography cover brief in 2.35:1. Quotes the Chinese title exactly and does not invent a different headline. Does not recommend a model or submit.",
+      "files": [],
+      "assertions": [
+        "Named typography, mono, hand-drawn, title-only, subtle, serif, and 2.35:1",
+        "Quoted the exact Chinese title 队列为什么会堵住",
+        "Did not invent a replacement title or an English headline",
+        "Did not recommend a model, provider, or slug",
+        "Stopped after the brief and did not submit a generation task"
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "Generate the cover. Use the recommendation and do not ask again. Article title: Notes from the night train. It is a personal travel essay. Aspect 16:9. Reference image ./train-window.png for style only. Pick the best model and make the image.",
+      "expected_output": "Confirms a recommendation suited to a personal travel essay, quotes the title, names ./train-window.png as a style reference, and hands one prompt to modellix-design. Omits the model because the user did not name a slug.",
+      "files": [],
+      "assertions": [
+        "Quoted the title Notes from the night train",
+        "Named a type, palette, and rendering that fit a personal travel essay",
+        "Named ./train-window.png as a style reference",
+        "Passed one prompt to modellix-design",
+        "Did not name or recommend a model slug",
+        "Did not submit, authenticate, or download from this skill"
+      ]
+    }
+  ]
+}

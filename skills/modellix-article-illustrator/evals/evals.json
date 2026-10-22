@@ -1,0 +1,78 @@
+{
+  "skill_name": "modellix-article-illustrator",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "为文章配图。先不要生成。我还没给你文章。",
+      "expected_output": "Asks for the article. Does not invent a title, a section, a quotation, or a statistic. Does not write prompts. Does not recommend a model or submit.",
+      "files": [],
+      "assertions": [
+        "Asked for the article",
+        "Did not invent a title, section, quotation, or statistic",
+        "Left the prompts empty",
+        "Did not recommend a model, provider, or slug",
+        "Did not submit a generation task"
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "Illustrate this article. Do not generate anything yet. I have not chosen a style or a density. Article: a short post that a queue backs up when arrivals outrun service. Sections: the symptom, the cause, what to change.",
+      "expected_output": "Recommends a preset or type, style, and palette, plus density, aspect, and language, and waits. Names section anchors. Leaves every prompt empty. Does not invent a model.",
+      "files": [],
+      "assertions": [
+        "Recommended a preset or a type, style, and palette",
+        "Recommended a density at or under six illustrations",
+        "Named the sections the pictures would follow",
+        "Left the prompts empty because the choices were not confirmed",
+        "Did not recommend a model, provider, or slug",
+        "Did not submit a generation task"
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "Make one cover for this blog post. Title: The queue that never drains. Do not illustrate the sections.",
+      "expected_output": "Does not plan a set of in-article illustrations. Routes the request to modellix-cover-image.",
+      "files": [],
+      "assertions": [
+        "Did not write an illustration set",
+        "Directed the request to modellix-cover-image"
+      ]
+    },
+    {
+      "id": 4,
+      "prompt": "Make one comparison infographic of three caching strategies, with the numbers in a single diagram. Do not illustrate an article.",
+      "expected_output": "Does not plan a set of in-article illustrations. Routes the request to modellix-infographic.",
+      "files": [],
+      "assertions": [
+        "Did not write an illustration set",
+        "Directed the request to modellix-infographic"
+      ]
+    },
+    {
+      "id": 5,
+      "prompt": "Turn this article into a four-panel comic. Do not add separate section illustrations.",
+      "expected_output": "Does not plan a set of in-article illustrations. Routes the request to modellix-comic.",
+      "files": [],
+      "assertions": [
+        "Did not write an illustration set",
+        "Directed the request to modellix-comic"
+      ]
+    },
+    {
+      "id": 6,
+      "prompt": "Illustrate this article. Use the recommendation and do not ask again. Then make the images and pick the best model. Article sections: Symptom, Cause, Change. The only number in the article is: p95 wait rose from 40ms to 900ms. The metaphor in the cause section is a bottleneck. Confirmed nothing else.",
+      "expected_output": "Treats the recommendation as confirmed, writes one prompt per section at or under six, shows the bottleneck as a narrow gate or jam rather than a glass bottle, and quotes only 40ms and 900ms. Hands the prompts to modellix-design in article order. Omits the model because the user did not name a slug. Does not submit from this skill and does not rewrite the article.",
+      "files": [],
+      "assertions": [
+        "Confirmed a recommendation instead of asking again",
+        "Wrote one prompt per section and stayed at or under six",
+        "Showed the bottleneck as the underlying jam rather than a literal bottle",
+        "Quoted only the 40ms and 900ms figures from the article",
+        "Passed the prompts to modellix-design in article order",
+        "Did not name or recommend a model slug",
+        "Did not submit, authenticate, or download from this skill",
+        "Did not rewrite the article"
+      ]
+    }
+  ]
+}

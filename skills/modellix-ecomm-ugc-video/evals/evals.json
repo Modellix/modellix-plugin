@@ -1,0 +1,48 @@
+{
+  "skill_name": "modellix-ecomm-ugc-video",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Plan a 15-second English TikTok UGC video. Pattern: interrupt-demo. Do not generate it. Product: a clear glass serum bottle with a silver pump. The only claim is that it feels lightweight and does not cake on dry skin. CTA: link in bio. No product photo.",
+      "expected_output": "Returns an Ecomm UGC brief with interrupt-demo, English, 9:16, and about 15 seconds as four shots. Quotes lightweight, does not cake, and link in bio. Shot prompts leave captions and packaging words out of the frame. Does not invent a price, recommend a model, or submit.",
+      "files": [],
+      "assertions": [
+        "Named interrupt-demo, English, 9:16, and a 15-second length split into shots",
+        "Quoted the lightweight claim, the no-cake claim, and the link-in-bio close",
+        "Told each shot prompt to leave captions and packaging text out of the frame",
+        "Did not invent a price, rating, or extra performance claim",
+        "Did not recommend a model, provider, or slug",
+        "Stopped after the brief and did not submit a generation task"
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "写四副墨镜的口播分镜，不要生成视频。30 秒，中文，listicle。四副分别是：黑色方框、椭圆玳瑁、透明圆框、银色飞行员。结尾问评论区选哪一副。",
+      "expected_output": "Returns a 30-second Chinese listicle brief. Quotes the four sunglass styles in order and a comment-question close. Does not add a fifth style, recommend a model, or submit.",
+      "files": [],
+      "assertions": [
+        "Named the listicle pattern, Chinese, and about 30 seconds",
+        "Quoted all four styles: black square, oval tortoiseshell, clear round, silver aviator",
+        "Did not add a variant the user did not name",
+        "Put the comment question in the close",
+        "Did not recommend a model, provider, or slug",
+        "Stopped after the brief and did not submit a generation task"
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "Generate the video. Pattern pain-proof-use, 15 seconds, English, 9:16. Product photo: ./serum-bottle.png. The annoyance is foundation looking thick on the nose. Claim: a thin layer still shows skin texture. Pick the best model and make every shot.",
+      "expected_output": "Writes one prompt per shot for a 15-second pain-proof-use video, names ./serum-bottle.png as the image reference, lists captions separately for modellix-ffmpeg, and hands each shot to modellix-design. Omits the model because the user did not name a slug.",
+      "files": [],
+      "assertions": [
+        "Named pain-proof-use, English, 9:16, and about 15 seconds",
+        "Quoted the thick-on-the-nose annoyance and the skin-texture claim",
+        "Named ./serum-bottle.png as a reference image for the shots",
+        "Listed on-screen captions separately for modellix-ffmpeg",
+        "Passed each shot prompt to modellix-design",
+        "Did not name or recommend a model slug",
+        "Did not submit, authenticate, or download from this skill"
+      ]
+    }
+  ]
+}

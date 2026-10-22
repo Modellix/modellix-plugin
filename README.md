@@ -2,7 +2,7 @@
 
 Agent plugin for [Modellix](https://modellix.ai), a unified Model-as-a-Service (MaaS) platform for image, video, and audio workflows.
 
-This repository conforms to the [Agent Plugins 1.0.0 specification](https://agent-plugins.org/specification): root [`plugin.json`](plugin.json) is the portable manifest, [`skills/`](skills/) is the fixed skill location, and root [`mcp.json`](mcp.json) declares Modellix Docs Search and Modellix Media Generation. Cursor, Claude Code, Codex, OpenClaw, OpenCode, Pi, and Hermes adapters remain alongside that core for hosts with additional or legacy capabilities.
+This repository conforms to the [Agent Plugins 1.0.0 specification](https://agent-plugins.org/specification): root [`plugin.json`](plugin.json) is the portable manifest, [`skills/`](skills/) is the fixed skill location, and root [`mcp.json`](mcp.json) declares Modellix Docs Search, Modellix Media Generation, and Modellix Web Tools. Cursor, Claude Code, Codex, OpenClaw, OpenCode, Pi, and Hermes adapters remain alongside that core for hosts with additional or legacy capabilities.
 
 Official install guide: [docs.modellix.ai/ways-to-use/plugin](https://docs.modellix.ai/ways-to-use/plugin).
 
@@ -12,6 +12,10 @@ Official install guide: [docs.modellix.ai/ways-to-use/plugin](https://docs.model
 - Image prompt engineering for covers, posters, mockups, edits, and coherent asset sets before execution
 - Social card planning for mainstream network covers, thumbnails, and carousels. `skills/modellix-social-card/` writes one prompt per placement and does not generate images
 - Infographic planning that turns a source into one prompt. `skills/modellix-infographic/` quotes the source facts and hands generation to `modellix-design`
+- Ecommerce UGC video planning. `skills/modellix-ecomm-ugc-video/` writes one prompt per shot and hands generation to `modellix-design`. Captions are burned later by `skills/modellix-ffmpeg/`
+- Article cover planning. `skills/modellix-cover-image/` confirms type, palette, rendering, and text level, then hands one prompt to `modellix-design`
+- Knowledge comic planning. `skills/modellix-comic/` confirms style, page count, and text level, writes one prompt per page, and hands generation to `modellix-design`
+- Article illustration planning. `skills/modellix-article-illustrator/` confirms type, style, palette, and density, writes one prompt per illustration, and hands generation to `modellix-design`
 - Local FFmpeg edits for files already on disk: concatenate, trim, reframe, transcode, and subtitle-file burns. `skills/modellix-ffmpeg/scripts/check_ffmpeg.py --json` only checks the install and prints the command; it does not install FFmpeg
 - Local moviepy composites for files already on disk: titles, lower thirds, and a timed stack of clips and voiceover. `skills/modellix-moviepy/scripts/check_moviepy.py --json` only checks moviepy 2.x and Pillow; it does not install them
 - Bounded server-side waits with resumable task IDs and no repeated paid submissions
@@ -20,7 +24,8 @@ Official install guide: [docs.modellix.ai/ways-to-use/plugin](https://docs.model
 - Model discovery via `modellix_list_models` / `modellix_get_schema`, or `modellix-cli model list` / `model describe` / `model get-schema`, plus live docs at [llms.txt](https://docs.modellix.ai/llms.txt)
 - **Modellix Docs Search** (`mcp.json`, plus host adapter `.mcp.json` → [docs.modellix.ai/mcp](https://docs.modellix.ai/mcp)) for searching and reading official documentation. It does not receive the API key and does not run generation
 - **Modellix Media Generation** (same manifests → [tool.modellix.ai/mcp/media](https://tool.modellix.ai/mcp/media)) for image, video, and audio tasks. The host attaches the API key; the manifests do not contain it
-- Slash **commands** under `commands/`: `/modellix:prompt`, `/modellix:social-card`, `/modellix:infographic`, `/modellix:image`, `/modellix:video`, `/modellix:audio`, `/modellix:doctor`, `/modellix:models`, `/modellix:tasks`, `/modellix:download`
+- **Modellix Web Tools** (same manifests → [tool.modellix.ai/mcp](https://tool.modellix.ai/mcp)) searches the public web and fetches public URLs (`modellix-ai/web-search`, `modellix-ai/web-fetch`). Calls are billed. The host attaches the API key; the manifests do not contain it
+- Slash **commands** under `commands/`: `/modellix:prompt`, `/modellix:social-card`, `/modellix:infographic`, `/modellix:ecomm-ugc-video`, `/modellix:cover-image`, `/modellix:comic`, `/modellix:article-illustrator`, `/modellix:image`, `/modellix:video`, `/modellix:audio`, `/modellix:doctor`, `/modellix:models`, `/modellix:tasks`, `/modellix:download`
 - Persistent host **rules** under `rules/` (`.mdc`): Media Generation routing, paid-submit safety, credential/docs guardrails
 - Optional **hooks** under `hooks/`: confirm before a repeated paid CLI submit or an unbounded `model batch`, confirm before a repeated `modellix_submit_task` on Cursor, and remind the agent to download results before they expire
 - Retry and error guidance aligned with CLI exit codes and paid-submit safety
@@ -50,12 +55,16 @@ Prefer **Plugin** when the host supports Agent Plugins or marketplace plugins. U
 **Skill** when you only need execution (`skills/modellix-design`) or image prompt
 engineering (`skills/modellix-image-prompt-engineering`), social card prompts
 (`skills/modellix-social-card`), infographic prompts
-(`skills/modellix-infographic`), or when the host has no
+(`skills/modellix-infographic`), ecommerce UGC video plans
+(`skills/modellix-ecomm-ugc-video`), article covers
+(`skills/modellix-cover-image`), knowledge comics
+(`skills/modellix-comic`), article illustrations
+(`skills/modellix-article-illustrator`), or when the host has no
 plugin marketplace.
 
 ### 1) Plugin
 
-Installs the repository root as a plugin, including all six skills under `skills/`: `modellix-design`, `modellix-image-prompt-engineering`, `modellix-social-card`, `modellix-infographic`, `modellix-ffmpeg`, and `modellix-moviepy`.
+Installs the repository root as a plugin, including all ten skills under `skills/`: `modellix-design`, `modellix-image-prompt-engineering`, `modellix-social-card`, `modellix-infographic`, `modellix-ecomm-ugc-video`, `modellix-cover-image`, `modellix-comic`, `modellix-article-illustrator`, `modellix-ffmpeg`, and `modellix-moviepy`.
 
 #### npm / npx
 
@@ -192,9 +201,9 @@ published to Smithery, ClawHub, and skills.sh. `modellix-image-prompt-engineerin
 prepares image prompts and is installed from this repository or skills.sh. It
 hands generation back to `modellix-design`.
 
-`modellix-ffmpeg`, `modellix-moviepy`, `modellix-social-card`, and `modellix-infographic` are not published as their own Smithery
+`modellix-ffmpeg`, `modellix-moviepy`, `modellix-social-card`, `modellix-infographic`, `modellix-ecomm-ugc-video`, `modellix-cover-image`, `modellix-comic`, and `modellix-article-illustrator` are not published as their own Smithery
 or ClawHub skills. They ship with the complete plugin and with a checkout of this
-repository. A skill-only install of `modellix-design` does not include them. `modellix-social-card` plans prompts for mainstream social cards and hands generation back to `modellix-design`. `modellix-infographic` turns a source into one infographic prompt and hands generation to `modellix-design`.
+repository. A skill-only install of `modellix-design` does not include them. `modellix-social-card` plans prompts for mainstream social cards and hands generation back to `modellix-design`. `modellix-infographic` turns a source into one infographic prompt and hands generation to `modellix-design`. `modellix-ecomm-ugc-video` plans a vertical ecommerce UGC video as one prompt per shot and hands generation to `modellix-design`. `modellix-cover-image` plans one article-cover prompt and hands generation to `modellix-design`. `modellix-comic` plans a knowledge comic as one prompt per page and hands generation to `modellix-design`. `modellix-article-illustrator` plans one prompt per in-article illustration and hands generation to `modellix-design`.
 
 #### Agent Skills (skills.sh) — any host
 
@@ -236,7 +245,7 @@ clawhub update --all
 
 #### OpenCode
 
-OpenCode’s [plugins](https://opencode.ai/docs/zh-cn/plugins/) are JS/TS event hooks — Modellix does **not** use that path. Use [Agent Skills](https://opencode.ai/docs/skills/) instead. This repo exposes six `.opencode/skills/*` symlinks, one for each skill tree.
+OpenCode’s [plugins](https://opencode.ai/docs/zh-cn/plugins/) are JS/TS event hooks — Modellix does **not** use that path. Use [Agent Skills](https://opencode.ai/docs/skills/) instead. This repo exposes ten `.opencode/skills/*` symlinks, one for each skill tree.
 
 Install:
 
@@ -252,6 +261,10 @@ ln -sfn /path/to/modellix-plugin/skills/modellix-ffmpeg ~/.config/opencode/skill
 ln -sfn /path/to/modellix-plugin/skills/modellix-moviepy ~/.config/opencode/skills/modellix-moviepy
 ln -sfn /path/to/modellix-plugin/skills/modellix-social-card ~/.config/opencode/skills/modellix-social-card
 ln -sfn /path/to/modellix-plugin/skills/modellix-infographic ~/.config/opencode/skills/modellix-infographic
+ln -sfn /path/to/modellix-plugin/skills/modellix-ecomm-ugc-video ~/.config/opencode/skills/modellix-ecomm-ugc-video
+ln -sfn /path/to/modellix-plugin/skills/modellix-cover-image ~/.config/opencode/skills/modellix-cover-image
+ln -sfn /path/to/modellix-plugin/skills/modellix-comic ~/.config/opencode/skills/modellix-comic
+ln -sfn /path/to/modellix-plugin/skills/modellix-article-illustrator ~/.config/opencode/skills/modellix-article-illustrator
 
 # Project-local
 mkdir -p .opencode/skills
@@ -261,6 +274,10 @@ ln -sfn /path/to/modellix-plugin/skills/modellix-ffmpeg .opencode/skills/modelli
 ln -sfn /path/to/modellix-plugin/skills/modellix-moviepy .opencode/skills/modellix-moviepy
 ln -sfn /path/to/modellix-plugin/skills/modellix-social-card .opencode/skills/modellix-social-card
 ln -sfn /path/to/modellix-plugin/skills/modellix-infographic .opencode/skills/modellix-infographic
+ln -sfn /path/to/modellix-plugin/skills/modellix-ecomm-ugc-video .opencode/skills/modellix-ecomm-ugc-video
+ln -sfn /path/to/modellix-plugin/skills/modellix-cover-image .opencode/skills/modellix-cover-image
+ln -sfn /path/to/modellix-plugin/skills/modellix-comic .opencode/skills/modellix-comic
+ln -sfn /path/to/modellix-plugin/skills/modellix-article-illustrator .opencode/skills/modellix-article-illustrator
 ```
 
 Update:
@@ -311,6 +328,10 @@ ln -sfn /path/to/modellix-plugin/skills/modellix-ffmpeg ~/.pi/agent/skills/model
 ln -sfn /path/to/modellix-plugin/skills/modellix-moviepy ~/.pi/agent/skills/modellix-moviepy
 ln -sfn /path/to/modellix-plugin/skills/modellix-social-card ~/.pi/agent/skills/modellix-social-card
 ln -sfn /path/to/modellix-plugin/skills/modellix-infographic ~/.pi/agent/skills/modellix-infographic
+ln -sfn /path/to/modellix-plugin/skills/modellix-ecomm-ugc-video ~/.pi/agent/skills/modellix-ecomm-ugc-video
+ln -sfn /path/to/modellix-plugin/skills/modellix-cover-image ~/.pi/agent/skills/modellix-cover-image
+ln -sfn /path/to/modellix-plugin/skills/modellix-comic ~/.pi/agent/skills/modellix-comic
+ln -sfn /path/to/modellix-plugin/skills/modellix-article-illustrator ~/.pi/agent/skills/modellix-article-illustrator
 ```
 
 #### Hermes Agent
@@ -333,6 +354,10 @@ ln -sfn /path/to/modellix-plugin/skills/modellix-ffmpeg ~/.hermes/skills/modelli
 ln -sfn /path/to/modellix-plugin/skills/modellix-moviepy ~/.hermes/skills/modellix-moviepy
 ln -sfn /path/to/modellix-plugin/skills/modellix-social-card ~/.hermes/skills/modellix-social-card
 ln -sfn /path/to/modellix-plugin/skills/modellix-infographic ~/.hermes/skills/modellix-infographic
+ln -sfn /path/to/modellix-plugin/skills/modellix-ecomm-ugc-video ~/.hermes/skills/modellix-ecomm-ugc-video
+ln -sfn /path/to/modellix-plugin/skills/modellix-cover-image ~/.hermes/skills/modellix-cover-image
+ln -sfn /path/to/modellix-plugin/skills/modellix-comic ~/.hermes/skills/modellix-comic
+ln -sfn /path/to/modellix-plugin/skills/modellix-article-illustrator ~/.hermes/skills/modellix-article-illustrator
 ```
 
 To reuse a shared Agent Skills directory, add under `skills` in `~/.hermes/config.yaml`:
@@ -359,6 +384,7 @@ export MODELLIX_API_KEY="your_api_key"
 - REST requires `MODELLIX_API_KEY`.
 - CLI may use the env var **or** a saved profile (`modellix-cli auth login` / `init`).
 - Modellix Media Generation needs the host to attach `Authorization: Bearer` to `https://tool.modellix.ai/mcp/media`. The plugin manifests declare the URL only. The Cursor `MODELLIX_API_KEY` variable does not automatically become that header.
+- Modellix Web Tools needs the host to attach `Authorization: Bearer` to `https://tool.modellix.ai/mcp`. The plugin manifests declare the URL only. The Cursor `MODELLIX_API_KEY` variable does not automatically become that header. Calls are billed.
 - In Cursor, the key can also be set as the `MODELLIX_API_KEY` plugin variable for the CLI and REST paths.
 - In Hermes, prefer `~/.hermes/.env` or a session environment variable.
 - Prefer session-only keys; persist only when you explicitly ask for it.
@@ -389,7 +415,10 @@ on-image text. It does not recommend a model, authenticate, or submit work.
 If the user asked only for prompts, stop there. If they asked for the images,
 pass each prompt to `skills/modellix-design/`. A poster with no platform stays
 on `skills/modellix-image-prompt-engineering/`. A structured infographic belongs
-to `skills/modellix-infographic/`.
+to `skills/modellix-infographic/`. An article or blog cover with no named
+network belongs to `skills/modellix-cover-image/`. A knowledge comic belongs to
+`skills/modellix-comic/`. A set of illustrations placed through an article, with
+no named network, belongs to `skills/modellix-article-illustrator/`.
 
 ## Infographic workflow
 
@@ -400,6 +429,55 @@ authenticate, or submit work. Generation goes to `skills/modellix-design/`.
 
 If the user asked only for a prompt, stop there. If they asked for the image,
 pass that prompt to `skills/modellix-design/`.
+
+## Article cover workflow
+
+For an article, blog, or newsletter cover with no named network, use
+`skills/modellix-cover-image/`. It recommends a type, palette, rendering, text
+level, mood, and font, quotes the source title, and writes one prompt. It does
+not recommend a model, authenticate, or submit work.
+
+If the user asked only for a prompt, stop there. If they asked for the image,
+pass that prompt to `skills/modellix-design/`. A cover for a named network stays
+on `skills/modellix-social-card/`.
+
+## Article illustration workflow
+
+For several pictures placed through an article, use
+`skills/modellix-article-illustrator/`. It confirms a preset or a type, style,
+and palette, plus density, aspect, and language, then writes one prompt per
+illustration. It does not recommend a model, authenticate, or submit work, and
+it does not rewrite the article.
+
+If the user asked only for prompts, stop there. If they asked for the images,
+pass the prompts to `skills/modellix-design/` in article order. One cover stays
+on `skills/modellix-cover-image/`. One standalone infographic stays on
+`skills/modellix-infographic/`.
+
+## Knowledge comic workflow
+
+For a tutorial, biography, concept story, or four-panel strip, use
+`skills/modellix-comic/`. It confirms the style, page count, aspect, language,
+and text level, locks the cast, and writes one prompt per page. A multi-page
+comic starts with a character-sheet prompt. It does not recommend a model,
+authenticate, or submit work.
+
+If the user asked only for prompts, stop there. If they asked for the pages,
+pass the prompts to `skills/modellix-design/` in order: character sheet, cover,
+then story pages. A single diagram with no story stays on
+`skills/modellix-infographic/`.
+
+## Ecommerce UGC video workflow
+
+For a creator-style product video, use `skills/modellix-ecomm-ugc-video/`. It
+turns the product facts into one vertical shot prompt per beat: hook, reveal,
+proof, and close. It quotes only claims the user supplied, leaves captions out
+of the generation prompt, and does not recommend a model, authenticate, or
+submit work.
+
+If the user asked only for the brief, stop there. If they asked for the video,
+pass each shot prompt to `skills/modellix-design/`. After those files exist,
+`skills/modellix-ffmpeg/` concatenates the shots and burns the caption list.
 
 ## Local video and audio edits
 
@@ -464,7 +542,7 @@ Request-body schemas come from `modellix-cli model get-schema <slug>` (JSON defa
 
 ## Security and data handling
 
-Prompts and public media inputs are sent to `https://api.modellix.ai` when a documented CLI or REST generation task is invoked, and to `https://tool.modellix.ai/mcp/media` when Modellix Media Generation is invoked. The host attaches the API key to Media Generation; the plugin manifests do not. Modellix Docs Search is read-only, connects only to `https://docs.modellix.ai/mcp`, and does not receive the API key or submit tasks. Spend-safety hook state contains hashes, model slugs, task ids, and timestamps, never prompts, request bodies, complete commands, or keys. See [SECURITY.md](SECURITY.md) and the [Modellix Privacy Policy](https://www.modellix.ai/privacy).
+Prompts and public media inputs are sent to `https://api.modellix.ai` when a documented CLI or REST generation task is invoked, and to `https://tool.modellix.ai/mcp/media` when Modellix Media Generation is invoked. The host attaches the API key to Media Generation; the plugin manifests do not. Modellix Docs Search is read-only, connects only to `https://docs.modellix.ai/mcp`, and does not receive the API key or submit tasks. Modellix Web Tools searches the public web and fetches public URLs at `https://tool.modellix.ai/mcp`. Calls are billed. The host attaches the API key; the manifests do not contain it. Spend-safety hook state contains hashes, model slugs, task ids, and timestamps, never prompts, request bodies, complete commands, or keys. See [SECURITY.md](SECURITY.md) and the [Modellix Privacy Policy](https://www.modellix.ai/privacy).
 
 ## Hooks (spend and result safety)
 
@@ -483,11 +561,17 @@ Plugin-level `scripts/` holds these hook scripts; the CLI/REST helpers used by t
 
 ## Slash commands
 
-Hosts that support the packaged command adapters expose eight shortcuts. Commands are outside the Agent Plugins 1.0.0 core; each routes to one of the packaged skills and adds no separate runtime:
+Hosts that support the packaged command adapters expose fourteen shortcuts. Commands are outside the Agent Plugins 1.0.0 core; each routes to one of the packaged skills and adds no separate runtime:
 
 | Command | Use it for |
 | --- | --- |
 | `/modellix:prompt [image idea or existing prompt]` | Prepare an image prompt and brief without submitting |
+| `/modellix:social-card [source or placement]` | Plan social-card prompts without submitting |
+| `/modellix:infographic [source text]` | Plan one infographic prompt without submitting |
+| `/modellix:ecomm-ugc-video [product, pattern, language, or length]` | Plan a vertical ecommerce UGC video without submitting |
+| `/modellix:cover-image [article title, type, palette, or aspect]` | Plan one article-cover prompt without submitting |
+| `/modellix:comic [source, preset, page count, or text level]` | Plan a knowledge-comic storyboard without submitting |
+| `/modellix:article-illustrator [article, preset, density, or aspect]` | Plan in-article illustration prompts without submitting |
 | `/modellix:image [prompt] [image url]` | Text-to-image, or image editing when input images are given |
 | `/modellix:video [prompt] [image or video url]` | Text-to-video, image-to-video, or video-to-video |
 | `/modellix:audio [tts\|stt\|sts] [text or audio url]` | Text-to-speech, speech-to-text, or speech-to-speech |
@@ -496,8 +580,9 @@ Hosts that support the packaged command adapters expose eight shortcuts. Command
 | `/modellix:tasks [task id]` | Task status, plus recovery after a timeout or unknown submission |
 | `/modellix:download [task id] [dir]` | Fetch results into `./outputs` before the ~7-day expiry |
 
-The three paid commands (`image`, `video`, `audio`) and the user-facing prompt
-command set `disable-model-invocation: true`. Hosts without command support (Pi,
+The three paid commands (`image`, `video`, `audio`) and the planning commands
+(`prompt`, `social-card`, `infographic`, `ecomm-ugc-video`, `cover-image`, `comic`, `article-illustrator`) set
+`disable-model-invocation: true`. Hosts without command support (Pi,
 Hermes, OpenCode, the ClawHub skill bundle) ignore [`commands/`](commands/) and
 keep using the skills.
 
@@ -525,9 +610,9 @@ keep using the skills.
 ├── package.json                    # npm + ClawHub OpenClaw + Pi package (@modellix/modellix-plugin)
 ├── openclaw.plugin.json            # OpenClaw package manifest (skills bundle)
 ├── plugin.json                     # Agent Plugins 1.0.0 portable manifest
-├── mcp.json                        # Agent Plugins 1.0.0 MCP servers (streamable-http)
-├── .mcp.json                       # Cursor/legacy host MCP adapter (`type: http`)
-├── commands/                       # Slash commands (:prompt, :social-card, :infographic, :image, :video, :audio, :doctor, :models, :tasks, :download)
+├── mcp.json                        # Agent Plugins 1.0.0 MCP servers: Docs Search, Media Generation, Web Tools (streamable-http)
+├── .mcp.json                       # Cursor/legacy host MCP adapter for the same servers (`type: http`)
+├── commands/                       # Slash commands (:prompt, :social-card, :infographic, :ecomm-ugc-video, :cover-image, :comic, :article-illustrator, :image, :video, :audio, :doctor, :models, :tasks, :download)
 ├── rules/                          # Host-extension always-on guardrails (.mdc)
 ├── hooks/                          # Host adapters: hooks.json (legacy/Claude), cursor-hooks.json (Cursor)
 ├── scripts/                        # Hook logic (Python stdlib) + cross-platform Node launcher
@@ -537,12 +622,20 @@ keep using the skills.
 ├── .opencode/skills/modellix-moviepy                      # Symlink → skills/modellix-moviepy
 ├── .opencode/skills/modellix-social-card                  # Symlink → skills/modellix-social-card
 ├── .opencode/skills/modellix-infographic                  # Symlink → skills/modellix-infographic
+├── .opencode/skills/modellix-ecomm-ugc-video              # Symlink → skills/modellix-ecomm-ugc-video
+├── .opencode/skills/modellix-cover-image                  # Symlink → skills/modellix-cover-image
+├── .opencode/skills/modellix-comic                        # Symlink → skills/modellix-comic
+├── .opencode/skills/modellix-article-illustrator          # Symlink → skills/modellix-article-illustrator
 ├── .pi/skills/modellix-design             # Symlink → skills/modellix-design (Pi local skill discovery)
 ├── .pi/skills/modellix-image-prompt-engineering       # Symlink → matching skill tree
 ├── .pi/skills/modellix-ffmpeg                         # Symlink → skills/modellix-ffmpeg
 ├── .pi/skills/modellix-moviepy                        # Symlink → skills/modellix-moviepy
 ├── .pi/skills/modellix-social-card                    # Symlink → skills/modellix-social-card
 ├── .pi/skills/modellix-infographic                    # Symlink → skills/modellix-infographic
+├── .pi/skills/modellix-ecomm-ugc-video                # Symlink → skills/modellix-ecomm-ugc-video
+├── .pi/skills/modellix-cover-image                    # Symlink → skills/modellix-cover-image
+├── .pi/skills/modellix-comic                          # Symlink → skills/modellix-comic
+├── .pi/skills/modellix-article-illustrator            # Symlink → skills/modellix-article-illustrator
 ├── .plugin/plugin.json             # Legacy Open Plugins host adapter
 ├── .cursor-plugin/
 │   ├── plugin.json                 # Cursor manifest (+ optional MODELLIX_API_KEY variable)
@@ -560,15 +653,19 @@ keep using the skills.
 │   ├── modellix-ffmpeg/            # Local concat, trim, reframe, and transcode
 │   ├── modellix-moviepy/           # Local titles, lower thirds, and timelines
 │   ├── modellix-social-card/       # Prompt-only social card planning
-│   └── modellix-infographic/       # Prompt-only infographic planning
+│   ├── modellix-infographic/       # Prompt-only infographic planning
+│   ├── modellix-ecomm-ugc-video/   # Prompt-only ecommerce UGC video planning
+│   ├── modellix-cover-image/       # Prompt-only article cover planning
+│   ├── modellix-comic/             # Prompt-only knowledge comic planning
+│   └── modellix-article-illustrator/ # Prompt-only in-article illustration planning
 └── .github/workflows/              # Publish sync (Smithery / skills add / ClawHub)
 ```
 
-The six immediate skill directories are discovered from the fixed Agent Plugins
+The ten immediate skill directories are discovered from the fixed Agent Plugins
 `skills/` location without manifest path fields. Pi uses
 `package.json#pi.skills`; Hermes installs skill trees directly (no
 Hermes-specific plugin manifest). A skill-only install of `modellix-design`
-does not include `modellix-ffmpeg`, `modellix-moviepy`, `modellix-social-card`, or `modellix-infographic`. Those skills ship with the plugin package
+does not include `modellix-ffmpeg`, `modellix-moviepy`, `modellix-social-card`, `modellix-infographic`, `modellix-ecomm-ugc-video`, `modellix-cover-image`, `modellix-comic`, or `modellix-article-illustrator`. Those skills ship with the plugin package
 and are not published as their own Smithery or ClawHub skills.
 
 ## Maintaining this plugin
@@ -577,10 +674,14 @@ See [AGENTS.md](AGENTS.md) for sources of truth, update checklists, smoke tests,
 
 Current plugin version: see [`plugin.json`](plugin.json) (kept in sync with host
 manifests and [`skills/modellix-design/skill.json`](skills/modellix-design/skill.json)).
-The prompt-only skill, the social-card skill, the infographic skill, the FFmpeg skill, and the moviepy skill have their own versions in
+The prompt-only skill, the social-card skill, the infographic skill, the ecommerce UGC skill, the cover skill, the comic skill, the article-illustrator skill, the FFmpeg skill, and the moviepy skill have their own versions in
 [`skills/modellix-image-prompt-engineering/skill.json`](skills/modellix-image-prompt-engineering/skill.json),
 [`skills/modellix-social-card/skill.json`](skills/modellix-social-card/skill.json),
 [`skills/modellix-infographic/skill.json`](skills/modellix-infographic/skill.json),
+[`skills/modellix-ecomm-ugc-video/skill.json`](skills/modellix-ecomm-ugc-video/skill.json),
+[`skills/modellix-cover-image/skill.json`](skills/modellix-cover-image/skill.json),
+[`skills/modellix-comic/skill.json`](skills/modellix-comic/skill.json),
+[`skills/modellix-article-illustrator/skill.json`](skills/modellix-article-illustrator/skill.json),
 [`skills/modellix-ffmpeg/skill.json`](skills/modellix-ffmpeg/skill.json), and
 [`skills/modellix-moviepy/skill.json`](skills/modellix-moviepy/skill.json).
 
@@ -593,6 +694,7 @@ The prompt-only skill, the social-card skill, the infographic skill, the FFmpeg 
 - Agent skill guide: [ways-to-use/skill](https://docs.modellix.ai/ways-to-use/skill.md)
 - Docs Search: [ways-to-use/mcp](https://docs.modellix.ai/ways-to-use/mcp) ([endpoint](https://docs.modellix.ai/mcp))
 - Media Generation: [ways-to-use/media-generation-mcp](https://docs.modellix.ai/ways-to-use/media-generation-mcp) ([endpoint](https://tool.modellix.ai/mcp/media))
+- Web Tools: [tools/mcp](https://docs.modellix.ai/tools/mcp) ([endpoint](https://tool.modellix.ai/mcp))
 - REST API: [ways-to-use/api](https://docs.modellix.ai/ways-to-use/api.md)
 - CLI package: [npmjs.com/package/modellix-cli](https://www.npmjs.com/package/modellix-cli)
 - Plugin package: [npmjs.com/package/@modellix/modellix-plugin](https://www.npmjs.com/package/@modellix/modellix-plugin)

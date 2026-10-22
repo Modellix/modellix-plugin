@@ -13,7 +13,7 @@ metadata:
 
 Finish a cut from media that is already on disk. `modellix-design` generates, waits, and downloads. This skill starts after those files exist and builds one layered picture: titles, name plates, and a short timeline of clips plus voiceover.
 
-Do not submit a Modellix task, poll one, or download one from here. If the user wants a new image, video, or audio asset, hand the request to `modellix-design`.
+Do not submit a Modellix task, poll one, or download one from here. If the user wants a new image, video, or audio asset, hand the request to `modellix-design`. A commerce UGC video that still needs a shot plan belongs to `modellix-ecomm-ugc-video`.
 
 Hand file-level work to `modellix-ffmpeg`: concatenate flat clips, trim, scale, compress, extract audio, change speed, fade a whole file, transcode, or burn a subtitle file. This skill does not reimplement those commands. A full SRT track is one of those handoffs. Hand-placed titles are not.
 

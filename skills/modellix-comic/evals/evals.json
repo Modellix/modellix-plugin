@@ -1,0 +1,83 @@
+{
+  "skill_name": "modellix-comic",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Plan a knowledge comic. Do not generate images. Source: a short tutorial on gradient descent. Confirmed: preset ohmsha, 1 cover + 4 story pages, aspect 9:16, English, text level bubbles. The only sentence that may appear is: the ball stops at the bottom.",
+      "expected_output": "Returns a comic brief for ohmsha with a cover and four story pages at 9:16. Prompts turn the idea into an action or a place and do not use talking-head panels. Quotes only the allowed sentence. Includes a character-sheet prompt because characters recur. Does not recommend a model or submit.",
+      "files": [],
+      "assertions": [
+        "Named preset ohmsha and aspect 9:16",
+        "Wrote one prompt for a character sheet plus a cover and four story pages",
+        "Described the idea as a visible action or place rather than two people lecturing",
+        "Quoted only the sentence the ball stops at the bottom",
+        "Did not recommend a model, provider, or slug",
+        "Stopped after the brief and did not submit a generation task"
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "Plan a biography comic and stop after the prompts. Subject: Ada Lovelace writing notes on the analytical engine. Confirmed: ligne-claire, neutral, mixed, 1 cover + 3 story pages, 3:4, English, bubbles. No reference images.",
+      "expected_output": "Returns a comic brief with a cast lock and a character-sheet prompt. Lovelace is described by era, role, and costume in ligne-claire, not as a photograph. Page prompts repeat the same lock. Does not invent unpublished quotations. Does not recommend a model or submit.",
+      "files": [],
+      "assertions": [
+        "Named ligne-claire, neutral, mixed, and 3:4",
+        "Included a character-sheet prompt and three story pages plus a cover",
+        "Described Ada Lovelace by era, role, and costume rather than a photographic portrait",
+        "Repeated the same cast lock on the pages",
+        "Did not invent a quotation or a statistic",
+        "Did not recommend a model, provider, or slug"
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "写一则四格漫画的提示词，先不要生成。主题：把复杂需求一次说清，比返工便宜。已确认 preset four-panel，文字档 silent，画面中文不出现在图里。",
+      "expected_output": "Returns a single-page four-panel brief, omits the character sheet, and puts no words in the prompt. Lists any dialogue beside the page. Does not recommend a model or submit.",
+      "files": [],
+      "assertions": [
+        "Named preset four-panel and one page",
+        "Omitted the character-sheet prompt",
+        "Told the image to contain no letters",
+        "Kept any dialogue beside the page rather than inside the prompt",
+        "Did not recommend a model, provider, or slug",
+        "Stopped after the brief and did not submit a generation task"
+      ]
+    },
+    {
+      "id": 4,
+      "prompt": "Turn this article into a comic. It explains how a queue backs up. I have not chosen a style or a page count. Do not generate anything yet.",
+      "expected_output": "Recommends a style, page count, aspect, language, and text level, and waits. Leaves the character-sheet prompt and page prompts empty. Does not invent a model.",
+      "files": [],
+      "assertions": [
+        "Recommended a preset or art, tone, and layout",
+        "Recommended a page count at or under a cover plus six story pages",
+        "Left the prompts empty because the choices were not confirmed",
+        "Did not recommend a model, provider, or slug",
+        "Did not submit a generation task"
+      ]
+    },
+    {
+      "id": 5,
+      "prompt": "Make a comparison infographic of three caching strategies, with numbers in one diagram. Do not make it a story.",
+      "expected_output": "Does not plan a comic. Routes the request to modellix-infographic.",
+      "files": [],
+      "assertions": [
+        "Did not write comic page prompts",
+        "Directed the request to modellix-infographic"
+      ]
+    },
+    {
+      "id": 6,
+      "prompt": "Generate the comic. Use the recommendation and do not ask again. Source: a one-page note that a checksum detects a flipped bit. Confirmed nothing else. Pick the best model and make every page.",
+      "expected_output": "Treats the recommendation as confirmed, writes the prompts, and hands them to modellix-design in order. Omits the model because the user did not name a slug. Does not submit from this skill.",
+      "files": [],
+      "assertions": [
+        "Confirmed a recommendation instead of asking again",
+        "Passed the prompts to modellix-design",
+        "Put the character sheet ahead of later pages when characters recur",
+        "Did not name or recommend a model slug",
+        "Did not submit, authenticate, or download from this skill"
+      ]
+    }
+  ]
+}

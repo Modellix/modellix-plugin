@@ -7,6 +7,10 @@
     "Modellix Media Generation": {
       "type": "http",
       "url": "https://tool.modellix.ai/mcp/media"
+    },
+    "Modellix Web Tools": {
+      "type": "http",
+      "url": "https://tool.modellix.ai/mcp"
     }
   }
 }

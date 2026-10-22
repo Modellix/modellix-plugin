@@ -13,7 +13,7 @@ metadata:
 
 Edit media that is already on disk. `modellix-design` generates, waits, and downloads. This skill starts after those files exist.
 
-Do not submit a Modellix task, poll one, or download one from here. If the user wants a new image, video, or audio asset, hand the request to `modellix-design`.
+Do not submit a Modellix task, poll one, or download one from here. If the user wants a new image, video, or audio asset, hand the request to `modellix-design`. A commerce UGC video that still needs a shot plan belongs to `modellix-ecomm-ugc-video`. After those shots are downloaded, concatenation and a subtitle-file burn stay here.
 
 Titles, lower thirds, and a timeline that stacks pictures with voiceover belong to `modellix-moviepy`. Keep concatenation, trimming, scaling, compression, audio extraction, and subtitle-file burns here.
 

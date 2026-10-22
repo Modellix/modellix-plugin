@@ -1,6 +1,6 @@
 ---
 name: modellix-social-card
-description: Plan prompts for social cards, covers, and carousels on mainstream networks. Use this skill whenever the user wants a Xiaohongshu, WeChat Official Account, Weibo, Douyin, Bilibili, X, Twitter, Instagram, Facebook, LinkedIn, YouTube thumbnail, TikTok, Threads, Pinterest, Snapchat, Bluesky, Reddit, WhatsApp Status, or Telegram card, cover, or carousel — even if they only say "social post image", "cover", "thumbnail", or "carousel". Turn the source into one image prompt per placement, with exact on-image text and aspect ratio, then hand generation to modellix-design. Skip generic posters with no platform, video edits, and requests that only need execution of an already finished prompt.
+description: Plan prompts for social cards, covers, and carousels on mainstream networks. Use this skill whenever the user wants a Xiaohongshu, WeChat Official Account, Weibo, Douyin, Bilibili, X, Twitter, Instagram, Facebook, LinkedIn, YouTube thumbnail, TikTok, Threads, Pinterest, Snapchat, Bluesky, Reddit, WhatsApp Status, or Telegram card, cover, or carousel — even if they only say "social post image", "thumbnail", or "carousel". Turn the source into one image prompt per placement, with exact on-image text and aspect ratio, then hand generation to modellix-design. Skip article covers with no named network, in-article illustration sets, knowledge comics, generic posters, video edits, and requests that only need execution of an already finished prompt.
 license: MIT
 compatibility: No external tools required; pairs with the modellix-design skill for image execution.
 metadata:
@@ -20,11 +20,12 @@ change quickly, and choosing a model is outside this skill. When the user wants
 the images made, finish the brief first and then hand each prompt to
 `modellix-design`.
 
-A cover, thumbnail, or carousel for a named network stays here. A structured
-infographic belongs to `modellix-infographic`. A poster, product shot, or
-illustration that is not an information diagram belongs to
-`modellix-image-prompt-engineering`. Files already on disk belong to
-`modellix-ffmpeg` or `modellix-moviepy`.
+A cover, thumbnail, or carousel for a named network stays here. A set of
+illustrations placed through an article, with no named network, belongs to
+`modellix-article-illustrator`. A structured infographic belongs to
+`modellix-infographic`. A poster, product shot, or illustration that is not an
+information diagram belongs to `modellix-image-prompt-engineering`. Files already
+on disk belong to `modellix-ffmpeg` or `modellix-moviepy`.
 
 ## Route the request
 
@@ -36,9 +37,17 @@ Skip or keep the pass short when:
 
 - The user already supplied a finished prompt and asked only to run it. Pass that
   prompt to `modellix-design`.
+- The request is an article, blog, or newsletter cover and does not name a
+  network placement. Use `modellix-cover-image`.
+- The request is a set of illustrations placed through an article and does not
+  name a network placement. Use `modellix-article-illustrator`.
+- The request is a knowledge comic, educational comic, biography comic, or
+  four-panel strip, and does not name a network placement. Use `modellix-comic`.
 - The request is a poster or illustration with no platform. Use
   `modellix-image-prompt-engineering`.
 - The request is a structured infographic. Use `modellix-infographic`.
+- The request is a commerce UGC video that still needs a shot plan. Use
+  `modellix-ecomm-ugc-video`.
 - The request is video editing, subtitles, credentials, task status, or a download.
 - The user wants an avatar or a profile banner. Say those placements are outside
   this skill and ask which content card they want instead.

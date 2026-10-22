@@ -185,6 +185,26 @@ reference 2 for [role].
 A structured infographic belongs to `modellix-infographic`. Do not plan that
 image here.
 
+### Article cover
+
+An article, blog, or newsletter cover belongs to `modellix-cover-image`. Do not
+plan that cover here.
+
+### Article illustrations
+
+A set of pictures placed through an article belongs to
+`modellix-article-illustrator`. Do not plan that set here.
+
+### Ecommerce UGC video
+
+A vertical creator-style product video belongs to `modellix-ecomm-ugc-video`.
+Do not plan that shot list here.
+
+### Knowledge comic
+
+A knowledge comic, tutorial comic, biography comic, or four-panel strip belongs
+to `modellix-comic`. Do not plan that page list here.
+
 ### UI decision screen
 
 Start with the user's decision:

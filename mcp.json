@@ -8,6 +8,10 @@
     "Modellix Media Generation": {
       "type": "streamable-http",
       "url": "https://tool.modellix.ai/mcp/media"
+    },
+    "Modellix Web Tools": {
+      "type": "streamable-http",
+      "url": "https://tool.modellix.ai/mcp"
     }
   }
 }

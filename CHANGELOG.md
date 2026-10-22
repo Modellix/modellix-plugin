@@ -3,6 +3,52 @@
 All notable changes to this project are documented here. The format loosely follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and versions use [Semantic Versioning](https://semver.org/).
 
+## [4.12.0] - 2026-10-22
+
+### Added
+
+- Add `skills/modellix-article-illustrator` to plan a set of illustrations placed through an article. It confirms type, style, palette, density, aspect, and language, writes one prompt per illustration, and hands generation to `modellix-design`. It does not recommend a model or submit a task.
+
+### Changed
+
+- Route an in-article illustration set from `modellix-image-prompt-engineering`, `modellix-infographic`, `modellix-cover-image`, `modellix-comic`, and `modellix-social-card` to `modellix-article-illustrator`.
+
+## [4.11.0] - 2026-10-22
+
+### Added
+
+- Add `skills/modellix-comic` to plan a knowledge comic, educational comic, biography comic, or four-panel strip. It confirms the style, page count, aspect, language, and text level, locks the cast, writes one prompt per page, and hands generation to `modellix-design`. It does not recommend a model or submit a task.
+
+### Changed
+
+- Route a knowledge comic that still needs a storyboard from `modellix-image-prompt-engineering`, `modellix-infographic`, `modellix-cover-image`, and `modellix-social-card` to `modellix-comic`.
+
+## [4.10.0] - 2026-10-22
+
+### Added
+
+- Add `skills/modellix-cover-image` to plan one article, blog, or newsletter cover. It confirms type, palette, rendering, text level, mood, and font, quotes the source title, and hands generation to `modellix-design`. It does not recommend a model or submit a task.
+
+### Changed
+
+- Route an article cover with no named network from `modellix-social-card`, `modellix-image-prompt-engineering`, and `modellix-infographic` to `modellix-cover-image`.
+
+## [4.9.0] - 2026-10-22
+
+### Added
+
+- Add `skills/modellix-ecomm-ugc-video` to plan a vertical ecommerce UGC video. It confirms the pattern, quotes only supplied product facts, writes one prompt per shot, and hands generation to `modellix-design`. On-screen captions are listed for `modellix-ffmpeg` after the shots exist. It does not recommend a model or submit a task.
+
+### Changed
+
+- Route a commerce UGC video that still needs a shot plan from `modellix-image-prompt-engineering`, `modellix-social-card`, `modellix-infographic`, `modellix-ffmpeg`, and `modellix-moviepy` to `modellix-ecomm-ugc-video`.
+
+## [4.8.0] - 2026-10-22
+
+### Added
+
+- Declare Modellix Web Tools in `mcp.json` and `.mcp.json` without auth headers. The server at `https://tool.modellix.ai/mcp` exposes billed public web search and URL fetch. The host attaches the API key.
+
 ## [4.7.0] - 2026-10-22
 
 ### Added
