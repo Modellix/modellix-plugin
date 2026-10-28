@@ -81,6 +81,10 @@ cell numbers, shadows, or extra symbols. Square canvas.
 
 ## Character sheets
 
+A casting board with a hero portrait, an expression grid, and a full-body
+turnaround belongs to `modellix-casting`. Do not plan that board here. A plain
+sheet that keeps a comic cast consistent belongs to `modellix-comic`.
+
 Define whether cells represent different characters, poses, expressions, or
 views. Do not mix those dimensions accidentally.
 

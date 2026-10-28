@@ -1,0 +1,5 @@
+{
+  "name": "modellix-casting",
+  "version": "1.0.0",
+  "description": "Plan one casting-board prompt per character, with a hero portrait, expression grid, and full-body turnaround, before handing generation to modellix-design."
+}

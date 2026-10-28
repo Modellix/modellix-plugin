@@ -1,0 +1,97 @@
+{
+  "skill_name": "modellix-casting",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "做一张选角图。先不要生成。我还没说角色是谁。",
+      "expected_output": "Asks who the character is. Does not invent a name, an age, or a costume. Does not write a prompt. Does not recommend a model or submit.",
+      "files": [],
+      "assertions": [
+        "Asked for the character",
+        "Did not invent a name, age, or costume",
+        "Left the prompt empty",
+        "Did not recommend a model, provider, or slug",
+        "Did not submit a generation task"
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "Make a casting board for a 28-year-old woman with a short black bob, sharp eyes, and a slim build. She wears a black blazer, white shirt, and black trousers. I have not chosen a rendering. Do not generate anything yet.",
+      "expected_output": "Recommends a rendering and a 16:9 aspect, and waits. Keeps the described identity. Leaves the board prompt empty. Does not invent a model.",
+      "files": [],
+      "assertions": [
+        "Recommended studio or another rendering with a reason",
+        "Recommended a 16:9 aspect",
+        "Kept the short black bob, black blazer, white shirt, and black trousers",
+        "Left the prompt empty because the rendering was not confirmed",
+        "Did not recommend a model, provider, or slug",
+        "Did not submit a generation task"
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "Plan a studio casting board and stop after the prompt. Confirmed: studio, 16:9. Character: a 30-year-old man, narrow eyes, black textured hair, tall, black suit and black shirt. No reference photo. Do not generate.",
+      "expected_output": "Returns one board prompt with a 3×3 expression grid, a center portrait, and a full-body front, three-quarter, and back view. Attaches references/examples/studio-board-suit.webp as layout and tells the image not to copy that person. Puts no text in the image. Does not recommend a model or submit.",
+      "files": [],
+      "assertions": [
+        "Wrote one board prompt at 16:9",
+        "Described a 3×3 headshot grid, a center portrait, and three full-body views",
+        "Repeated the black suit and black shirt in the zones",
+        "Named references/examples/studio-board-suit.webp with layout usage",
+        "Told the image not to copy the example person's face, hair, or costume",
+        "Told the image to contain no text",
+        "Did not recommend a model, provider, or slug",
+        "Did not submit a generation task"
+      ]
+    },
+    {
+      "id": 4,
+      "prompt": "Use the recommendation and make the casting board. Do not ask again. Pick the best model. Character: a woman in a cream knit set, long black hair, soft face, around 25. Reference photo: refs/lead.png. Confirmed nothing else.",
+      "expected_output": "Treats the studio recommendation as confirmed, marks refs/lead.png as direct, and still marks one layout example. The prompt separates identity from layout. Hands the prompt to modellix-design. Omits the model because the user did not name a slug. Does not submit from this skill.",
+      "files": [],
+      "assertions": [
+        "Confirmed studio instead of asking again",
+        "Marked refs/lead.png as direct",
+        "Marked one references/examples layout image as layout",
+        "Separated the photo's identity from the example's board",
+        "Passed the prompt to modellix-design",
+        "Did not name or recommend a model slug",
+        "Did not submit, authenticate, or download from this skill"
+      ]
+    },
+    {
+      "id": 5,
+      "prompt": "Plan an illustrated casting board and stop after the prompt. Confirmed: illustrated, ink line and flat color, 16:9. Character: a courier with a red scarf and a gray coat. No photo.",
+      "expected_output": "Writes one board prompt in the ink-and-flat-color style. Does not attach a photographic layout example. Does not recommend a model or submit.",
+      "files": [],
+      "assertions": [
+        "Named illustrated and 16:9",
+        "Described the three board zones",
+        "Kept the red scarf and gray coat",
+        "Did not attach a file under references/examples",
+        "Did not recommend a model, provider, or slug",
+        "Did not submit a generation task"
+      ]
+    },
+    {
+      "id": 6,
+      "prompt": "Turn this character into a four-panel comic. Do not make a casting board.",
+      "expected_output": "Does not plan a casting board. Routes the request to modellix-comic.",
+      "files": [],
+      "assertions": [
+        "Did not write a casting-board prompt",
+        "Directed the request to modellix-comic"
+      ]
+    },
+    {
+      "id": 7,
+      "prompt": "Make one poster of a single portrait, no expression grid and no turnaround.",
+      "expected_output": "Does not plan a casting board. Routes the request to modellix-image-prompt-engineering.",
+      "files": [],
+      "assertions": [
+        "Did not write a casting-board prompt",
+        "Directed the request to modellix-image-prompt-engineering"
+      ]
+    }
+  ]
+}

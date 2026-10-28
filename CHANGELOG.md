@@ -3,6 +3,16 @@
 All notable changes to this project are documented here. The format loosely follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and versions use [Semantic Versioning](https://semver.org/).
 
+## [4.13.0] - 2026-10-28
+
+### Added
+
+- Add `skills/modellix-casting` to plan one casting board per character. It confirms the rendering and aspect, locks the identity, writes one prompt for a hero portrait, expression grid, and full-body turnaround, and hands generation to `modellix-design`. Studio boards may cite a shipped layout example. The skill does not recommend a model or submit a task.
+
+### Changed
+
+- Route a casting board or turnaround lookbook from `modellix-image-prompt-engineering`, `modellix-comic`, `modellix-cover-image`, `modellix-article-illustrator`, and `modellix-social-card` to `modellix-casting`.
+
 ## [4.12.0] - 2026-10-22
 
 ### Added

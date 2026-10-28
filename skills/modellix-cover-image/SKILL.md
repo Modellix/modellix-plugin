@@ -1,6 +1,6 @@
 ---
 name: modellix-cover-image
-description: Plan one prompt for an article, blog, or newsletter cover. Use this skill whenever the user asks for an article cover, blog cover, 文章封面, or 封面图 that is not tied to a named social network — even if they only say "make a cover for this post." Recommend a type, palette, rendering, text level, mood, and font, confirm them, quote the source title, then hand generation to modellix-design. Skip platform cards, in-article illustration sets, infographics, knowledge comics, photographic posters, and requests that only need an already finished prompt executed.
+description: Plan one prompt for an article, blog, or newsletter cover. Use this skill whenever the user asks for an article cover, blog cover, 文章封面, or 封面图 that is not tied to a named social network — even if they only say "make a cover for this post." Recommend a type, palette, rendering, text level, mood, and font, confirm them, quote the source title, then hand generation to modellix-design. Skip platform cards, in-article illustration sets, casting boards, infographics, knowledge comics, photographic posters, and requests that only need an already finished prompt executed.
 license: MIT
 compatibility: No external tools required; pairs with the modellix-design skill for image execution.
 metadata:
@@ -21,7 +21,8 @@ user wants the image made, finish the brief first and then hand the prompt to
 
 A cover, thumbnail, or carousel for a named network belongs to
 `modellix-social-card`. A set of illustrations placed through an article belongs
-to `modellix-article-illustrator`. A structured infographic belongs to
+to `modellix-article-illustrator`. A casting board belongs to
+`modellix-casting`. A structured infographic belongs to
 `modellix-infographic`. A photographic poster, product shot, or packaging concept
 belongs to `modellix-image-prompt-engineering`. Files already on disk belong to
 `modellix-ffmpeg` or `modellix-moviepy`.
@@ -42,6 +43,7 @@ Skip or keep the pass short when:
   `modellix-social-card`.
 - The request is a set of illustrations placed through the article, not one
   cover. Use `modellix-article-illustrator`.
+- The request is a casting board or turnaround lookbook. Use `modellix-casting`.
 - The request is a structured infographic, or the picture has to carry a
   comparison, sequence, or metric board. Use `modellix-infographic`.
 - The request is a knowledge comic, educational comic, biography comic, or

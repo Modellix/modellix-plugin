@@ -1,6 +1,6 @@
 ---
 name: modellix-comic
-description: Plan prompts for a knowledge comic, educational comic, biography comic, tutorial comic, concept story, or four-panel strip. Use this skill whenever the user asks for 知识漫画, 教育漫画, 传记漫画, 四格漫画, or a comic that explains an idea — even if they only say "turn this into a comic." Recommend art, tone, and layout or a preset, confirm page count, aspect, language, and text level, lock the cast, then hand each page to modellix-design. Skip infographics, article covers, in-article illustration sets, social cards, posters, and requests that only need an already finished prompt executed.
+description: Plan prompts for a knowledge comic, educational comic, biography comic, tutorial comic, concept story, or four-panel strip. Use this skill whenever the user asks for 知识漫画, 教育漫画, 传记漫画, 四格漫画, or a comic that explains an idea — even if they only say "turn this into a comic." Recommend art, tone, and layout or a preset, confirm page count, aspect, language, and text level, lock the cast, then hand each page to modellix-design. Skip infographics, article covers, in-article illustration sets, casting boards, social cards, posters, and requests that only need an already finished prompt executed.
 license: MIT
 compatibility: No external tools required; pairs with the modellix-design skill for image execution.
 metadata:
@@ -21,7 +21,8 @@ user wants the pages made, finish the brief first and then hand the prompts to
 
 A structured infographic belongs to `modellix-infographic`. An article cover with
 no named network belongs to `modellix-cover-image`. A set of illustrations placed
-through an article belongs to `modellix-article-illustrator`. A card for a named
+through an article belongs to `modellix-article-illustrator`. A casting board
+belongs to `modellix-casting`. A card for a named
 network belongs to `modellix-social-card`. A poster, product shot, or single
 illustration belongs to `modellix-image-prompt-engineering`. A commerce UGC video
 belongs to `modellix-ecomm-ugc-video`. Files already on disk belong to
@@ -44,6 +45,8 @@ Skip or keep the pass short when:
 - The request is one article, blog, or newsletter cover. Use `modellix-cover-image`.
 - The request is a set of illustrations placed through an article, with no comic
   pages. Use `modellix-article-illustrator`.
+- The request is a casting board or turnaround lookbook, with no comic pages.
+  Use `modellix-casting`.
 - The request names a network and a card, cover, thumbnail, or carousel. Use
   `modellix-social-card`.
 - The request is a poster, product shot, or single illustration. Use

@@ -1,6 +1,6 @@
 ---
 name: modellix-social-card
-description: Plan prompts for social cards, covers, and carousels on mainstream networks. Use this skill whenever the user wants a Xiaohongshu, WeChat Official Account, Weibo, Douyin, Bilibili, X, Twitter, Instagram, Facebook, LinkedIn, YouTube thumbnail, TikTok, Threads, Pinterest, Snapchat, Bluesky, Reddit, WhatsApp Status, or Telegram card, cover, or carousel — even if they only say "social post image", "thumbnail", or "carousel". Turn the source into one image prompt per placement, with exact on-image text and aspect ratio, then hand generation to modellix-design. Skip article covers with no named network, in-article illustration sets, knowledge comics, generic posters, video edits, and requests that only need execution of an already finished prompt.
+description: Plan prompts for social cards, covers, and carousels on mainstream networks. Use this skill whenever the user wants a Xiaohongshu, WeChat Official Account, Weibo, Douyin, Bilibili, X, Twitter, Instagram, Facebook, LinkedIn, YouTube thumbnail, TikTok, Threads, Pinterest, Snapchat, Bluesky, Reddit, WhatsApp Status, or Telegram card, cover, or carousel — even if they only say "social post image", "thumbnail", or "carousel". Turn the source into one image prompt per placement, with exact on-image text and aspect ratio, then hand generation to modellix-design. Skip article covers with no named network, in-article illustration sets, casting boards, knowledge comics, generic posters, video edits, and requests that only need execution of an already finished prompt.
 license: MIT
 compatibility: No external tools required; pairs with the modellix-design skill for image execution.
 metadata:
@@ -22,7 +22,8 @@ the images made, finish the brief first and then hand each prompt to
 
 A cover, thumbnail, or carousel for a named network stays here. A set of
 illustrations placed through an article, with no named network, belongs to
-`modellix-article-illustrator`. A structured infographic belongs to
+`modellix-article-illustrator`. A casting board with no named network belongs
+to `modellix-casting`. A structured infographic belongs to
 `modellix-infographic`. A poster, product shot, or illustration that is not an
 information diagram belongs to `modellix-image-prompt-engineering`. Files already
 on disk belong to `modellix-ffmpeg` or `modellix-moviepy`.
@@ -41,6 +42,8 @@ Skip or keep the pass short when:
   network placement. Use `modellix-cover-image`.
 - The request is a set of illustrations placed through an article and does not
   name a network placement. Use `modellix-article-illustrator`.
+- The request is a casting board or turnaround lookbook and does not name a
+  network placement. Use `modellix-casting`.
 - The request is a knowledge comic, educational comic, biography comic, or
   four-panel strip, and does not name a network placement. Use `modellix-comic`.
 - The request is a poster or illustration with no platform. Use

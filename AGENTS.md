@@ -4,7 +4,7 @@ Instructions for coding agents that maintain this **Modellix plugin** package. H
 
 ## Project overview
 
-This repository conforms to [Agent Plugins](https://agent-plugins.org/specification) **1.0.0**: **the git repository root is the plugin root**, root `plugin.json` is the portable manifest, immediate children under `skills/` are portable Agent Skills, and root `mcp.json` declares **Modellix Docs Search**, **Modellix Media Generation**, and **Modellix Web Tools**. Cursor, Claude Code, Codex, legacy Open Plugins, OpenClaw/ClawHub, OpenCode, Pi, and Hermes adapters add host capabilities such as rules, hooks, and fourteen slash commands without changing the portable core.
+This repository conforms to [Agent Plugins](https://agent-plugins.org/specification) **1.0.0**: **the git repository root is the plugin root**, root `plugin.json` is the portable manifest, immediate children under `skills/` are portable Agent Skills, and root `mcp.json` declares **Modellix Docs Search**, **Modellix Media Generation**, and **Modellix Web Tools**. Cursor, Claude Code, Codex, legacy Open Plugins, OpenClaw/ClawHub, OpenCode, Pi, and Hermes adapters add host capabilities such as rules, hooks, and fifteen slash commands without changing the portable core.
 
 There is no application runtime. The product is manifests + skill markdown + thin stdlib Python helpers, covered by repository regression tests.
 
@@ -72,6 +72,11 @@ modellix-plugin/                 ← plugin root (= repo root)
 │   ├── skill.json
 │   ├── references/              ← type, style, preset, and prompt shape
 │   └── evals/
+├── skills/modellix-casting/            ← prompt-only casting-board planning skill
+│   ├── SKILL.md
+│   ├── skill.json
+│   ├── references/              ← layout, examples, and prompt shape
+│   └── evals/
 ├── openclaw.plugin.json         ← ClawHub bundle-plugin (skills only; no extensions)
 ├── .mcp.json                    ← Cursor/legacy MCP adapter (`type: http`; same servers, no auth headers)
 ├── commands/                    ← slash commands (thin prompts; each routes to one skill)
@@ -89,6 +94,7 @@ modellix-plugin/                 ← plugin root (= repo root)
 ├── .opencode/skills/modellix-cover-image → ../../skills/modellix-cover-image
 ├── .opencode/skills/modellix-comic → ../../skills/modellix-comic
 ├── .opencode/skills/modellix-article-illustrator → ../../skills/modellix-article-illustrator
+├── .opencode/skills/modellix-casting → ../../skills/modellix-casting
 ├── .pi/skills/modellix-design → ../../skills/modellix-design
 ├── .pi/skills/modellix-image-prompt-engineering → ../../skills/modellix-image-prompt-engineering
 ├── .pi/skills/modellix-ffmpeg → ../../skills/modellix-ffmpeg
@@ -99,6 +105,7 @@ modellix-plugin/                 ← plugin root (= repo root)
 ├── .pi/skills/modellix-cover-image → ../../skills/modellix-cover-image
 ├── .pi/skills/modellix-comic → ../../skills/modellix-comic
 ├── .pi/skills/modellix-article-illustrator → ../../skills/modellix-article-illustrator
+├── .pi/skills/modellix-casting → ../../skills/modellix-casting
 └── .github/workflows/skill_update.yml
 ```
 
@@ -171,7 +178,7 @@ Progressive disclosure for the execution skill:
 | `references/capability-matrix.md` | Media Generation ↔ CLI ↔ REST mapping |
 | `scripts/` | CLI update/preflight + optional execution wrapper; must retain direct CLI/REST fallback |
 
-Keep exactly ten immediate skill trees with separate responsibilities:
+Keep exactly eleven immediate skill trees with separate responsibilities:
 
 - `skills/modellix-image-prompt-engineering/` prepares T2I/I2I prompts and never executes, authenticates, submits, polls, or downloads.
 - `skills/modellix-social-card/` plans mainstream social-card prompts and never executes, authenticates, submits, polls, or downloads.
@@ -180,15 +187,16 @@ Keep exactly ten immediate skill trees with separate responsibilities:
 - `skills/modellix-cover-image/` plans one article-cover prompt and never executes, authenticates, submits, polls, or downloads.
 - `skills/modellix-comic/` plans a knowledge-comic storyboard and one prompt per page and never executes, authenticates, submits, polls, or downloads.
 - `skills/modellix-article-illustrator/` plans one prompt per in-article illustration and never executes, authenticates, submits, polls, or downloads.
+- `skills/modellix-casting/` plans one casting-board prompt per character and never executes, authenticates, submits, polls, or downloads.
 - `skills/modellix-design/` owns all Modellix execution policy, model schemas, credentials, paid-submit safety, waiting, and downloads.
 - `skills/modellix-moviepy/` composites local files into a finished spot (titles, lower thirds, timed voiceover) and never calls Modellix, reads an API key, or installs moviepy without the user confirming the printed command.
 - `skills/modellix-ffmpeg/` edits local files (concatenate, trim, reframe, transcode, subtitle-file burns) and never calls Modellix, reads an API key, or installs FFmpeg without the user confirming the printed command.
 
-The matching `.opencode/skills/*` and `.pi/skills/*` entries are symlinks only — do not duplicate any of the trees. OpenCode’s JS/TS `.opencode/plugins/` system is unused here. Do not publish `modellix-ffmpeg`, `modellix-moviepy`, `modellix-social-card`, `modellix-infographic`, `modellix-ecomm-ugc-video`, `modellix-cover-image`, `modellix-comic`, or `modellix-article-illustrator` as their own Smithery or ClawHub skills; they ship inside the plugin package. A skill-only install of `modellix-design` does not include them.
+The matching `.opencode/skills/*` and `.pi/skills/*` entries are symlinks only — do not duplicate any of the trees. OpenCode’s JS/TS `.opencode/plugins/` system is unused here. Do not publish `modellix-ffmpeg`, `modellix-moviepy`, `modellix-social-card`, `modellix-infographic`, `modellix-ecomm-ugc-video`, `modellix-cover-image`, `modellix-comic`, `modellix-article-illustrator`, or `modellix-casting` as their own Smithery or ClawHub skills; they ship inside the plugin package. A skill-only install of `modellix-design` does not include them.
 
 ## Commands
 
-Fourteen markdown prompts in `commands/`; the filename is the command name, hosts namespace it as `/modellix:<file>`.
+Fifteen markdown prompts in `commands/`; the filename is the command name, hosts namespace it as `/modellix:<file>`.
 
 | File | Paid | Role |
 |------|------|------|
@@ -199,6 +207,7 @@ Fourteen markdown prompts in `commands/`; the filename is the command name, host
 | `cover-image.md` | no | plan one article-cover prompt without submitting |
 | `comic.md` | no | plan a knowledge-comic storyboard without submitting |
 | `article-illustrator.md` | no | plan in-article illustration prompts without submitting |
+| `casting.md` | no | plan one casting-board prompt without submitting |
 | `image.md` | yes | T2I, or I2I when the request carries input images |
 | `video.md` | yes | T2V / I2V / V2V routed by input type |
 | `audio.md` | yes | TTS / STT / STS routed by the requested speech workflow |
@@ -209,8 +218,8 @@ Fourteen markdown prompts in `commands/`; the filename is the command name, host
 
 Invariants when editing commands:
 
-- **Thin prompts, not policy.** A command routes arguments to one skill: `prompt.md` points at `skills/modellix-image-prompt-engineering/SKILL.md`; `social-card.md` points at `skills/modellix-social-card/SKILL.md`; `infographic.md` points at `skills/modellix-infographic/SKILL.md`; `ecomm-ugc-video.md` points at `skills/modellix-ecomm-ugc-video/SKILL.md`; `cover-image.md` points at `skills/modellix-cover-image/SKILL.md`; `comic.md` points at `skills/modellix-comic/SKILL.md`; `article-illustrator.md` points at `skills/modellix-article-illustrator/SKILL.md`; execution commands point at `skills/modellix-design/SKILL.md`. Upstream planning skills hand completed briefs to the execution skill, but the execution skill does not enumerate or depend on its callers. Do not restate the credential lifecycle, retry table, or REST fallback — that duplication goes stale.
-- **Paid commands stay user-only.** `image.md`, `video.md`, `audio.md`, `prompt.md`, `social-card.md`, `infographic.md`, `ecomm-ugc-video.md`, `cover-image.md`, `comic.md`, and `article-illustrator.md` set `disable-model-invocation: true`. An agent cannot spend by calling a paid command; agent-initiated generation goes through the skill, where the rules and hooks apply.
+- **Thin prompts, not policy.** A command routes arguments to one skill: `prompt.md` points at `skills/modellix-image-prompt-engineering/SKILL.md`; `social-card.md` points at `skills/modellix-social-card/SKILL.md`; `infographic.md` points at `skills/modellix-infographic/SKILL.md`; `ecomm-ugc-video.md` points at `skills/modellix-ecomm-ugc-video/SKILL.md`; `cover-image.md` points at `skills/modellix-cover-image/SKILL.md`; `comic.md` points at `skills/modellix-comic/SKILL.md`; `article-illustrator.md` points at `skills/modellix-article-illustrator/SKILL.md`; `casting.md` points at `skills/modellix-casting/SKILL.md`; execution commands point at `skills/modellix-design/SKILL.md`. Upstream planning skills hand completed briefs to the execution skill, but the execution skill does not enumerate or depend on its callers. Do not restate the credential lifecycle, retry table, or REST fallback — that duplication goes stale.
+- **Paid commands stay user-only.** `image.md`, `video.md`, `audio.md`, `prompt.md`, `social-card.md`, `infographic.md`, `ecomm-ugc-video.md`, `cover-image.md`, `comic.md`, `article-illustrator.md`, and `casting.md` set `disable-model-invocation: true`. An agent cannot spend by calling a paid command; agent-initiated generation goes through the skill, where the rules and hooks apply.
 - **Frontmatter is the union of hosts.** `description` (all hosts), `argument-hint` (Claude), `disable-model-invocation` (spec + Claude). Unknown keys are ignored elsewhere. Only `$ARGUMENTS` is a guaranteed placeholder — never `$1` / `$2`.
 - **Handle empty arguments.** Ask the user instead of inventing a prompt or a task id.
 - Commands must not assign a model slug. If the user did not name one, the command asks. Keep that rule aligned with `SKILL.md` and [`rules/cli-and-defaults.mdc`](rules/cli-and-defaults.mdc).
@@ -248,7 +257,7 @@ Invariants when editing hooks:
 
 ## Manifest rules
 
-- Keep plugin release metadata in sync across root `plugin.json`, the four host `plugin.json` adapters, `skills/modellix-design/skill.json`, and root `package.json` (`name`/`version`/`description`/`homepage`/…). `modellix-image-prompt-engineering`, `modellix-social-card`, `modellix-infographic`, `modellix-ecomm-ugc-video`, `modellix-cover-image`, `modellix-comic`, `modellix-article-illustrator`, `modellix-ffmpeg`, and `modellix-moviepy` have independent skill versions. Cursor also adds `displayName`, `publisher`, discovery metadata, explicit component paths, and an optional `MODELLIX_API_KEY` variable; `.cursor-plugin/marketplace.json` must resolve back to the repository root.
+- Keep plugin release metadata in sync across root `plugin.json`, the four host `plugin.json` adapters, `skills/modellix-design/skill.json`, and root `package.json` (`name`/`version`/`description`/`homepage`/…). `modellix-image-prompt-engineering`, `modellix-social-card`, `modellix-infographic`, `modellix-ecomm-ugc-video`, `modellix-cover-image`, `modellix-comic`, `modellix-article-illustrator`, `modellix-casting`, `modellix-ffmpeg`, and `modellix-moviepy` have independent skill versions. Cursor also adds `displayName`, `publisher`, discovery metadata, explicit component paths, and an optional `MODELLIX_API_KEY` variable; `.cursor-plugin/marketplace.json` must resolve back to the repository root.
 - Edit root `plugin.json` first, then mirror. `homepage` = https://docs.modellix.ai/ways-to-use/plugin
 - `openclaw.plugin.json`: `skills: ["./skills"]`, empty `configSchema`. Do **not** add `openclaw.extensions` or hooks there — ClawHub treats this as a content bundle.
 - Hook wiring: `.cursor-plugin` → `./hooks/cursor-hooks.json`; `.plugin` and `.claude-plugin` → `./hooks/hooks.json`; `.codex-plugin` stays without hooks.
@@ -284,7 +293,7 @@ Verify a named slug via `model get-schema` / OpenAPI / `model describe`.
 
 ```bash
 # Manifests
-python3 -c "import json,glob; [json.load(open(f)) for f in glob.glob('.*-plugin/*.json') + glob.glob('hooks/*.json') + ['plugin.json', 'mcp.json', '.plugin/plugin.json', '.agents/plugins/marketplace.json', 'openclaw.plugin.json', 'package.json', 'skills/modellix-design/skill.json', 'skills/modellix-image-prompt-engineering/skill.json', 'skills/modellix-social-card/skill.json', 'skills/modellix-infographic/skill.json', 'skills/modellix-ecomm-ugc-video/skill.json', 'skills/modellix-cover-image/skill.json', 'skills/modellix-comic/skill.json', 'skills/modellix-article-illustrator/skill.json', 'skills/modellix-ffmpeg/skill.json', 'skills/modellix-moviepy/skill.json', '.mcp.json']]"
+python3 -c "import json,glob; [json.load(open(f)) for f in glob.glob('.*-plugin/*.json') + glob.glob('hooks/*.json') + ['plugin.json', 'mcp.json', '.plugin/plugin.json', '.agents/plugins/marketplace.json', 'openclaw.plugin.json', 'package.json', 'skills/modellix-design/skill.json', 'skills/modellix-image-prompt-engineering/skill.json', 'skills/modellix-social-card/skill.json', 'skills/modellix-infographic/skill.json', 'skills/modellix-ecomm-ugc-video/skill.json', 'skills/modellix-cover-image/skill.json', 'skills/modellix-comic/skill.json', 'skills/modellix-article-illustrator/skill.json', 'skills/modellix-casting/skill.json', 'skills/modellix-ffmpeg/skill.json', 'skills/modellix-moviepy/skill.json', '.mcp.json']]"
 
 # Commands (frontmatter present)
 python3 -c "import pathlib,sys; [sys.exit(f'bad frontmatter: {p}') for p in sorted(pathlib.Path('commands').glob('*.md')) if not (p.read_text().startswith('---') and 'description:' in p.read_text().split('---')[1])]"
@@ -352,10 +361,10 @@ Bump versions when behavior or packaged content changes.
 - Trust npm CLI / `--help` over website CLI docs.
 - Filename ≠ model slug (`seedance-2-0-…md` vs `bytedance/seedance-2.0-…`).
 - Do not auto-retry ambiguous paid `model run` outcomes.
-- Skill-only execution path is `skills/modellix-design`; prompt-only image planning is `skills/modellix-image-prompt-engineering`; social-card prompts are `skills/modellix-social-card`; infographic prompts are `skills/modellix-infographic`; ecommerce UGC video plans are `skills/modellix-ecomm-ugc-video`; article covers are `skills/modellix-cover-image`; knowledge comics are `skills/modellix-comic`; in-article illustrations are `skills/modellix-article-illustrator`; local composites are `skills/modellix-moviepy`; local file edits are `skills/modellix-ffmpeg`. None of them uses the repo root as a skill path.
+- Skill-only execution path is `skills/modellix-design`; prompt-only image planning is `skills/modellix-image-prompt-engineering`; social-card prompts are `skills/modellix-social-card`; infographic prompts are `skills/modellix-infographic`; ecommerce UGC video plans are `skills/modellix-ecomm-ugc-video`; article covers are `skills/modellix-cover-image`; knowledge comics are `skills/modellix-comic`; in-article illustrations are `skills/modellix-article-illustrator`; casting boards are `skills/modellix-casting`; local composites are `skills/modellix-moviepy`; local file edits are `skills/modellix-ffmpeg`. None of them uses the repo root as a skill path.
 - The ClawHub bundle-plugin and npm package share `@modellix/modellix-plugin` as a name but are separate registries; always use an explicit `clawhub:` or `npm:` source with OpenClaw.
 - Plain `npm install` materializes files but does not register every host. Only document direct npm consumption where the host supports it (currently Pi and OpenClaw); use `npx ... install --host cursor` for Cursor local installation.
-- Plugin version must match across the root Agent Plugins manifest, the four host manifests, `package.json`, Claude marketplace `metadata.version`, `skills/modellix-design/skill.json`, and that skill's frontmatter. `modellix-image-prompt-engineering`, `modellix-social-card`, `modellix-infographic`, `modellix-ecomm-ugc-video`, `modellix-cover-image`, `modellix-comic`, `modellix-article-illustrator`, `modellix-ffmpeg`, and `modellix-moviepy` keep their own versions.
+- Plugin version must match across the root Agent Plugins manifest, the four host manifests, `package.json`, Claude marketplace `metadata.version`, `skills/modellix-design/skill.json`, and that skill's frontmatter. `modellix-image-prompt-engineering`, `modellix-social-card`, `modellix-infographic`, `modellix-ecomm-ugc-video`, `modellix-cover-image`, `modellix-comic`, `modellix-article-illustrator`, `modellix-casting`, `modellix-ffmpeg`, and `modellix-moviepy` keep their own versions.
 
 ## Quick file map
 
@@ -371,6 +380,7 @@ Bump versions when behavior or packaged content changes.
 | Article covers | `skills/modellix-cover-image/SKILL.md` + `references/*`; plan one cover prompt and hand it to `modellix-design` |
 | Knowledge comics | `skills/modellix-comic/SKILL.md` + `references/*`; plan one prompt per page and hand each page to `modellix-design` |
 | Article illustrations | `skills/modellix-article-illustrator/SKILL.md` + `references/*`; plan one prompt per illustration and hand each image to `modellix-design` |
+| Casting boards | `skills/modellix-casting/SKILL.md` + `references/*`; plan one board prompt per character and hand it to `modellix-design` |
 | Local FFmpeg edits | `skills/modellix-ffmpeg/SKILL.md` + `references/*` + `scripts/check_ffmpeg.py`; do not install FFmpeg without confirmation |
 | Local moviepy composites | `skills/modellix-moviepy/SKILL.md` + `references/*` + `scripts/check_moviepy.py`; do not install moviepy without confirmation |
 | Always-on guardrails | `rules/*.mdc` (keep in sync with model selection / paid-submit / credential policy) |

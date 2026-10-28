@@ -1,6 +1,6 @@
 ---
 name: modellix-article-illustrator
-description: Plan prompts for a set of illustrations placed through an article. Use this skill whenever the user asks to illustrate an article, add images to a post, 为文章配图, or 文章配图 — even if they only say "add pictures to this article." Recommend a preset or a type, style, and palette, confirm density, aspect, and language, then write one prompt per illustration and hand each to modellix-design. Skip a single article cover, a single infographic, a knowledge comic, a named social card, and requests that only need an already finished prompt executed.
+description: Plan prompts for a set of illustrations placed through an article. Use this skill whenever the user asks to illustrate an article, add images to a post, 为文章配图, or 文章配图 — even if they only say "add pictures to this article." Recommend a preset or a type, style, and palette, confirm density, aspect, and language, then write one prompt per illustration and hand each to modellix-design. Skip a single article cover, a single infographic, a casting board, a knowledge comic, a named social card, and requests that only need an already finished prompt executed.
 license: MIT
 compatibility: No external tools required; pairs with the modellix-design skill for image execution.
 metadata:
@@ -21,7 +21,8 @@ user wants the images made, finish the brief first and then hand the prompts to
 
 One article cover with no named network belongs to `modellix-cover-image`. One
 standalone infographic belongs to `modellix-infographic`. A knowledge comic
-belongs to `modellix-comic`. A card for a named network belongs to
+belongs to `modellix-comic`. A casting board belongs to `modellix-casting`. A
+card for a named network belongs to
 `modellix-social-card`. A poster, product shot, or single illustration belongs
 to `modellix-image-prompt-engineering`. A commerce UGC video belongs to
 `modellix-ecomm-ugc-video`. Files already on disk belong to `modellix-ffmpeg` or
@@ -50,6 +51,7 @@ Skip or keep the pass short when:
   `modellix-infographic`.
 - The request is a knowledge comic, educational comic, biography comic, or
   four-panel strip. Use `modellix-comic`.
+- The request is a casting board or turnaround lookbook. Use `modellix-casting`.
 - The request names a network and a card, cover, thumbnail, or carousel. Use
   `modellix-social-card`.
 - The request is a poster, product shot, or single illustration. Use

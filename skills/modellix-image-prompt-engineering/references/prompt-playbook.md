@@ -195,6 +195,11 @@ plan that cover here.
 A set of pictures placed through an article belongs to
 `modellix-article-illustrator`. Do not plan that set here.
 
+### Casting board
+
+A casting board, talent board, or turnaround lookbook belongs to
+`modellix-casting`. Do not plan that board here.
+
 ### Ecommerce UGC video
 
 A vertical creator-style product video belongs to `modellix-ecomm-ugc-video`.
