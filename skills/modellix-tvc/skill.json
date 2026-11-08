@@ -1,0 +1,5 @@
+{
+  "name": "modellix-tvc",
+  "version": "1.0.0",
+  "description": "Plan one prompt per shot for a product TVC from a confirmed structure, length, and aspect, before handing generation to modellix-design."
+}

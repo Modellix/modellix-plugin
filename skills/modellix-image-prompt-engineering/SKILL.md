@@ -1,6 +1,6 @@
 ---
 name: modellix-image-prompt-engineering
-description: Engineer clear, high-density prompts for AI image generation and editing before execution. Use this skill whenever a user asks for a poster, banner, product shot, packaging concept, editorial illustration, UI mockup, slide visual, icon set, character sheet, card set, sprite sheet, image edit, or a better image prompt—even when they do not say "prompt engineering." Turn vague visual requests into an execution-ready T2I or I2I brief, then hand generation to modellix-design. Skip article covers, in-article illustration sets, casting boards, knowledge comics, video/audio tasks, structured infographics, CLI/auth troubleshooting, and requests that already contain a complete prompt and only need execution.
+description: Engineer clear, high-density prompts for AI image generation and editing before execution. Use this skill whenever a user asks for a poster, banner, product shot, packaging concept, editorial illustration, UI mockup, slide visual, icon set, character sheet, card set, sprite sheet, image edit, or a better image prompt—even when they do not say "prompt engineering." Turn vague visual requests into an execution-ready T2I or I2I brief, then hand generation to modellix-design. Skip article covers, in-article illustration sets, casting boards, knowledge comics, product TVCs, video/audio tasks, structured infographics, CLI/auth troubleshooting, and requests that already contain a complete prompt and only need execution.
 license: MIT
 compatibility: No external tools required; pairs with the modellix-design skill for image execution.
 metadata:
@@ -42,6 +42,8 @@ Skip or keep the pass minimal when:
 - The request is a knowledge comic, educational comic, biography comic, or four-panel strip that still needs a storyboard. Use `modellix-comic`.
 - The request is a vertical ecommerce UGC video that still needs a shot plan.
   Use `modellix-ecomm-ugc-video`.
+- The request is a cinematic product commercial, TVC, or brand film. Use
+  `modellix-tvc`.
 - The request is a finished video prompt, audio, credentials, task status,
   downloads, model schemas, or command syntax. Use `modellix-design`.
 - The user only wants image compression, format conversion, cropping, or reuse of

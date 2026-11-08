@@ -3,6 +3,16 @@
 All notable changes to this project are documented here. The format loosely follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and versions use [Semantic Versioning](https://semver.org/).
 
+## [4.14.0] - 2026-11-08
+
+### Added
+
+- Add `skills/modellix-tvc` to plan a product TVC for any product. It confirms structure, length, and aspect, writes one prompt per shot, and hands generation to `modellix-design`. Concatenation after the shots exist belongs to `modellix-ffmpeg`. It does not recommend a model or submit a task.
+
+### Changed
+
+- Route a cinematic product commercial from `modellix-ecomm-ugc-video`, `modellix-image-prompt-engineering`, `modellix-ffmpeg`, and `modellix-moviepy` to `modellix-tvc`.
+
 ## [4.13.0] - 2026-10-28
 
 ### Added

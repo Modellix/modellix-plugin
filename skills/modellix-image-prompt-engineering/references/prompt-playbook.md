@@ -205,6 +205,11 @@ A casting board, talent board, or turnaround lookbook belongs to
 A vertical creator-style product video belongs to `modellix-ecomm-ugc-video`.
 Do not plan that shot list here.
 
+### Product TVC
+
+A cinematic product commercial, TVC, or brand film belongs to `modellix-tvc`.
+Do not plan that shot list here.
+
 ### Knowledge comic
 
 A knowledge comic, tutorial comic, biography comic, or four-panel strip belongs

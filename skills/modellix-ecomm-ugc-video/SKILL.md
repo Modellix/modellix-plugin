@@ -1,6 +1,6 @@
 ---
 name: modellix-ecomm-ugc-video
-description: Plan shot prompts for a vertical ecommerce UGC video. Use this skill whenever the user wants a creator-style product video, 带货口播, unboxing, try-on, haul, listicle, or a TikTok, Reels, or Shorts shop ad — even if they only say "UGC", "口播视频", or "make it look like a real person reviewing this". Confirm the pattern, spoken language, and length, quote only the product facts they supplied, then hand each shot to modellix-design. Skip a finished video prompt that only needs execution, still images, and edits of files already on disk.
+description: Plan shot prompts for a vertical ecommerce UGC video. Use this skill whenever the user wants a creator-style product video, 带货口播, unboxing, try-on, haul, listicle, or a TikTok, Reels, or Shorts shop ad — even if they only say "UGC", "口播视频", or "make it look like a real person reviewing this". Confirm the pattern, spoken language, and length, quote only the product facts they supplied, then hand each shot to modellix-design. Skip cinematic product commercials, still images, and edits of files already on disk.
 license: MIT
 compatibility: No external tools required; pairs with the modellix-design skill for video execution. After those files exist, modellix-ffmpeg concatenates shots and burns the caption list.
 metadata:
@@ -19,7 +19,8 @@ run the Modellix CLI. Do not recommend a model, a provider, or a slug. When the
 user wants the video made, finish the brief first and then hand each shot prompt
 to `modellix-design`.
 
-A cover or thumbnail belongs to `modellix-social-card`. A still product shot or
+A cover or thumbnail belongs to `modellix-social-card`. A cinematic product
+commercial, TVC, or brand film belongs to `modellix-tvc`. A still product shot or
 poster belongs to `modellix-image-prompt-engineering`. A structured infographic
 belongs to `modellix-infographic`. Files already on disk belong to
 `modellix-ffmpeg` or `modellix-moviepy`.
@@ -28,7 +29,7 @@ belongs to `modellix-infographic`. Files already on disk belong to
 
 Use this skill when the user wants a new ecommerce video that should feel like a
 person filmed it on a phone: a talking-head review, an unboxing, a try-on, a
-short list of variants, or a product placed into daily life.
+short list of variants, or a casual product clip with someone speaking.
 
 Ask once for the product when the user names the format but not the item. Do not
 invent a product, a price, a review count, or a performance claim to fill an
@@ -40,6 +41,8 @@ Skip or keep the pass short when:
   Pass that prompt to `modellix-design`.
 - The request is a still image, a poster, or a product photo with no video. Use
   `modellix-image-prompt-engineering`.
+- The request is a cinematic product commercial, TVC, or brand film. Use
+  `modellix-tvc`.
 - The request is a social card, cover, or thumbnail. Use `modellix-social-card`.
 - The request is a structured infographic. Use `modellix-infographic`.
 - The request is concatenation, trimming, a subtitle burn, or a title on files

@@ -1,0 +1,72 @@
+{
+  "skill_name": "modellix-tvc",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "做一条商品广告片。先不要生成。我还没说商品是什么。",
+      "expected_output": "Asks for the product. Does not invent a product, a price, a slogan, or a claim. Does not write shot prompts. Does not recommend a model or submit.",
+      "files": [],
+      "assertions": [
+        "Asked for the product",
+        "Did not invent a product, price, slogan, or claim",
+        "Left the shot prompts empty",
+        "Did not recommend a model, provider, or slug",
+        "Did not submit a generation task"
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "Plan a TVC for a matte black folding bicycle with silver hinges. I have not chosen a structure or a length. Do not generate anything yet.",
+      "expected_output": "Recommends a structure, 15 seconds, 16:9, and whether a person appears, and waits. Keeps the bicycle facts. Leaves every shot prompt empty. Does not invent a model.",
+      "files": [],
+      "assertions": [
+        "Recommended one structure with a reason from the job of the film",
+        "Recommended 15 seconds, five shots, and 16:9",
+        "Kept the matte black frame and silver hinges",
+        "Left the shot prompts empty because the choices were not confirmed",
+        "Did not recommend a model, provider, or slug",
+        "Did not submit a generation task"
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "Plan a product commercial and stop after the prompts. Confirmed: sculpture, 15 seconds, 16:9, no person. Product: a square stainless lunch box with a clear lid. The only claim allowed is that the lid snaps shut. No logo and no slogan.",
+      "expected_output": "Returns five shot prompts for a 16:9 sculpture film. The product lock repeats the square stainless box and clear lid. The last shot is a product hold. No person. No writing in the frame. Does not invent a price or an extra claim. Does not recommend a model or submit.",
+      "files": [],
+      "assertions": [
+        "Named sculpture, 15 seconds, five shots, and 16:9",
+        "Repeated the square stainless lunch box and clear lid in the shots",
+        "Used the snap-shut claim and no other claim",
+        "Ended on a product hold with no person",
+        "Told the frames to contain no logos or writing",
+        "Did not recommend a model, provider, or slug",
+        "Did not submit a generation task"
+      ]
+    },
+    {
+      "id": 4,
+      "prompt": "Make a vertical talking-head review of this snack. The creator should speak to the camera and unbox it. Do not make a cinematic brand film.",
+      "expected_output": "Does not plan a TVC. Routes the request to modellix-ecomm-ugc-video.",
+      "files": [],
+      "assertions": [
+        "Did not write TVC shot prompts",
+        "Directed the request to modellix-ecomm-ugc-video"
+      ]
+    },
+    {
+      "id": 5,
+      "prompt": "Use the recommendation and make the commercial. Do not ask again. Pick the best model. Product: a compact red flashlight with a rubber grip. No slogan. No person was requested.",
+      "expected_output": "Treats the recommendation as confirmed, writes the shot prompts, and hands them to modellix-design in order. Omits the model because the user did not name a slug. Does not submit from this skill. The prompts contain no slogan and no invented claim.",
+      "files": [],
+      "assertions": [
+        "Confirmed a recommendation instead of asking again",
+        "Wrote one prompt per shot within the default shot count",
+        "Repeated the compact red flashlight and rubber grip",
+        "Passed the shot prompts to modellix-design in order",
+        "Named modellix-ffmpeg for concatenation after the shots exist",
+        "Did not name or recommend a model slug",
+        "Did not submit, authenticate, or download from this skill"
+      ]
+    }
+  ]
+}
