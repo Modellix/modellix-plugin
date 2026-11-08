@@ -516,6 +516,13 @@ class RepositoryTests(unittest.TestCase):
         workflow = (ROOT / ".github/workflows/skill_update.yml").read_text(encoding="utf-8")
         self.assertNotRegex(workflow, r"uses:\s+[^\s]+@(main|master|v\d+)\s*$")
 
+    def test_skill_update_installs_modellix_design_only(self):
+        workflow = (ROOT / ".github/workflows/skill_update.yml").read_text(encoding="utf-8")
+        lowered = workflow.lower()
+        self.assertIn("--skill modellix-design", workflow)
+        self.assertNotIn("smithery", lowered)
+        self.assertNotIn("clawhub", lowered)
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -201,12 +201,12 @@ pi install git:github.com/Modellix/modellix-plugin
 
 Install `modellix-design` or `modellix-image-prompt-engineering` on their own.
 `modellix-design` executes image, video, and audio workflows and is the skill
-published to Smithery, ClawHub, and skills.sh. `modellix-image-prompt-engineering`
+installed on skills.sh. `modellix-image-prompt-engineering`
 prepares image prompts and is installed from this repository or skills.sh. It
 hands generation back to `modellix-design`.
 
-`modellix-ffmpeg`, `modellix-moviepy`, `modellix-social-card`, `modellix-infographic`, `modellix-ecomm-ugc-video`, `modellix-cover-image`, `modellix-comic`, `modellix-article-illustrator`, `modellix-casting`, and `modellix-tvc` are not published as their own Smithery
-or ClawHub skills. They ship with the complete plugin and with a checkout of this
+`modellix-ffmpeg`, `modellix-moviepy`, `modellix-social-card`, `modellix-infographic`, `modellix-ecomm-ugc-video`, `modellix-cover-image`, `modellix-comic`, `modellix-article-illustrator`, `modellix-casting`, and `modellix-tvc` are not installed on skills.sh.
+They ship with the complete plugin and with a checkout of this
 repository. A skill-only install of `modellix-design` does not include them. `modellix-social-card` plans prompts for mainstream social cards and hands generation back to `modellix-design`. `modellix-infographic` turns a source into one infographic prompt and hands generation to `modellix-design`. `modellix-ecomm-ugc-video` plans a vertical ecommerce UGC video as one prompt per shot and hands generation to `modellix-design`. `modellix-cover-image` plans one article-cover prompt and hands generation to `modellix-design`. `modellix-comic` plans a knowledge comic as one prompt per page and hands generation to `modellix-design`. `modellix-article-illustrator` plans one prompt per in-article illustration and hands generation to `modellix-design`. `modellix-casting` plans one casting-board prompt per character and hands generation to `modellix-design`. `modellix-tvc` plans one prompt per TVC shot and hands generation to `modellix-design`.
 
 #### Agent Skills (skills.sh) — any host
@@ -223,28 +223,6 @@ Update:
 
 ```bash
 npx skills update
-```
-
-#### ClawHub / OpenClaw (skill)
-
-Only `modellix-design` is currently published as a standalone ClawHub skill (skill
-registry; separate from the `@modellix/modellix-plugin` package above). Install
-the prompt skill from the GitHub repository or as part of the complete plugin.
-
-Install:
-
-```bash
-clawhub install modellix-design
-# or
-openclaw skills install modellix-design
-```
-
-Update:
-
-```bash
-clawhub update modellix-design
-# or
-clawhub update --all
 ```
 
 #### OpenCode
@@ -307,17 +285,6 @@ npx skills add https://github.com/Modellix/modellix-plugin --skill modellix-desi
 npx skills add https://github.com/Modellix/modellix-plugin --skill modellix-image-prompt-engineering --agent cursor
 npx skills update
 ```
-
-#### Smithery
-
-Install:
-
-```bash
-npx @smithery/cli@latest skill add modellix/modellix-skill
-npx @smithery/cli@latest skill add modellix/modellix-skill --agent cursor
-```
-
-Update: re-run the same `skill add` command (or your Smithery client’s update flow).
 
 #### Pi (skill-only)
 
@@ -706,15 +673,15 @@ keep using the skills.
 │   ├── modellix-article-illustrator/ # Prompt-only in-article illustration planning
 │   ├── modellix-casting/           # Prompt-only casting-board planning
 │   └── modellix-tvc/               # Prompt-only product TVC planning
-└── .github/workflows/              # Publish sync (Smithery / skills add / ClawHub)
+└── .github/workflows/              # Validate, then install modellix-design on skills.sh
 ```
 
 The twelve immediate skill directories are discovered from the fixed Agent Plugins
 `skills/` location without manifest path fields. Pi uses
 `package.json#pi.skills`; Hermes installs skill trees directly (no
 Hermes-specific plugin manifest). A skill-only install of `modellix-design`
-does not include `modellix-ffmpeg`, `modellix-moviepy`, `modellix-social-card`, `modellix-infographic`, `modellix-ecomm-ugc-video`, `modellix-cover-image`, `modellix-comic`, `modellix-article-illustrator`, `modellix-casting`, or `modellix-tvc`. Those skills ship with the plugin package
-and are not published as their own Smithery or ClawHub skills.
+does not include `modellix-ffmpeg`, `modellix-moviepy`, `modellix-social-card`, `modellix-infographic`, `modellix-ecomm-ugc-video`, `modellix-cover-image`, `modellix-comic`, `modellix-article-illustrator`, `modellix-casting`, or `modellix-tvc`. Those skills ship with the plugin package.
+The skills.sh install records `modellix-design` only.
 
 ## Maintaining this plugin
 

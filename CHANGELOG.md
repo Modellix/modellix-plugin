@@ -3,6 +3,12 @@
 All notable changes to this project are documented here. The format loosely follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and versions use [Semantic Versioning](https://semver.org/).
 
+## [4.14.1] - 2026-11-08
+
+### Changed
+
+- On `main`, the skill update workflow no longer publishes to Smithery or ClawHub. It installs `modellix-design` with the skills CLI, which is the skills.sh record.
+
 ## [4.14.0] - 2026-11-08
 
 ### Added

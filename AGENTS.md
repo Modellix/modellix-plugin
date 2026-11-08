@@ -200,7 +200,7 @@ Keep exactly twelve immediate skill trees with separate responsibilities:
 - `skills/modellix-moviepy/` composites local files into a finished spot (titles, lower thirds, timed voiceover) and never calls Modellix, reads an API key, or installs moviepy without the user confirming the printed command.
 - `skills/modellix-ffmpeg/` edits local files (concatenate, trim, reframe, transcode, subtitle-file burns) and never calls Modellix, reads an API key, or installs FFmpeg without the user confirming the printed command.
 
-The matching `.opencode/skills/*` and `.pi/skills/*` entries are symlinks only — do not duplicate any of the trees. OpenCode’s JS/TS `.opencode/plugins/` system is unused here. Do not publish `modellix-ffmpeg`, `modellix-moviepy`, `modellix-social-card`, `modellix-infographic`, `modellix-ecomm-ugc-video`, `modellix-cover-image`, `modellix-comic`, `modellix-article-illustrator`, `modellix-casting`, or `modellix-tvc` as their own Smithery or ClawHub skills; they ship inside the plugin package. A skill-only install of `modellix-design` does not include them.
+The matching `.opencode/skills/*` and `.pi/skills/*` entries are symlinks only — do not duplicate any of the trees. OpenCode’s JS/TS `.opencode/plugins/` system is unused here. The skills.sh install publishes only `modellix-design`. Do not add `modellix-ffmpeg`, `modellix-moviepy`, `modellix-social-card`, `modellix-infographic`, `modellix-ecomm-ugc-video`, `modellix-cover-image`, `modellix-comic`, `modellix-article-illustrator`, `modellix-casting`, or `modellix-tvc` to that install; they ship inside the plugin package. A skill-only install of `modellix-design` does not include them.
 
 ## Commands
 
@@ -343,19 +343,13 @@ Each skill keeps its regression reference under `skills/<name>/evals/evals.json`
 
 ## CI / publish
 
-On `main` push, [`.github/workflows/skill_update.yml`](.github/workflows/skill_update.yml):
-
-1. Smithery skill `modellix/modellix-skill` → git URL `skills/modellix-design/` (`SMITHERY_TOKEN`; slug kept for existing installs)
-2. `npx skills add https://github.com/Modellix/modellix-plugin --skill modellix-design`
-3. ClawHub skill `modellix/modellix-design` via inline `clawhub` CLI (`CLAWHUB_TOKEN`); accepts `published` / `pending-publication` / `submitted` / `unchanged`; retries on version collision; skips when `skills/modellix-design/` is unchanged
-4. ClawHub bundle-plugin `@modellix/modellix-plugin` only when `package.json` version changed (or `workflow_dispatch` + `force_publish`)
-
-Merging to `main` publishes the automated targets above; Claude/Codex marketplaces read the repo directly. npm is deliberately manual-only: publish `@modellix/modellix-plugin` from a trusted local environment using the single token stored outside the repository, after tests and `npm pack --dry-run`. Never add an npm token to GitHub Actions, workflow files, commits, or logs. Replace the local token when it expires or is rotated, and skip publishing when the exact version already exists.
+On `main` push, [`.github/workflows/skill_update.yml`](.github/workflows/skill_update.yml) validates the repository, then installs only `modellix-design` with the skills CLI. That install is what skills.sh records:
 
 ```bash
-npx clawhub@latest package validate .
-npx clawhub@latest package publish . --family bundle-plugin --owner modellix --dry-run --json
+npx skills add https://github.com/Modellix/modellix-plugin --skill modellix-design -g --agent codex -y
 ```
+
+Claude and Codex marketplaces read the repo directly. npm is deliberately manual-only: publish `@modellix/modellix-plugin` from a trusted local environment using the single token stored outside the repository, after tests and `npm pack --dry-run`. Never add an npm token to GitHub Actions, workflow files, commits, or logs. Replace the local token when it expires or is rotated, and skip publishing when the exact version already exists.
 
 ## Commits and PRs
 
