@@ -3,6 +3,13 @@
 All notable changes to this project are documented here. The format loosely follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and versions use [Semantic Versioning](https://semver.org/).
 
+## [4.14.2] - 2026-11-09
+
+### Fixed
+
+- Run Windows `.cmd` FFmpeg shims through the system command processor without enabling shell parsing for normal executables.
+- Keep the hook-state permission regression check on platforms that implement POSIX mode bits, while retaining the privacy and state assertions on Windows.
+
 ## [4.14.1] - 2026-11-08
 
 ### Changed

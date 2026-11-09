@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import re
 import shutil
 import subprocess
@@ -153,7 +154,7 @@ def _read_os_release() -> str:
 def _capture(command: list[str], env: dict[str, str] | None) -> str:
     try:
         completed = subprocess.run(
-            command,
+            _platform_command(command),
             check=False,
             capture_output=True,
             text=True,
@@ -163,6 +164,16 @@ def _capture(command: list[str], env: dict[str, str] | None) -> str:
     except (OSError, subprocess.TimeoutExpired):
         return ""
     return f"{completed.stdout or ''}{completed.stderr or ''}"
+
+
+def _platform_command(command: list[str]) -> list[str]:
+    """Run Windows command shims without enabling shell parsing globally."""
+    if os.name != "nt" or Path(command[0]).suffix.lower() not in {".bat", ".cmd"}:
+        return command
+    command_processor = (
+        os.environ.get("COMSPEC") or shutil.which("cmd.exe") or "cmd.exe"
+    )
+    return [command_processor, "/d", "/s", "/c", subprocess.list2cmdline(command)]
 
 
 def _version(text: str) -> str | None:

@@ -155,10 +155,12 @@ class HookTests(unittest.TestCase):
             self.assertEqual(record["source"], "mcp")
             self.assertIn("task-mcp-123", record["task_ids"])
             self.assertNotIn("prompt", record)
-            self.assertEqual(
-                next((Path(temp_dir) / "modellix-hooks").glob("*.json")).stat().st_mode & 0o777,
-                0o600,
-            )
+            if os.name != "nt":
+                self.assertEqual(
+                    next((Path(temp_dir) / "modellix-hooks").glob("*.json")).stat().st_mode
+                    & 0o777,
+                    0o600,
+                )
 
     def test_cli_submit_after_mcp_requires_confirmation(self):
         with tempfile.TemporaryDirectory() as temp_dir:

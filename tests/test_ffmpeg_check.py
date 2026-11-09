@@ -115,13 +115,15 @@ def _run_cli(directory: Path) -> subprocess.CompletedProcess[str]:
 def _write_fake(directory: Path, name: str, encoders: str) -> None:
     if os.name == "nt":
         path = directory / f"{name}.cmd"
+        encoder_lines = [
+            f"  echo {line}" for line in encoders.splitlines() if line
+        ] or ["  rem no encoders"]
         path.write_text(
             "\r\n".join(
                 [
                     "@echo off",
-                    "echo %* | findstr /C:\"encoders\" >nul",
-                    "if %errorlevel%==0 (",
-                    f"  echo {encoders.strip()}",
+                    "if /I \"%~2\"==\"-encoders\" (",
+                    *encoder_lines,
                     ") else (",
                     f"  echo {name} version 7.0.2 Copyright",
                     ")",
