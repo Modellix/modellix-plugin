@@ -2,7 +2,7 @@
   "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
   "name": "modellix",
   "version": "4.14.2",
-  "description": "Unified API/CLI for AI image, video, and audio workflows via Modellix",
+  "description": "AI image, video & audio generation & editing.",
   "author": {
     "name": "Modellix",
     "email": "support@modellix.ai",
