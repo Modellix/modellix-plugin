@@ -2,7 +2,7 @@
   "name": "modellix",
   "displayName": "Modellix",
   "version": "4.14.2",
-  "description": "Unified API/CLI for AI image, video, and audio workflows via Modellix",
+  "description": "AI image, video & audio generation & editing.",
   "author": {
     "name": "Modellix",
     "email": "support@modellix.ai"

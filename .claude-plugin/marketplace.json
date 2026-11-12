@@ -12,7 +12,7 @@
     {
       "name": "modellix",
       "source": "./",
-      "description": "Unified API/CLI for AI image, video, and audio workflows via Modellix"
+      "description": "AI image, video & audio generation & editing."
     }
   ]
 }
